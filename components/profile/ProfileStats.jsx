@@ -39,42 +39,7 @@ function ProfileStats({
     }
 
     const statCards = [
-        {
-            value: impact.totalFoodShared,
-            label: 'Total Food Shared',
-            unit: 'lb',
-            icon: 'fa-utensils',
-            color: 'green',
-            bgGradient: 'from-green-50 to-green-100',
-            iconColor: 'text-green-600'
-        },
-        {
-            value: impact.foodClaimed,
-            label: 'Food Claimed',
-            unit: 'lb',
-            icon: 'fa-check-circle',
-            color: 'blue',
-            bgGradient: 'from-blue-50 to-blue-100',
-            iconColor: 'text-blue-600'
-        },
-        {
-            value: impact.livesImpacted,
-            label: 'Lives Impacted',
-            unit: '',
-            icon: 'fa-heart',
-            color: 'red',
-            bgGradient: 'from-red-50 to-red-100',
-            iconColor: 'text-red-600'
-        },
-        {
-            value: impact.co2Reduced,
-            label: 'CO₂ Reduced',
-            unit: 'lb',
-            icon: 'fa-leaf',
-            color: 'emerald',
-            bgGradient: 'from-emerald-50 to-emerald-100',
-            iconColor: 'text-emerald-600'
-        }
+    
     ];
 
     const progressCards = [

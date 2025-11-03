@@ -284,38 +284,88 @@ class AuthService {
 
   async uploadAvatar(file) {
     try {
-      if (!this.currentUser) throw new Error('No user logged in')
-
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${this.currentUser.id}-${Date.now()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
-
-      // Upload file to bucket
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        alert('Failed to upload avatar: ' + uploadError.message)
-        throw uploadError
+      // 1. Validate user authentication
+      if (!this.currentUser) {
+        throw new Error('No user logged in')
       }
 
-      // Get public URL
-      const { data, error: urlError } = supabase.storage
+      // Debug log authentication state
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Current session:', session)
+      
+      // 2. Validate file
+      if (!file || !(file instanceof File)) {
+        throw new Error('Invalid file provided')
+      }
+      console.log('Uploading file:', { name: file.name, type: file.type, size: file.size })
+
+      // 3. Set up file path
+      const fileExt = file.name.split('.').pop()
+      const fileName = `avatar.${fileExt}`
+      const filePath = `${this.currentUser.id}/${fileName}` // Remove 'avatars/' prefix as it's the bucket name
+      console.log('Upload path:', filePath)
+
+      // 4. Test bucket access
+      const { data: bucketTest, error: bucketError } = await supabase.storage
+        .from('avatars')
+        .list(this.currentUser.id, { limit: 1 })
+      console.log('Bucket access test:', { data: bucketTest, error: bucketError })
+
+      // 5. Upload new file to bucket
+      console.log('Starting file upload...')
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type
+        })
+
+      if (uploadError) {
+        console.error('Upload error details:', uploadError)
+        throw new Error(`Failed to upload avatar: ${uploadError.message}`)
+      }
+      
+      console.log('Upload successful:', uploadData)
+
+      // 6. Get public URL
+      const { data: urlData, error: urlError } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath)
 
-      if (urlError || !data || !data.publicUrl) {
-        alert('Failed to get public URL for avatar. Please check your Supabase bucket settings.')
-        throw urlError || new Error('No public URL returned')
+      if (urlError) {
+        console.error('URL error details:', urlError)
+        throw new Error('Failed to get public URL for avatar')
       }
 
-      // Update user profile with new avatar URL
-      await this.updateProfile({ avatar_url: data.publicUrl })
+      if (!urlData?.publicUrl) {
+        throw new Error('No public URL returned from storage')
+      }
 
-      return { success: true, avatarUrl: data.publicUrl }
+      console.log('Got public URL:', urlData.publicUrl)
+
+      // 7. Update user profile
+      try {
+        await this.updateProfile({ 
+          avatar_url: urlData.publicUrl,
+          updated_at: new Date().toISOString()
+        })
+        console.log('Profile updated with new avatar')
+      } catch (error) {
+        console.error('Profile update error:', error)
+        throw new Error('Failed to update profile with new avatar URL')
+      }
+
+      return { 
+        success: true, 
+        avatarUrl: urlData.publicUrl 
+      }
     } catch (error) {
-      console.error('Avatar upload error:', error)
+      // Log full error details
+      console.error('Avatar upload error:', {
+        message: error.message,
+        details: error,
+        user: this.currentUser?.id
+      })
       reportError(error)
       throw error
     }

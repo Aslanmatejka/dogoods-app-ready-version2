@@ -145,8 +145,8 @@ function ImpactDataEntry() {
     };
 
     const exportToCSV = () => {
-        const headers = ['Date', 'Food Saved (kg)', 'People Helped', 'Meals Provided',
-                        'CO2 Reduced (kg)', 'Waste Diverted (kg)', 'Volunteer Hours',
+        const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Closets Served',
+                        'Communities', 'Waste Diverted (kg)', 'Volunteer Hours',
                         'Partner Orgs', 'Notes'];
 
         const rows = data.map(row => [
@@ -226,19 +226,19 @@ function ImpactDataEntry() {
                                         Date
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Food Saved (kg)
+                                        Food Saved (LB)
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                                         People Helped
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Meals Provided
+                                        Closets Served
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        CO2 Reduced (kg)
+                                        Communities served(LB)
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Waste Diverted (kg)
+                                        Waste Diverted (LB)
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                                         Volunteer Hours

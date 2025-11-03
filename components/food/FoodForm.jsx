@@ -252,7 +252,9 @@ function FoodForm({
                             { value: 'NEA/ACLC CC', label: 'NEA/ACLC CC' },
                             { value: 'Academy of Alameda CC', label: 'Academy of Alameda CC' },
                             { value: 'Island HS CC', label: 'Island HS CC' },
-                            { value: 'Encinal Jr Sr High School', label: 'Encinal Jr Sr High School' }
+                            { value: 'Encinal Jr Sr High School', label: 'Encinal Jr Sr High School' },
+                            { value: 'Oakland Unified School District', label: 'Oakland Unified School District' },
+                            { value: 'Alameda Unified School District', label: 'Alameda Unified School District' }
                         ]}
                         helperText="If this donation is for a school, choose the district or school."
                     />

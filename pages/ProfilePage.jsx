@@ -20,6 +20,25 @@ function ProfilePageContent() {
     const [activeTab, setActiveTab] = React.useState('profile');
     const [impact, setImpact] = React.useState(null);
     const [impactLoading, setImpactLoading] = React.useState(true);
+    const [uploading, setUploading] = React.useState(false);
+
+    const handleAvatarChange = async (event) => {
+        try {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            setUploading(true);
+            const result = await uploadAvatar(file);
+            if (result.success) {
+                // Avatar updated successfully
+            }
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            alert('Failed to upload avatar. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     React.useEffect(() => {
         if (!isAuthenticated) {
@@ -157,8 +176,20 @@ function ProfilePageContent() {
                                     size="xl"
                                     alt={`${profile.name}'s avatar`}
                                 />
-                                <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 cursor-pointer transition duration-200">
-                                    <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold"><i className="fas fa-camera mr-2"></i>Change</span>
+                                <label htmlFor="avatar-upload" className={`absolute inset-0 flex items-center justify-center bg-black ${uploading ? 'bg-opacity-40' : 'bg-opacity-0 group-hover:bg-opacity-40'} cursor-pointer transition duration-200`}>
+                                    <span className={`text-white ${uploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-sm font-semibold`}>
+                                        {uploading ? (
+                                            <>
+                                                <i className="fas fa-spinner fa-spin mr-2"></i>
+                                                Uploading...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fas fa-camera mr-2"></i>
+                                                Change
+                                            </>
+                                        )}
+                                    </span>
                                 </label>
                                 <input
                                     id="avatar-upload"
@@ -169,11 +200,16 @@ function ProfilePageContent() {
                                         const file = e.target.files[0];
                                         if (file) {
                                             try {
-                                                // Call uploadAvatar from context
-                                                await authUser && authUser.uploadAvatar(file);
-                                                window.location.reload(); // Refresh to show new avatar
+                                                setUploading(true);
+                                                const result = await uploadAvatar(file);
+                                                if (result.success) {
+                                                    // The avatar_url will be updated automatically through AuthContext
+                                                }
                                             } catch (err) {
-                                                alert('Failed to upload avatar.');
+                                                console.error('Error uploading avatar:', err);
+                                                alert('Failed to upload avatar. Please try again.');
+                                            } finally {
+                                                setUploading(false);
                                             }
                                         }
                                     }}

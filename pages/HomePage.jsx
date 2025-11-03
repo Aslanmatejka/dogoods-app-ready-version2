@@ -375,7 +375,7 @@ function HomePage() {
                                             <div className="text-4xl font-bold text-green-600 mb-2">
                                                 {Math.round(impact.foodSavedKg).toLocaleString()}
                                             </div>
-                                            <div className="text-sm text-gray-600">kg Food Saved</div>
+                                            <div className="text-sm text-gray-600">Food Saved(LB)</div>
                                         </div>
                                     </Card>
                                     <Card>
@@ -391,7 +391,7 @@ function HomePage() {
                                             <div className="text-4xl font-bold text-green-600 mb-2">
                                                 {impact.totalMeals.toLocaleString()}
                                             </div>
-                                            <div className="text-sm text-gray-600">Meals Provided</div>
+                                            <div className="text-sm text-gray-600">Closets Served</div>
                                         </div>
                                     </Card>
                                     <Card>
@@ -399,7 +399,7 @@ function HomePage() {
                                             <div className="text-4xl font-bold text-green-600 mb-2">
                                                 {Math.round(impact.co2Saved).toLocaleString()}
                                             </div>
-                                            <div className="text-sm text-gray-600">kg CO2 Reduced</div>
+                                            <div className="text-sm text-gray-600">Communities Served</div>
                                         </div>
                                     </Card>
                                 </div>
