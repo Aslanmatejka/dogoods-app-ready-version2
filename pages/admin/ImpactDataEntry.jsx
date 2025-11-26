@@ -11,8 +11,8 @@ function ImpactDataEntry() {
     const [editingId, setEditingId] = React.useState(null);
     const [newRow, setNewRow] = React.useState({
         date: new Date().toISOString().split('T')[0],
-        food_saved_kg: 0,
-        people_helped: 0,
+        food_saved_kg: '',
+        people_helped: '',
         notes: ''
     });
 
@@ -71,8 +71,8 @@ function ImpactDataEntry() {
 
             setNewRow({
                 date: new Date().toISOString().split('T')[0],
-                food_saved_kg: 0,
-                people_helped: 0,
+                food_saved_kg: '',
+                people_helped: '',
                 notes: ''
             });
 
@@ -164,8 +164,8 @@ function ImpactDataEntry() {
             type={type === 'number' ? 'text' : type}
             inputMode={type === 'number' ? 'numeric' : undefined}
             value={value}
-            onChange={(e) => onChange(type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
-            onBlur={(e) => onBlur(type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
+            onChange={(e) => onChange(type === 'number' ? e.target.value : e.target.value)}
+            onBlur={(e) => onBlur(type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value)}
             className={`w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${className}`}
         />
     );
