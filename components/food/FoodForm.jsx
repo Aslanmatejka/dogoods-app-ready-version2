@@ -278,16 +278,7 @@ function FoodForm({
                         maxLength={20}
                         helperText="Enter your phone number."
                     />
-                    <Input
-                        label="Occupation"
-                        name="donor_occupation"
-                        value={formData.donor_occupation}
-                        onChange={handleChange}
-                        error={errors.donor_occupation}
-                        required
-                        maxLength={100}
-                        helperText="Enter your occupation."
-                    />
+                    
                 </div>
             </div>
             {/* ...existing code... */}
