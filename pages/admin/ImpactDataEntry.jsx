@@ -18,26 +18,6 @@ function ImpactDataEntry() {
 
     React.useEffect(() => {
         fetchData();
-
-        const subscription = supabase
-            .channel('impact-data')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'impact_data'
-                },
-                () => {
-                    console.log('Impact data changed, refreshing...');
-                    fetchData();
-                }
-            )
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(subscription);
-        };
     }, []);
 
     const fetchData = async () => {
