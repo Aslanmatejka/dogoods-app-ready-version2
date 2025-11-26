@@ -45,13 +45,6 @@ function HomePage() {
                 image: 'https://images.unsplash.com/photo-1584473457406-6240486418e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
                 itemCount: 34
             },
-            {
-                id: 'prepared',
-                title: 'Prepared Meals',
-                description: 'Home-cooked meals and leftovers',
-                image: 'https://images.unsplash.com/photo-1594834749740-74b3f6764be4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
-                itemCount: 28
-            }
         ];
 
     // communities loaded from utils/communities.js
