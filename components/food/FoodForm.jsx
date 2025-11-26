@@ -246,7 +246,7 @@ function FoodForm({
                         onChange={handleChange}
                         error={errors.school_district}
                         options={[
-                            { value: '', label: 'Select school district' },
+                            { value: '', label: 'Select Community' },
                             { value: 'Do Good Warehouse', label: 'Do Good Warehouse' },
                             { value: 'Ruby Bridges Elementary CC', label: 'Ruby Bridges Elementary CC' },
                             { value: 'NEA/ACLC CC', label: 'NEA/ACLC CC' },
