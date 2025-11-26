@@ -308,18 +308,10 @@ function HomePage() {
                                                 <i className="fas fa-clock w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
                                                 <span>Hours: {community.hours}</span>
                                             </div>
-                                            <div className="flex justify-between items-center mt-3 pt-2 border-t">
+                                            <div className="mt-3 pt-2 border-t">
                                                 <a href={`tel:${community.phone}`} className="text-sm text-blue-600 hover:underline">
                                                     {community.phone}
                                                 </a>
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
-                                                    onClick={() => handleNavigation(`/community/${community.id}`)}
-                                                    aria-label={`Join ${community.name}`}
-                                                >
-                                                    Join
-                                                </Button>
                                             </div>
                                         </div>
                                     </Card>
