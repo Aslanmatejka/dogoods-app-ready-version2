@@ -94,7 +94,6 @@ function ImpactDataEntry() {
                 .eq('id', id);
 
             if (error) throw error;
-            await fetchData();
         } catch (error) {
             console.error('Error updating row:', error);
             alert('Failed to update: ' + error.message);
