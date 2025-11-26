@@ -13,7 +13,6 @@ function ImpactDataEntry() {
         date: new Date().toISOString().split('T')[0],
         food_saved_kg: 0,
         people_helped: 0,
-        waste_diverted_kg: 0,
         notes: ''
     });
 
@@ -74,7 +73,6 @@ function ImpactDataEntry() {
                 date: new Date().toISOString().split('T')[0],
                 food_saved_kg: 0,
                 people_helped: 0,
-                waste_diverted_kg: 0,
                 notes: ''
             });
 
@@ -137,13 +135,12 @@ function ImpactDataEntry() {
     };
 
     const exportToCSV = () => {
-        const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Waste Diverted (LB)', 'Notes'];
+        const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Notes'];
 
         const rows = data.map(row => [
             row.date,
             row.food_saved_kg,
             row.people_helped,
-            row.waste_diverted_kg,
             row.notes || ''
         ]);
 
@@ -218,9 +215,6 @@ function ImpactDataEntry() {
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                                         People Helped
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Waste Diverted (LB)
-                                    </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                                         Notes
                                     </th>
@@ -252,14 +246,6 @@ function ImpactDataEntry() {
                                             type="number"
                                             value={newRow.people_helped}
                                             onChange={(val) => handleCellChange('new', 'people_helped', val)}
-                                            onBlur={() => {}}
-                                        />
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Cell
-                                            type="number"
-                                            value={newRow.waste_diverted_kg}
-                                            onChange={(val) => handleCellChange('new', 'waste_diverted_kg', val)}
                                             onBlur={() => {}}
                                         />
                                     </td>
@@ -309,14 +295,6 @@ function ImpactDataEntry() {
                                         </td>
                                         <td className="px-3 py-2">
                                             <Cell
-                                                type="number"
-                                                value={row.waste_diverted_kg}
-                                                onChange={(val) => handleCellChange(row.id, 'waste_diverted_kg', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'waste_diverted_kg', val)}
-                                            />
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <Cell
                                                 value={row.notes || ''}
                                                 onChange={(val) => handleCellChange(row.id, 'notes', val)}
                                                 onBlur={(val) => handleCellBlur(row.id, 'notes', val)}
@@ -336,7 +314,7 @@ function ImpactDataEntry() {
 
                                 {data.length === 0 && (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                                             No data entries yet. Add your first entry using the row above.
                                         </td>
                                     </tr>
