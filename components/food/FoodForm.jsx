@@ -256,7 +256,7 @@ function FoodForm({
                             { value: 'Oakland Unified School District', label: 'Oakland Unified School District' },
                             { value: 'Alameda Unified School District', label: 'Alameda Unified School District' }
                         ]}
-                        helperText="If this donation is for a school, choose the district or school."
+                        helperText="choose a community"
                     />
                     <Input
                         label="Email"
