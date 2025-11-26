@@ -20,7 +20,7 @@ function HomePage() {
             {
                 id: 'produce',
                 title: 'Fruits and vegetables',
-                description: 'fruits and vegetables',
+                description: 'all fruits and vegetables',
                 image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
                 itemCount: 67
             },
