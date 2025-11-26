@@ -234,6 +234,7 @@ function SignupPageContent() {
                                 <option value="individual">Individual</option>
                                 <option value="business">Business</option>
                                 <option value="nonprofit">Non-profit Organization</option>
+                                <option value="school">School</option>
                             </select>
                         </div>
 
