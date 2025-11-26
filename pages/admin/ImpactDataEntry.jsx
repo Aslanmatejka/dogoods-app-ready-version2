@@ -13,11 +13,7 @@ function ImpactDataEntry() {
         date: new Date().toISOString().split('T')[0],
         food_saved_kg: 0,
         people_helped: 0,
-        meals_provided: 0,
-        co2_reduced_kg: 0,
         waste_diverted_kg: 0,
-        volunteer_hours: 0,
-        partner_organizations: 0,
         notes: ''
     });
 
@@ -78,11 +74,7 @@ function ImpactDataEntry() {
                 date: new Date().toISOString().split('T')[0],
                 food_saved_kg: 0,
                 people_helped: 0,
-                meals_provided: 0,
-                co2_reduced_kg: 0,
                 waste_diverted_kg: 0,
-                volunteer_hours: 0,
-                partner_organizations: 0,
                 notes: ''
             });
 
@@ -145,19 +137,13 @@ function ImpactDataEntry() {
     };
 
     const exportToCSV = () => {
-        const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Closets Served',
-                        'Communities', 'Waste Diverted (kg)', 'Volunteer Hours',
-                        'Partner Orgs', 'Notes'];
+        const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Waste Diverted (LB)', 'Notes'];
 
         const rows = data.map(row => [
             row.date,
             row.food_saved_kg,
             row.people_helped,
-            row.meals_provided,
-            row.co2_reduced_kg,
             row.waste_diverted_kg,
-            row.volunteer_hours,
-            row.partner_organizations,
             row.notes || ''
         ]);
 
@@ -178,7 +164,8 @@ function ImpactDataEntry() {
 
     const Cell = ({ value, onChange, onBlur, type = 'text', className = '' }) => (
         <input
-            type={type}
+            type={type === 'number' ? 'text' : type}
+            inputMode={type === 'number' ? 'numeric' : undefined}
             value={value}
             onChange={(e) => onChange(type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
             onBlur={(e) => onBlur(type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
@@ -232,19 +219,7 @@ function ImpactDataEntry() {
                                         People Helped
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Closets Served
-                                    </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Communities served(LB)
-                                    </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                                         Waste Diverted (LB)
-                                    </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Volunteer Hours
-                                    </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                                        Partner Orgs
                                     </th>
                                     <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                                         Notes
@@ -283,40 +258,8 @@ function ImpactDataEntry() {
                                     <td className="px-3 py-2">
                                         <Cell
                                             type="number"
-                                            value={newRow.meals_provided}
-                                            onChange={(val) => handleCellChange('new', 'meals_provided', val)}
-                                            onBlur={() => {}}
-                                        />
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Cell
-                                            type="number"
-                                            value={newRow.co2_reduced_kg}
-                                            onChange={(val) => handleCellChange('new', 'co2_reduced_kg', val)}
-                                            onBlur={() => {}}
-                                        />
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Cell
-                                            type="number"
                                             value={newRow.waste_diverted_kg}
                                             onChange={(val) => handleCellChange('new', 'waste_diverted_kg', val)}
-                                            onBlur={() => {}}
-                                        />
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Cell
-                                            type="number"
-                                            value={newRow.volunteer_hours}
-                                            onChange={(val) => handleCellChange('new', 'volunteer_hours', val)}
-                                            onBlur={() => {}}
-                                        />
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        <Cell
-                                            type="number"
-                                            value={newRow.partner_organizations}
-                                            onChange={(val) => handleCellChange('new', 'partner_organizations', val)}
                                             onBlur={() => {}}
                                         />
                                     </td>
@@ -367,41 +310,9 @@ function ImpactDataEntry() {
                                         <td className="px-3 py-2">
                                             <Cell
                                                 type="number"
-                                                value={row.meals_provided}
-                                                onChange={(val) => handleCellChange(row.id, 'meals_provided', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'meals_provided', val)}
-                                            />
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <Cell
-                                                type="number"
-                                                value={row.co2_reduced_kg}
-                                                onChange={(val) => handleCellChange(row.id, 'co2_reduced_kg', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'co2_reduced_kg', val)}
-                                            />
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <Cell
-                                                type="number"
                                                 value={row.waste_diverted_kg}
                                                 onChange={(val) => handleCellChange(row.id, 'waste_diverted_kg', val)}
                                                 onBlur={(val) => handleCellBlur(row.id, 'waste_diverted_kg', val)}
-                                            />
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <Cell
-                                                type="number"
-                                                value={row.volunteer_hours}
-                                                onChange={(val) => handleCellChange(row.id, 'volunteer_hours', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'volunteer_hours', val)}
-                                            />
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <Cell
-                                                type="number"
-                                                value={row.partner_organizations}
-                                                onChange={(val) => handleCellChange(row.id, 'partner_organizations', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'partner_organizations', val)}
                                             />
                                         </td>
                                         <td className="px-3 py-2">
@@ -425,7 +336,7 @@ function ImpactDataEntry() {
 
                                 {data.length === 0 && (
                                     <tr>
-                                        <td colSpan="10" className="px-6 py-8 text-center text-gray-500">
+                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                                             No data entries yet. Add your first entry using the row above.
                                         </td>
                                     </tr>
