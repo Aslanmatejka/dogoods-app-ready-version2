@@ -1,13 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { reportError } from '../../utils/helpers';
+import messageService from '../../utils/messageService';
 
 function AdminSidebar({ active, onNavigate }) {
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        loadUnreadCount();
+
+        const subscription = messageService.subscribeToAllMessages(() => {
+            loadUnreadCount();
+        });
+
+        return () => {
+            if (subscription) {
+                messageService.unsubscribe(subscription);
+            }
+        };
+    }, []);
+
+    const loadUnreadCount = async () => {
+        const result = await messageService.getConversations();
+        if (result.success) {
+            const total = result.data.reduce((sum, conv) => sum + conv.unread_count, 0);
+            setUnreadCount(total);
+        }
+    };
+
     try {
         const menuItems = [
             { id: 'dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt', path: '/admin' },
             { id: 'users', label: 'User Management', icon: 'fa-users', path: '/admin/users' },
-            { id: 'messages', label: 'Messages', icon: 'fa-comments', path: '/admin/messages' },
+            { id: 'messages', label: 'Messages', icon: 'fa-comments', path: '/admin/messages', badge: unreadCount },
             { id: 'content', label: 'Content Moderation', icon: 'fa-shield-alt', path: '/admin/content' },
             { id: 'posts', label: 'Posts & Blog', icon: 'fa-newspaper', path: '/admin/posts' },
             { id: 'distribution', label: 'Food Distribution', icon: 'fa-box-open', path: '/admin/distribution' },
@@ -53,17 +78,24 @@ function AdminSidebar({ active, onNavigate }) {
                             onClick={() => onNavigate(item.path)}
                             onKeyDown={(e) => handleKeyPress(e, item.path)}
                             className={`
-                                w-full flex items-center px-4 py-2 text-sm font-medium rounded-md
+                                w-full flex items-center justify-between px-4 py-2 text-sm font-medium rounded-md
                                 transition-colors duration-150 ease-in-out
-                                ${active === item.id 
-                                    ? 'bg-gray-900 text-white' 
+                                ${active === item.id
+                                    ? 'bg-gray-900 text-white'
                                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'}
                             `}
                             role="menuitem"
                             aria-current={active === item.id ? 'page' : undefined}
                         >
-                            <i className={`fas ${item.icon} w-6`} aria-hidden="true"></i>
-                            <span className="ml-3">{item.label}</span>
+                            <div className="flex items-center">
+                                <i className={`fas ${item.icon} w-6`} aria-hidden="true"></i>
+                                <span className="ml-3">{item.label}</span>
+                            </div>
+                            {item.badge > 0 && (
+                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    {item.badge}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </nav>

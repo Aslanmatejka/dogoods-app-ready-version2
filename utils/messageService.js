@@ -169,6 +169,23 @@ class MessageService {
     return subscription;
   }
 
+  subscribeToAllMessages(callback) {
+    const subscription = supabase
+      .channel('all-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages'
+        },
+        callback
+      )
+      .subscribe();
+
+    return subscription;
+  }
+
   unsubscribe(subscription) {
     if (subscription) {
       supabase.removeChannel(subscription);

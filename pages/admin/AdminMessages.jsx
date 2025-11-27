@@ -23,6 +23,18 @@ function AdminMessages() {
 
   useEffect(() => {
     loadConversations();
+
+    const subscription = messageService.subscribeToAllMessages((payload) => {
+      if (payload.eventType === 'INSERT') {
+        loadConversations();
+      }
+    });
+
+    return () => {
+      if (subscription) {
+        messageService.unsubscribe(subscription);
+      }
+    };
   }, []);
 
   useEffect(() => {
