@@ -278,12 +278,7 @@ function FoodForm({
                         maxLength={20}
                         helperText="Enter your phone number."
                     />
-                    
-                </div>
-            </div>
-            {/* ...existing code... */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input
+                    <Input
                     label="Donor Type"
                     name="donor_type"
                     type="select"
@@ -298,6 +293,12 @@ function FoodForm({
                     ]}
                     aria-describedby="donor_type-error"
                 />
+                    
+                </div>
+            </div>
+            {/* ...existing code... */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
                 <Input
                     label="Title"
                     name="title"
