@@ -86,7 +86,7 @@ function Footer({
                         >
                             {communityLinks.map((link, index) => (
                                 <li key={`community-${index}`} role="none">
-                                    <a 
+                                    <a
                                         href={link.path}
                                         className="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                                         role="menuitem"
@@ -95,6 +95,16 @@ function Footer({
                                     </a>
                                 </li>
                             ))}
+                            <li role="none">
+                                <a
+                                    href="/messages?recipient=support"
+                                    className="text-gray-400 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                                    role="menuitem"
+                                >
+                                    <i className="fas fa-life-ring mr-2"></i>
+                                    Contact Support
+                                </a>
+                            </li>
                         </ul>
                     </nav>
 

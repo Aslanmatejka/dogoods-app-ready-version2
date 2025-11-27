@@ -84,6 +84,36 @@ function UserMessagesPage() {
   }, [selectedConversation, user?.id]);
 
   const startNewConversation = async (recipientId) => {
+    if (recipientId === 'support') {
+      const { data: admins } = await supabase
+        .from('users')
+        .select('id, name, email, avatar_url')
+        .eq('is_admin', true)
+        .limit(1)
+        .single();
+
+      if (admins) {
+        const newConvId = crypto.randomUUID();
+        setSelectedConversation({
+          conversation_id: newConvId,
+          other_user: { ...admins, name: 'Support Team', email: admins.email },
+          last_message: '',
+          last_message_time: new Date().toISOString(),
+          unread_count: 0
+        });
+      } else {
+        const newConvId = crypto.randomUUID();
+        setSelectedConversation({
+          conversation_id: newConvId,
+          other_user: { name: 'Support Team', email: 'support@dogoods.com' },
+          last_message: '',
+          last_message_time: new Date().toISOString(),
+          unread_count: 0
+        });
+      }
+      return;
+    }
+
     const { data: userData } = await supabase
       .from('users')
       .select('id, name, email, avatar_url')
@@ -186,14 +216,24 @@ function UserMessagesPage() {
       <div className="flex-1 flex overflow-hidden">
         <div className="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
           <div className="p-4">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Conversations ({conversations.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-700">
+                Conversations ({conversations.length})
+              </h2>
+              <Button
+                onClick={() => startNewConversation('support')}
+                variant="primary"
+                size="sm"
+              >
+                <i className="fas fa-plus mr-2"></i>
+                New
+              </Button>
+            </div>
             {conversations.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 <i className="fas fa-inbox text-4xl mb-4 text-gray-300"></i>
                 <p>No conversations yet</p>
-                <p className="text-sm mt-2">Start chatting with other users</p>
+                <p className="text-sm mt-2">Click "New" to start a conversation</p>
               </div>
             ) : (
               <div className="space-y-2">

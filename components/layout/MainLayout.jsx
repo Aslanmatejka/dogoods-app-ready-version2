@@ -3,6 +3,7 @@ import Header from "../common/Header";
 import Footer from "../common/Footer";
 import AssistantButton from "../assistant/AssistantButton";
 import AIAssistant from "../assistant/AIAssistant";
+import HelpButton from "../common/HelpButton";
 
 
 function MainLayout({ children }) {
@@ -31,6 +32,9 @@ function MainLayout({ children }) {
                     onClose={() => setIsAssistantOpen(false)}
                 />
             )}
+
+            {/* Help/Support Button */}
+            <HelpButton />
         </div>
     );
 }
