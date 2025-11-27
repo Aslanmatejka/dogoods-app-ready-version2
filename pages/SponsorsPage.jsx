@@ -12,6 +12,8 @@ import island from "./sponsoredby/island.jpg";
 import jets from "./sponsoredby/jets.jpg";
 import ruby from "./sponsoredby/Ruby.jpg";
 import theAcademy from "./sponsoredby/the academy.jpg";
+import foodrecovery from "./sponsoredby/foodrecovery.jpg";
+import foodshift from "./sponsoredby/foodshift.jpg";
 
 const sponsors = [
   {
@@ -49,6 +51,18 @@ const sponsors = [
     img: sharePizza,
     website: "#",
     description: "Community-focused pizzeria supporting local food access"
+  },
+  {
+    name: "Food shift",
+    img: foodshift,
+    website: "https://foodshift.net",
+    description: ""
+  },
+  {
+    name: "Food recovery",
+    image: foodrecovery,
+    website: "https//foodrecovery.org";
+    description: ""
   }
 ];
 
