@@ -346,36 +346,50 @@ function FoodForm({
                     />
                 </div>
 
-                <Input
-                    label="Quantity"
-                    name="quantity"
-                    type="number"
-                    value={formData.quantity}
-                    onChange={handleChange}
-                    error={errors.quantity}
-                    required
-                    min="0"
-                    step="0.01"
-                    aria-describedby="quantity-error"
-                    helperText="Enter the quantity amount."
-                />
-
-                <Input
-                    label="Unit"
-                    name="unit"
-                    type="select"
-                    value={formData.unit}
-                    onChange={handleChange}
-                    options={[
-                        { value: 'lb', label: 'Pounds (lb)' },
-                        { value: 'oz', label: 'Ounces (oz)' },
-                        { value: 'kg', label: 'Kilograms (kg)' },
-                        { value: 'g', label: 'Grams (g)' },
-                        { value: 'count', label: 'Count/Items' },
-                        { value: 'serving', label: 'Servings' }
-                    ]}
-                    helperText="Select the unit of measurement."
-                />
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Quantity <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <input
+                                type="number"
+                                name="quantity"
+                                value={formData.quantity}
+                                onChange={handleChange}
+                                min="0"
+                                step="0.01"
+                                required
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                                    errors.quantity ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                                placeholder="Enter amount"
+                                aria-describedby="quantity-error"
+                            />
+                        </div>
+                        <div className="w-40">
+                            <select
+                                name="unit"
+                                value={formData.unit}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            >
+                                <option value="lb">Pounds (lb)</option>
+                                <option value="oz">Ounces (oz)</option>
+                                <option value="kg">Kilograms (kg)</option>
+                                <option value="g">Grams (g)</option>
+                                <option value="count">Count/Items</option>
+                                <option value="serving">Servings</option>
+                            </select>
+                        </div>
+                    </div>
+                    {errors.quantity && (
+                        <p className="mt-1 text-sm text-red-500" id="quantity-error">
+                            {errors.quantity}
+                        </p>
+                    )}
+                    <p className="mt-1 text-sm text-gray-500">Enter the quantity and select the unit.</p>
+                </div>
 
                 {formData.category !== 'produce' && (
                     <Input
