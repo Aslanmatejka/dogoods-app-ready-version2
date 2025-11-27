@@ -39,12 +39,6 @@ const sponsors = [
     description: "Working to end hunger in Alameda County"
   },
   {
-    name: "Feel Good Bakery",
-    img: feelGoodBakery,
-    website: "https://www.feelgoodbakery.com/",
-    description: "Artisan bakery committed to quality and community"
-  },
-  {
     name: "Community Kitchen",
     img: shareChicken,
     website: "#",
@@ -55,42 +49,6 @@ const sponsors = [
     img: sharePizza,
     website: "#",
     description: "Community-focused pizzeria supporting local food access"
-  },
-  {
-    name: "Alameda County Library Cooperative",
-    img: aclc,
-    website: "https://aclibrary.org/",
-    description: "Connecting communities through library services and programs"
-  },
-  {
-    name: "All Good Living",
-    img: allGoodLiving,
-    website: "#",
-    description: "Promoting healthy and sustainable living practices"
-  },
-  {
-    name: "Island Community Services",
-    img: island,
-    website: "#",
-    description: "Supporting island communities with essential services"
-  },
-  {
-    name: "Jets Community Program",
-    img: jets,
-    website: "#",
-    description: "Youth sports and community development programs"
-  },
-  {
-    name: "Ruby's Kitchen",
-    img: ruby,
-    website: "#",
-    description: "Serving wholesome meals with community at heart"
-  },
-  {
-    name: "The Academy",
-    img: theAcademy,
-    website: "#",
-    description: "Educational programs and community development"
   }
 ];
 
