@@ -12,8 +12,8 @@ import island from "./sponsoredby/island.jpg";
 import jets from "./sponsoredby/jets.jpg";
 import ruby from "./sponsoredby/Ruby.jpg";
 import theAcademy from "./sponsoredby/the academy.jpg";
-import foodrecovery from "./sponsoredby/foodrecovery.jpg";
-import foodshift from "./sponsoredby/foodshift.jpg";
+import foodrecovery from "./sponsoredby/foodrecovery.png";
+import foodshift from "./sponsoredby/foodshift.png";
 
 const sponsors = [
   {
