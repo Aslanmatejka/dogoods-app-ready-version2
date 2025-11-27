@@ -93,47 +93,114 @@ function HomePage() {
                         </div>
                     </section>
 
-                    {/* Featured Listings Section */}
-                    <section 
+                    {/* How It Works Schematic */}
+                    <section
                         className="py-16 bg-gray-50"
-                        aria-labelledby="featured-heading"
+                        aria-labelledby="how-it-works-schematic-heading"
                     >
                         <div className="container mx-auto px-4">
                             <div className="text-center mb-12">
-                                <h2 
-                                    id="featured-heading"
+                                <h2
+                                    id="how-it-works-schematic-heading"
                                     className="text-3xl font-bold text-gray-900 mb-4"
                                 >
-                                    Featured Listings
+                                    How It Works
                                 </h2>
                                 <p className="text-xl text-gray-600">
-                                    Browse our latest food sharing opportunities
+                                    Join our community in three simple steps
                                 </p>
                             </div>
 
-                            <div 
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-                                role="list"
-                                aria-label="Featured food listings"
-                            >
-                                {featuredListings.map((listing) => (
-                                    <div key={listing.id} role="listitem">
-                                        <FoodCard
-                                            food={listing}
-                                            onClaim={(food) => navigate('/claim', { state: { food } })}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
+                            <div className="max-w-5xl mx-auto">
+                                <div className="relative">
+                                    {/* Process Flow Diagram */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                                        {/* Step 1 */}
+                                        <div className="relative">
+                                            <div className="bg-white rounded-lg shadow-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <i className="fas fa-search text-3xl text-green-600"></i>
+                                                </div>
+                                                <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                                                    1
+                                                </div>
+                                                <h3 className="text-xl font-bold mb-3 text-gray-900">Find Food</h3>
+                                                <p className="text-gray-600 mb-4">Browse available food items in your area or search for specific items you need</p>
+                                                <div className="mt-auto pt-4">
+                                                    <div className="inline-block bg-green-50 text-green-700 text-sm px-4 py-2 rounded-full font-medium">
+                                                        Browse Listings
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* Arrow for desktop */}
+                                            <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                                                <i className="fas fa-arrow-right text-4xl text-green-600"></i>
+                                            </div>
+                                            {/* Arrow for mobile */}
+                                            <div className="md:hidden flex justify-center my-4">
+                                                <i className="fas fa-arrow-down text-4xl text-green-600"></i>
+                                            </div>
+                                        </div>
 
-                            <div className="text-center">
-                                <Button
-                                    variant="primary"
-                                    onClick={() => handleNavigation('/find')}
-                                    aria-label="View all food listings"
-                                >
-                                    View All Listings
-                                </Button>
+                                        {/* Step 2 */}
+                                        <div className="relative">
+                                            <div className="bg-white rounded-lg shadow-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                                                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <i className="fas fa-comments text-3xl text-blue-600"></i>
+                                                </div>
+                                                <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                                                    2
+                                                </div>
+                                                <h3 className="text-xl font-bold mb-3 text-gray-900">Connect</h3>
+                                                <p className="text-gray-600 mb-4">Message the food sharer and arrange a convenient pickup time and location</p>
+                                                <div className="mt-auto pt-4">
+                                                    <div className="inline-block bg-blue-50 text-blue-700 text-sm px-4 py-2 rounded-full font-medium">
+                                                        Arrange Pickup
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* Arrow for desktop */}
+                                            <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                                                <i className="fas fa-arrow-right text-4xl text-blue-600"></i>
+                                            </div>
+                                            {/* Arrow for mobile */}
+                                            <div className="md:hidden flex justify-center my-4">
+                                                <i className="fas fa-arrow-down text-4xl text-blue-600"></i>
+                                            </div>
+                                        </div>
+
+                                        {/* Step 3 */}
+                                        <div className="relative">
+                                            <div className="bg-white rounded-lg shadow-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                                                <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <i className="fas fa-handshake text-3xl text-orange-600"></i>
+                                                </div>
+                                                <div className="absolute -top-4 -left-4 w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                                                    3
+                                                </div>
+                                                <h3 className="text-xl font-bold mb-3 text-gray-900">Share & Save</h3>
+                                                <p className="text-gray-600 mb-4">Meet up, share food, and help reduce waste while building community connections</p>
+                                                <div className="mt-auto pt-4">
+                                                    <div className="inline-block bg-orange-50 text-orange-700 text-sm px-4 py-2 rounded-full font-medium">
+                                                        Make Impact
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Call to Action */}
+                                    <div className="text-center mt-12">
+                                        <Button
+                                            variant="primary"
+                                            size="lg"
+                                            onClick={() => handleNavigation('/find')}
+                                            aria-label="Start sharing food now"
+                                        >
+                                            Get Started Now
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -181,65 +248,6 @@ function HomePage() {
                                     View all categories
                                     <i className="fas fa-arrow-right ml-2" aria-hidden="true"></i>
                                 </Button>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* How It Works Section */}
-                    <section 
-                        className="py-16 bg-white"
-                        aria-labelledby="how-it-works-heading"
-                    >
-                        <div className="container mx-auto px-4">
-                            <div className="text-center mb-12">
-                                <h2 
-                                    id="how-it-works-heading"
-                                    className="text-3xl font-bold text-gray-900 mb-4"
-                                >
-                                    How It Works
-                                </h2>
-                                <p className="text-xl text-gray-600">
-                                    Join our community in three simple steps
-                                </p>
-                            </div>
-
-                            <div 
-                                className="grid grid-cols-1 md:grid-cols-3 gap-8"
-                                role="list"
-                                aria-label="Steps to join the community"
-                            >
-                                {[
-                                    {
-                                        title: 'Find Food',
-                                        description: 'Browse available food items in your area or search for specific items',
-                                        icon: 'fa-search'
-                                    },
-                                    {
-                                        title: 'Connect',
-                                        description: 'Message the food sharer and arrange a pickup time and location',
-                                        icon: 'fa-comments'
-                                    },
-                                    {
-                                        title: 'Share & Save',
-                                        description: 'Meet up, share food, and help reduce waste in your community',
-                                        icon: 'fa-handshake'
-                                    }
-                                ].map((step, index) => (
-                                    <div 
-                                        key={index} 
-                                        className="text-center"
-                                        role="listitem"
-                                    >
-                                        <div 
-                                            className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
-                                            aria-hidden="true"
-                                        >
-                                            <i className={`fas ${step.icon} text-2xl text-green-600`}></i>
-                                        </div>
-                                        <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                                        <p className="text-gray-600">{step.description}</p>
-                                    </div>
-                                ))}
                             </div>
                         </div>
                     </section>
