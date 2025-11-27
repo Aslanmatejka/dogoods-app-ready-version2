@@ -7,7 +7,7 @@ import supabase from '../utils/supabaseClient';
 import { toast } from 'react-toastify';
 
 function UserMessagesPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState([]);
@@ -28,12 +28,14 @@ function UserMessagesPage() {
   }, [messages]);
 
   useEffect(() => {
+    if (authLoading) return;
+
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
     loadConversations();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   useEffect(() => {
     const recipientId = searchParams.get('recipient');
@@ -139,6 +141,17 @@ function UserMessagesPage() {
     }
     setSending(false);
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-gray-500">
+          <i className="fas fa-spinner fa-spin mr-2"></i>
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return null;
