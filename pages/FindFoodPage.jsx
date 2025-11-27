@@ -293,7 +293,6 @@ function FindFoodPage({ initialCategory }) {
                             <option value="bakery">Bakery</option>
                             <option value="pantry">Pantry Items</option>
                             <option value="meat">Meat & Poultry</option>
-                            <option value="prepared">Prepared Foods</option>
                         </select>
                     </div>
                     <Button variant="primary" onClick={handleSearch} disabled={searchLoading}>Search</Button>
