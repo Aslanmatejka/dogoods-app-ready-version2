@@ -125,7 +125,7 @@ function HomePage() {
                                                     1
                                                 </div>
                                                 <h3 className="text-xl font-bold mb-3 text-gray-900">Find Food</h3>
-                                                <p className="text-gray-600 mb-4">Browse available food items in your area or search for specific items you need</p>
+                                                <p className="text-gray-600 mb-4">Browse available food items in your area or search for specific items you need, claim and pick up</p>
                                                 <div className="mt-auto pt-4">
                                                     <div className="inline-block bg-green-50 text-green-700 text-sm px-4 py-2 rounded-full font-medium">
                                                         Browse Listings
