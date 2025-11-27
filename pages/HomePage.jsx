@@ -152,7 +152,7 @@ function HomePage() {
                                                     2
                                                 </div>
                                                 <h3 className="text-xl font-bold mb-3 text-gray-900">Connect</h3>
-                                                <p className="text-gray-600 mb-4">share and claim food through active communities </p>
+                                                <p className="text-gray-600 mb-4">share and claim food through active communities, contact and arrange pickups </p>
                                                 <div className="mt-auto pt-4">
                                                     <div className="inline-block bg-blue-50 text-blue-700 text-sm px-4 py-2 rounded-full font-medium">
                                                         Arrange Pickup
