@@ -23,16 +23,16 @@ const sponsors = [
     description: "A worker-owned cooperative bakery and pizzeria in Berkeley"
   },
   {
-    name: "Alameda County Community Food Bank",
+    name: "Alameda Food Bank",
     img: community,
-    website: "https://www.accfb.org/",
-    description: "Distributing nutritious food to people in need throughout Alameda County"
+    website: "https://www.alamedafoodbank.org",
+    description: "Founded in 1977, the Alameda Food Bank is a non-profit organization that helps Alameda community by providing nourishing food to those in need."
   },
   {
-    name: "Berkeley Student Food Collective",
+    name: "Semifreddi's",
     img: farm,
-    website: "https://www.berkeleysfc.org/",
-    description: "Student-run organization providing fresh, local, and organic food"
+    website: "https://www.semifreddis.com/",
+    description: "Semifreddi's Bakery is an Alameda-based artisan backery that serves the entire San Francisco Bay Area."
   },
   {
     name: "Feeding Alameda County",
@@ -43,14 +43,14 @@ const sponsors = [
   {
     name: "Community Kitchen",
     img: shareChicken,
-    website: "#",
-    description: "Providing nutritious meals to community members in need"
+    website: "https://www.ckoakland.org/",
+    description: "Community Kichen's mission is to harness the power of food to change lives, uplift communities and protect our enviroment."
   },
   {
     name: "Berkeley Pizza Collective",
     img: sharePizza,
-    website: "#",
-    description: "Community-focused pizzeria supporting local food access"
+    website: "https://www.sharepizzakitchen.com",
+    description: "We specialize in sourdough pizza with craft that is crispy on outside, soft on the inside, and taste like sourdough when you bite into it"
   },
   {
     name: "Food shift",
