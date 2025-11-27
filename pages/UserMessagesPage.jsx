@@ -38,16 +38,11 @@ function UserMessagesPage() {
   }, [isAuthenticated, authLoading, navigate]);
 
   useEffect(() => {
-    const recipientId = searchParams.get('recipient');
-    if (recipientId && conversations.length > 0) {
-      const existingConv = conversations.find(
-        conv => conv.other_user?.id === recipientId
-      );
-      if (existingConv) {
-        setSelectedConversation(existingConv);
-      } else {
-        startNewConversation(recipientId);
-      }
+    const recipientParam = searchParams.get('recipient');
+    if (recipientParam === 'support' && conversations.length === 0) {
+      startNewConversation();
+    } else if (conversations.length > 0 && !selectedConversation) {
+      setSelectedConversation(conversations[0]);
     }
   }, [searchParams, conversations]);
 
@@ -83,48 +78,28 @@ function UserMessagesPage() {
     };
   }, [selectedConversation, user?.id]);
 
-  const startNewConversation = async (recipientId) => {
-    if (recipientId === 'support') {
-      const { data: admins } = await supabase
-        .from('users')
-        .select('id, name, email, avatar_url')
-        .eq('is_admin', true)
-        .limit(1)
-        .single();
-
-      if (admins) {
-        const newConvId = crypto.randomUUID();
-        setSelectedConversation({
-          conversation_id: newConvId,
-          other_user: { ...admins, name: 'Support Team', email: admins.email },
-          last_message: '',
-          last_message_time: new Date().toISOString(),
-          unread_count: 0
-        });
-      } else {
-        const newConvId = crypto.randomUUID();
-        setSelectedConversation({
-          conversation_id: newConvId,
-          other_user: { name: 'Support Team', email: 'support@dogoods.com' },
-          last_message: '',
-          last_message_time: new Date().toISOString(),
-          unread_count: 0
-        });
-      }
-      return;
-    }
-
-    const { data: userData } = await supabase
+  const startNewConversation = async () => {
+    const { data: admins } = await supabase
       .from('users')
       .select('id, name, email, avatar_url')
-      .eq('id', recipientId)
-      .single();
+      .eq('is_admin', true)
+      .limit(1)
+      .maybeSingle();
 
-    if (userData) {
+    if (admins) {
       const newConvId = crypto.randomUUID();
       setSelectedConversation({
         conversation_id: newConvId,
-        other_user: userData,
+        other_user: { ...admins, name: 'Support Team', email: admins.email },
+        last_message: '',
+        last_message_time: new Date().toISOString(),
+        unread_count: 0
+      });
+    } else {
+      const newConvId = crypto.randomUUID();
+      setSelectedConversation({
+        conversation_id: newConvId,
+        other_user: { id: null, name: 'Support Team', email: 'support@dogoods.com' },
         last_message: '',
         last_message_time: new Date().toISOString(),
         unread_count: 0
@@ -221,19 +196,19 @@ function UserMessagesPage() {
                 Conversations ({conversations.length})
               </h2>
               <Button
-                onClick={() => startNewConversation('support')}
+                onClick={startNewConversation}
                 variant="primary"
                 size="sm"
               >
                 <i className="fas fa-plus mr-2"></i>
-                New
+                Contact Support
               </Button>
             </div>
             {conversations.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 <i className="fas fa-inbox text-4xl mb-4 text-gray-300"></i>
                 <p>No conversations yet</p>
-                <p className="text-sm mt-2">Click "New" to start a conversation</p>
+                <p className="text-sm mt-2">Click "Contact Support" to start chatting with our team</p>
               </div>
             ) : (
               <div className="space-y-2">
