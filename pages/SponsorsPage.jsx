@@ -61,7 +61,7 @@ const sponsors = [
   {
     name: "Food recovery",
     image: foodrecovery,
-    website: "https//foodrecovery.org";
+    website: "https//foodrecovery.org",
     description: ""
   }
 ];
