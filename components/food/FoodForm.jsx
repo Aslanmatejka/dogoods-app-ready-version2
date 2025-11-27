@@ -347,7 +347,7 @@ function FoodForm({
                 </div>
 
                 <Input
-                    label="Quantity (LB Only)"
+                    label="Quantity"
                     name="quantity"
                     type="number"
                     value={formData.quantity}
@@ -357,10 +357,25 @@ function FoodForm({
                     min="0"
                     step="0.01"
                     aria-describedby="quantity-error"
-                    helperText="Enter the weight in pounds (LB) only."
+                    helperText="Enter the quantity amount."
                 />
 
-                {/* Unit is always LB, so no unit selector needed */}
+                <Input
+                    label="Unit"
+                    name="unit"
+                    type="select"
+                    value={formData.unit}
+                    onChange={handleChange}
+                    options={[
+                        { value: 'lb', label: 'Pounds (lb)' },
+                        { value: 'oz', label: 'Ounces (oz)' },
+                        { value: 'kg', label: 'Kilograms (kg)' },
+                        { value: 'g', label: 'Grams (g)' },
+                        { value: 'count', label: 'Count/Items' },
+                        { value: 'serving', label: 'Servings' }
+                    ]}
+                    helperText="Select the unit of measurement."
+                />
 
                 {formData.category !== 'produce' && (
                     <Input
