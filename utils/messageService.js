@@ -10,7 +10,7 @@ class MessageService {
         .from('users')
         .select('is_admin')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       const isAdmin = userData?.is_admin || false;
 
@@ -22,7 +22,11 @@ class MessageService {
           message,
           conversation_id: conversationId,
           is_admin_sender: isAdmin,
-          read: false
+          read: false,
+          topic: 'support',
+          extension: 'public.messages',
+          event: 'INSERT',
+          private: false
         })
         .select()
         .single();
