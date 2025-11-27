@@ -158,6 +158,7 @@ function FoodCard({
                                 Trade
                             </Button>
                         )}
+                        {/* Recipes button removed for shared food */}
                         {showReturnButton && (
                             <Button
                                 variant="secondary"
