@@ -128,12 +128,20 @@ function Header({
                                                     Admin Panel
                                                 </a>
                                             )}
-                                            <a 
-                                                href="/settings" 
+                                            <a
+                                                href="/settings"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 role="menuitem"
                                             >
                                                 Settings
+                                            </a>
+                                            <a
+                                                href="/messages"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem"
+                                            >
+                                                <i className="fas fa-comment-alt mr-2"></i>
+                                                Messages
                                             </a>
                                         </div>
                                         <div className="py-1">

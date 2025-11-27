@@ -33,6 +33,8 @@ import AdminContentManagement from './pages/admin/AdminContentManagement.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
 import ImpactDataEntry from './pages/admin/ImpactDataEntry.jsx';
+import AdminMessages from './pages/admin/AdminMessages.jsx';
+import MessagesPage from './pages/MessagesPage.jsx';
 import { AuthProvider, useAuthContext } from './utils/AuthContext';
 import { GoodsProvider } from './utils/stores/goodsStore.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
@@ -77,7 +79,9 @@ function AppContent() {
                 <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                 <Route path="/listings" element={<ProtectedRoute><UserListings /></ProtectedRoute>} />
+                <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
                 <Route path="/admin/posts" element={<AdminRoute><AdminContentManagement /></AdminRoute>} />
                 <Route path="/admin/content" element={<AdminRoute><ContentModeration /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
