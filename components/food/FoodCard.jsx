@@ -135,7 +135,16 @@ function FoodCard({
                 </div>
             }
             footer={
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-between">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => window.location.href = `/messages?recipient=${food.donor_id}`}
+                        aria-label="Message donor"
+                    >
+                        <i className="fas fa-comment mr-2"></i>
+                        Message
+                    </Button>
                     <div className="flex space-x-2">
                         {type === 'donation' ? (
                             <Button
@@ -158,7 +167,6 @@ function FoodCard({
                                 Trade
                             </Button>
                         )}
-                        {/* Recipes button removed for shared food */}
                         {showReturnButton && (
                             <Button
                                 variant="secondary"
