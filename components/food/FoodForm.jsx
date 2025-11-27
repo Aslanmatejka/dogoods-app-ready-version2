@@ -239,7 +239,7 @@ function FoodForm({
                         helperText="Enter your state."
                     />
                     <Input
-                        label="School District"
+                        label="Active Communities"
                         name="school_district"
                         type="select"
                         value={formData.school_district}
