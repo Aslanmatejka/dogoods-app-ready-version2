@@ -62,7 +62,7 @@ const sponsors = [
     name: "Food recovery",
     image: foodrecovery,
     website: "https//foodrecovery.org",
-    description: ""
+    description: "We connect food donors with nonprofits to fight hunger and reduce waste. Our solutions make it easy to donate or receive food while helping the environment. All for free."
   }
 ];
 
