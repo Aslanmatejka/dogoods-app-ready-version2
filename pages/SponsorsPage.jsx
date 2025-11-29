@@ -56,7 +56,7 @@ const sponsors = [
     name: "Food shift",
     img: foodshift,
     website: "https://foodshift.net",
-    description: ""
+    description: "At Food Shift, we transform surplus into opportunities. Since 2012, we’ve been reducing food waste and nourishing neighbors in the San Francisco Bay Area while sharing solutions globally. Together, we’re building a stronger, more equitable food system"
   },
   {
     name: "Food recovery",
