@@ -20,7 +20,7 @@ const sponsors = [
     name: "The Cheese Board Collective",
     img: cheeseBoard,
     website: "https://cheeseboardcollective.coop/",
-    description: "A worker-owned cooperative bakery and pizzeria in Berkeley"
+    description: "A worker-owned cooperative bakery and pizzeria in Berkeley since 1971"
   },
   {
     name: "Alameda County Community Food bank",
