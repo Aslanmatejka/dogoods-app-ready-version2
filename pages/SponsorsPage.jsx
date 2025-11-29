@@ -23,10 +23,10 @@ const sponsors = [
     description: "A worker-owned cooperative bakery and pizzeria in Berkeley"
   },
   {
-    name: "Alameda Food Bank",
+    name: "Alameda County Community Food bank",
     img: community,
-    website: "https://www.alamedafoodbank.org",
-    description: "Founded in 1977, the Alameda Food Bank is a non-profit organization that helps Alameda community by providing nourishing food to those in need."
+    website: "https://accfb.org",
+    description: "the Alameda County community food Bank is non-profit organization that supplies food to 400+ Alameda County."
   },
   {
     name: "Semifreddi's",
