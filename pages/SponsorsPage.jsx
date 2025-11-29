@@ -35,10 +35,10 @@ const sponsors = [
     description: "Semifreddi's Bakery is an Alameda-based artisan backery that serves the entire San Francisco Bay Area."
   },
   {
-    name: "Feeding Alameda County",
+    name: "Alameda Food Bank",
     img: feedingElmeda,
-    website: "https://www.accfb.org/",
-    description: "Working to end hunger in Alameda County"
+    website: "https://www.alamedafoodbank.org/",
+    description: "Founded in 1977, the Alameda Food Bank is a non-profit organization that helps Alameda community by providing nourishing food to those in need."
   },
   {
     name: "Community Kitchen",
