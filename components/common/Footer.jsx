@@ -21,9 +21,9 @@ function Footer({
                             className="inline-block mb-6"
                             aria-label="Go to homepage"
                         >
-                            <img 
-                                src="/logos/dogoodlogo.png" 
-                                alt="All Good Living Foundation Logo" 
+                            <img
+                                src="/logos/dogoodlogo.png"
+                                alt="All Good Living Foundation Logo"
                                 className="h-16 w-auto"
                             />
                         </a>
@@ -137,13 +137,15 @@ function Footer({
                 </div>
 
                 {/* Bottom Section */}
-                <div className="border-t border-gray-700 mt-12 pt-8 text-center">
-                    <p className="text-gray-400 text-sm">
-                        Activate Windows
-                    </p>
-                    <p className="text-gray-500 text-xs mt-1">
-                        Go to Settings to activate Windows.
-                    </p>
+                <div className="border-t border-gray-700 mt-12 pt-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+                        <p>© {new Date().getFullYear()} All Good Living Foundation. All rights reserved.</p>
+                        <div className="flex gap-6 mt-4 md:mt-0">
+                            <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
+                            <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
+                            <a href="/cookies" className="hover:text-white transition-colors">Cookie Policy</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </footer>
