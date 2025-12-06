@@ -103,33 +103,57 @@ function ImpactDataEntry() {
     };
 
     const handleCellChange = React.useCallback((id, field, value) => {
-        if (id === 'new') {
-            setNewRow(prev => ({ ...prev, [field]: value }));
-        } else {
-            // Store temporary editing values
-            setEditingValues(prev => ({
-                ...prev,
-                [`${id}-${field}`]: value
-            }));
+        console.log('handleCellChange called:', { id, field, value });
+        try {
+            if (id === 'new') {
+                console.log('Updating newRow state');
+                setNewRow(prev => {
+                    const updated = { ...prev, [field]: value };
+                    console.log('newRow updated:', updated);
+                    return updated;
+                });
+            } else {
+                console.log('Updating editingValues');
+                // Store temporary editing values
+                setEditingValues(prev => {
+                    const updated = {
+                        ...prev,
+                        [`${id}-${field}`]: value
+                    };
+                    console.log('editingValues updated:', updated);
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error('Error in handleCellChange:', error);
         }
     }, []);
 
     const handleCellBlur = React.useCallback((id, field, value) => {
-        if (id !== 'new') {
-            handleUpdateRow(id, field, value);
-            // Clear the temporary editing value
-            setEditingValues(prev => {
-                const newValues = { ...prev };
-                delete newValues[`${id}-${field}`];
-                return newValues;
-            });
+        console.log('handleCellBlur called:', { id, field, value });
+        try {
+            if (id !== 'new') {
+                console.log('Calling handleUpdateRow');
+                handleUpdateRow(id, field, value);
+                // Clear the temporary editing value
+                setEditingValues(prev => {
+                    const newValues = { ...prev };
+                    delete newValues[`${id}-${field}`];
+                    console.log('Cleared editing value, remaining:', newValues);
+                    return newValues;
+                });
+            }
+        } catch (error) {
+            console.error('Error in handleCellBlur:', error);
         }
     }, []);
-    
+
     const getCellValue = React.useCallback((id, field, originalValue) => {
         const editKey = `${id}-${field}`;
-        return editingValues[editKey] !== undefined ? editingValues[editKey] : originalValue;
-    }, [editingValues]);    const exportToCSV = () => {
+        const value = editingValues[editKey] !== undefined ? editingValues[editKey] : originalValue;
+        console.log('getCellValue:', { id, field, editKey, originalValue, returnValue: value });
+        return value;
+    }, [editingValues]); const exportToCSV = () => {
         const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Notes'];
 
         const rows = data.map(row => [
@@ -156,25 +180,39 @@ function ImpactDataEntry() {
 
     const Cell = React.memo(({ value, onChange, onBlur, type = 'text', className = '' }) => {
         const [localValue, setLocalValue] = React.useState(value);
-        
+
         // Update local value when external value changes (e.g., after save)
         React.useEffect(() => {
+            console.log('Cell useEffect triggered - External value changed:', { value, type });
             setLocalValue(value);
         }, [value]);
-        
+
         const handleChange = (e) => {
-            const newValue = e.target.value;
-            setLocalValue(newValue);
-            onChange(newValue);
+            try {
+                const newValue = e.target.value;
+                console.log('Cell handleChange:', { type, oldValue: localValue, newValue, field: className });
+                setLocalValue(newValue);
+                onChange(newValue);
+                console.log('Cell handleChange completed successfully');
+            } catch (error) {
+                console.error('Error in Cell handleChange:', error);
+            }
         };
-        
+
         const handleBlur = (e) => {
-            const finalValue = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
-            onBlur(finalValue);
+            try {
+                const finalValue = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
+                console.log('Cell handleBlur:', { type, value: e.target.value, finalValue });
+                onBlur(finalValue);
+                console.log('Cell handleBlur completed successfully');
+            } catch (error) {
+                console.error('Error in Cell handleBlur:', error);
+            }
         };
-        
+
         const displayValue = localValue === null || localValue === undefined ? '' : String(localValue);
-        
+        console.log('Cell render:', { type, value, localValue, displayValue });
+
         return (
             <input
                 type={type === 'number' ? 'text' : type}
