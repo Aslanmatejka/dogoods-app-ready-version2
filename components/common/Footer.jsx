@@ -22,7 +22,7 @@ function Footer({
                             aria-label="Go to homepage"
                         >
                             <img
-                                src="/logos/dogoodlogo.png"
+                                src="/dogoodlogo.png"
                                 alt="All Good Living Foundation Logo"
                                 className="h-16 w-auto"
                             />
