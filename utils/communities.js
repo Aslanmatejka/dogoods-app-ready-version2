@@ -59,27 +59,27 @@ const communities = [
         lastActive: new Date().toISOString(),
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/jets.jpg?raw=true'
     },
-    {
-        id: 7,
-        name: 'Oakland Unified School District',
-        location: '1011 Union Street Oakland, CA94607',
-        contact: 'Khánh Hữu Nguyên',
-        hours: 'Monday - Friday 8:00 am - 4:00 pm',
-        phone: '510-879-1525',
-        lastActive: new Date().toISOString(),
-        image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/OUSD.png?raw=true'
-    },
-    {
-        id: 8,
-        name: 'Alameda Unified School District',
-        location: '2060 Challenger Dr Alameda, C 94501',
-        contact: 'Jodi McCarthy',
-        hours: 'Monday - Friday 8:00 am - 4:00 pm',
-        phone: 'null',
-        lastActive: new Date().toISOString(),
-        image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/AUSD.png?raw=true'
-        
-    },
+    // {
+    //     id: 7,
+    //     name: 'Oakland Unified School District',
+    //     location: '1011 Union Street Oakland, CA94607',
+    //     contact: 'Khánh Hữu Nguyên',
+    //     hours: 'Monday - Friday 8:00 am - 4:00 pm',
+    //     phone: '510-879-1525',
+    //     lastActive: new Date().toISOString(),
+    //     image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/OUSD.png?raw=true'
+    // },
+    // {
+    //     id: 8,
+    //     name: 'Alameda Unified School District',
+    //     location: '2060 Challenger Dr Alameda, C 94501',
+    //     contact: 'Jodi McCarthy',
+    //     hours: 'Monday - Friday 8:00 am - 4:00 pm',
+    //     phone: 'null',
+    //     lastActive: new Date().toISOString(),
+    //     image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/AUSD.png?raw=true'
+    //     
+    // },
     
 
 
