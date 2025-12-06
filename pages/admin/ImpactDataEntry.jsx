@@ -8,12 +8,13 @@ function ImpactDataEntry() {
     const { user } = useAuthContext();
     const [data, setData] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
-    const [editingValues, setEditingValues] = React.useState({});
-    const [newRow, setNewRow] = React.useState({
-        date: new Date().toISOString().split('T')[0],
-        food_saved_kg: '',
-        people_helped: '',
-        notes: ''
+    
+    // Use refs for uncontrolled inputs instead of state
+    const newRowRefs = React.useRef({
+        date: null,
+        food_saved_kg: null,
+        people_helped: null,
+        notes: null
     });
 
     React.useEffect(() => {
@@ -40,21 +41,26 @@ function ImpactDataEntry() {
 
     const handleAddRow = async () => {
         try {
+            // Get values from refs (uncontrolled inputs)
+            const newRowData = {
+                date: newRowRefs.current.date?.value || new Date().toISOString().split('T')[0],
+                food_saved_kg: newRowRefs.current.food_saved_kg?.value || '',
+                people_helped: newRowRefs.current.people_helped?.value || '',
+                notes: newRowRefs.current.notes?.value || '',
+                created_by: user?.id
+            };
+
             const { error } = await supabase
                 .from('impact_data')
-                .insert([{
-                    ...newRow,
-                    created_by: user?.id
-                }]);
+                .insert([newRowData]);
 
             if (error) throw error;
 
-            setNewRow({
-                date: new Date().toISOString().split('T')[0],
-                food_saved_kg: '',
-                people_helped: '',
-                notes: ''
-            });
+            // Clear input fields
+            if (newRowRefs.current.date) newRowRefs.current.date.value = new Date().toISOString().split('T')[0];
+            if (newRowRefs.current.food_saved_kg) newRowRefs.current.food_saved_kg.value = '';
+            if (newRowRefs.current.people_helped) newRowRefs.current.people_helped.value = '';
+            if (newRowRefs.current.notes) newRowRefs.current.notes.value = '';
 
             await fetchData();
         } catch (error) {
@@ -102,78 +108,7 @@ function ImpactDataEntry() {
         }
     };
 
-    const handleCellChange = React.useCallback((id, field, value) => {
-        console.log('handleCellChange called:', { id, field, value });
-        try {
-            if (id === 'new') {
-                console.log('Updating newRow state');
-                setNewRow(prev => {
-                    const updated = { ...prev, [field]: value };
-                    console.log('newRow updated:', updated);
-                    return updated;
-                });
-            } else {
-                console.log('Updating editingValues');
-                // Store temporary editing values
-                setEditingValues(prev => {
-                    const updated = {
-                        ...prev,
-                        [`${id}-${field}`]: value
-                    };
-                    console.log('editingValues updated:', updated);
-                    return updated;
-                });
-            }
-        } catch (error) {
-            console.error('Error in handleCellChange:', error);
-        }
-    }, []);
-
-    const handleCellBlur = React.useCallback((id, field, value) => {
-        console.log('handleCellBlur called:', { id, field, value });
-        try {
-            if (id !== 'new') {
-                console.log('Calling handleUpdateRow');
-                handleUpdateRow(id, field, value);
-                // Clear the temporary editing value
-                setEditingValues(prev => {
-                    const newValues = { ...prev };
-                    delete newValues[`${id}-${field}`];
-                    console.log('Cleared editing value, remaining:', newValues);
-                    return newValues;
-                });
-            }
-        } catch (error) {
-            console.error('Error in handleCellBlur:', error);
-        }
-    }, []);
-
-    const getCellValue = React.useCallback((id, field, originalValue) => {
-        const editKey = `${id}-${field}`;
-        const value = editingValues[editKey] !== undefined ? editingValues[editKey] : originalValue;
-        console.log('getCellValue:', { id, field, editKey, originalValue, returnValue: value });
-        return value;
-    }, [editingValues]);
-
-    // Create stable callback references for new row inputs
-    const newRowCallbacks = React.useMemo(() => ({
-        date: {
-            onChange: (val) => handleCellChange('new', 'date', val),
-            onBlur: () => {}
-        },
-        food_saved_kg: {
-            onChange: (val) => handleCellChange('new', 'food_saved_kg', val),
-            onBlur: () => {}
-        },
-        people_helped: {
-            onChange: (val) => handleCellChange('new', 'people_helped', val),
-            onBlur: () => {}
-        },
-        notes: {
-            onChange: (val) => handleCellChange('new', 'notes', val),
-            onBlur: () => {}
-        }
-    }), [handleCellChange]);
+    // Simple update handler for existing rows - uses uncontrolled inputs too
 
     const exportToCSV = () => {
         const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Notes'];
@@ -200,52 +135,21 @@ function ImpactDataEntry() {
         document.body.removeChild(link);
     };
 
-    const Cell = React.memo(({ value, onChange, onBlur, type = 'text', className = '' }) => {
-        const [localValue, setLocalValue] = React.useState(value);
-
-        // Update local value when external value changes (e.g., after save)
-        React.useEffect(() => {
-            console.log('Cell useEffect triggered - External value changed:', { value, type });
-            setLocalValue(value);
-        }, [value]);
-
-        const handleChange = (e) => {
-            try {
-                const newValue = e.target.value;
-                console.log('Cell handleChange:', { type, oldValue: localValue, newValue, field: className });
-                setLocalValue(newValue);
-                onChange(newValue);
-                console.log('Cell handleChange completed successfully');
-            } catch (error) {
-                console.error('Error in Cell handleChange:', error);
-            }
-        };
-
-        const handleBlur = (e) => {
-            try {
-                const finalValue = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
-                console.log('Cell handleBlur:', { type, value: e.target.value, finalValue });
-                onBlur(finalValue);
-                console.log('Cell handleBlur completed successfully');
-            } catch (error) {
-                console.error('Error in Cell handleBlur:', error);
-            }
-        };
-
-        const displayValue = localValue === null || localValue === undefined ? '' : String(localValue);
-        console.log('Cell render:', { type, value, localValue, displayValue });
-
+    // Uncontrolled input component - no state, no re-renders
+    const UncontrolledCell = ({ defaultValue, onBlur, type = 'text', inputRef }) => {
         return (
             <input
-                type={type === 'number' ? 'text' : type}
-                inputMode={type === 'number' ? 'numeric' : undefined}
-                value={displayValue}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${className}`}
+                ref={inputRef}
+                type={type}
+                defaultValue={defaultValue}
+                onBlur={(e) => {
+                    const value = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
+                    onBlur(value);
+                }}
+                className="w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
         );
-    });
+    };
 
     return (
         <AdminLayout active="impact">
@@ -303,34 +207,34 @@ function ImpactDataEntry() {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 <tr className="bg-green-50">
                                     <td className="px-3 py-2">
-                                        <Cell
+                                        <UncontrolledCell
                                             type="date"
-                                            value={newRow.date}
-                                            onChange={newRowCallbacks.date.onChange}
-                                            onBlur={newRowCallbacks.date.onBlur}
+                                            defaultValue={new Date().toISOString().split('T')[0]}
+                                            inputRef={el => newRowRefs.current.date = el}
+                                            onBlur={() => {}}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
-                                        <Cell
+                                        <UncontrolledCell
                                             type="number"
-                                            value={newRow.food_saved_kg}
-                                            onChange={newRowCallbacks.food_saved_kg.onChange}
-                                            onBlur={newRowCallbacks.food_saved_kg.onBlur}
+                                            defaultValue=""
+                                            inputRef={el => newRowRefs.current.food_saved_kg = el}
+                                            onBlur={() => {}}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
-                                        <Cell
+                                        <UncontrolledCell
                                             type="number"
-                                            value={newRow.people_helped}
-                                            onChange={newRowCallbacks.people_helped.onChange}
-                                            onBlur={newRowCallbacks.people_helped.onBlur}
+                                            defaultValue=""
+                                            inputRef={el => newRowRefs.current.people_helped = el}
+                                            onBlur={() => {}}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
-                                        <Cell
-                                            value={newRow.notes}
-                                            onChange={newRowCallbacks.notes.onChange}
-                                            onBlur={newRowCallbacks.notes.onBlur}
+                                        <UncontrolledCell
+                                            defaultValue=""
+                                            inputRef={el => newRowRefs.current.notes = el}
+                                            onBlur={() => {}}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
@@ -347,34 +251,30 @@ function ImpactDataEntry() {
                                 {data.map((row) => (
                                     <tr key={row.id} className="hover:bg-gray-50">
                                         <td className="px-3 py-2">
-                                            <Cell
+                                            <UncontrolledCell
                                                 type="date"
-                                                value={getCellValue(row.id, 'date', row.date)}
-                                                onChange={(val) => handleCellChange(row.id, 'date', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'date', val)}
+                                                defaultValue={row.date}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'date', val)}
                                             />
                                         </td>
                                         <td className="px-3 py-2">
-                                            <Cell
+                                            <UncontrolledCell
                                                 type="number"
-                                                value={getCellValue(row.id, 'food_saved_kg', row.food_saved_kg)}
-                                                onChange={(val) => handleCellChange(row.id, 'food_saved_kg', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'food_saved_kg', val)}
+                                                defaultValue={row.food_saved_kg}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'food_saved_kg', val)}
                                             />
                                         </td>
                                         <td className="px-3 py-2">
-                                            <Cell
+                                            <UncontrolledCell
                                                 type="number"
-                                                value={getCellValue(row.id, 'people_helped', row.people_helped)}
-                                                onChange={(val) => handleCellChange(row.id, 'people_helped', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'people_helped', val)}
+                                                defaultValue={row.people_helped}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'people_helped', val)}
                                             />
                                         </td>
                                         <td className="px-3 py-2">
-                                            <Cell
-                                                value={getCellValue(row.id, 'notes', row.notes || '')}
-                                                onChange={(val) => handleCellChange(row.id, 'notes', val)}
-                                                onBlur={(val) => handleCellBlur(row.id, 'notes', val)}
+                                            <UncontrolledCell
+                                                defaultValue={row.notes || ''}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'notes', val)}
                                             />
                                         </td>
                                         <td className="px-3 py-2">
