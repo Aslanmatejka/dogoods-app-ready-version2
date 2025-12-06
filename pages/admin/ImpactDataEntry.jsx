@@ -8,7 +8,7 @@ function ImpactDataEntry() {
     const { user } = useAuthContext();
     const [data, setData] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
-    const [editingId, setEditingId] = React.useState(null);
+    const [editingValues, setEditingValues] = React.useState({});
     const [newRow, setNewRow] = React.useState({
         date: new Date().toISOString().split('T')[0],
         food_saved_kg: '',
@@ -74,6 +74,11 @@ function ImpactDataEntry() {
                 .eq('id', id);
 
             if (error) throw error;
+            
+            // Update local data after successful save
+            setData(prev => prev.map(row =>
+                row.id === id ? { ...row, [field]: value } : row
+            ));
         } catch (error) {
             console.error('Error updating row:', error);
             alert('Failed to update: ' + error.message);
@@ -101,16 +106,29 @@ function ImpactDataEntry() {
         if (id === 'new') {
             setNewRow(prev => ({ ...prev, [field]: value }));
         } else {
-            setData(prev => prev.map(row =>
-                row.id === id ? { ...row, [field]: value } : row
-            ));
+            // Store temporary editing values
+            setEditingValues(prev => ({
+                ...prev,
+                [`${id}-${field}`]: value
+            }));
         }
     };
 
     const handleCellBlur = (id, field, value) => {
         if (id !== 'new') {
             handleUpdateRow(id, field, value);
+            // Clear the temporary editing value
+            setEditingValues(prev => {
+                const newValues = { ...prev };
+                delete newValues[`${id}-${field}`];
+                return newValues;
+            });
         }
+    };
+    
+    const getCellValue = (id, field, originalValue) => {
+        const editKey = `${id}-${field}`;
+        return editingValues[editKey] !== undefined ? editingValues[editKey] : originalValue;
     };
 
     const exportToCSV = () => {
@@ -212,7 +230,7 @@ function ImpactDataEntry() {
                                             type="date"
                                             value={newRow.date}
                                             onChange={(val) => handleCellChange('new', 'date', val)}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
@@ -220,7 +238,7 @@ function ImpactDataEntry() {
                                             type="number"
                                             value={newRow.food_saved_kg}
                                             onChange={(val) => handleCellChange('new', 'food_saved_kg', val)}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
@@ -228,14 +246,14 @@ function ImpactDataEntry() {
                                             type="number"
                                             value={newRow.people_helped}
                                             onChange={(val) => handleCellChange('new', 'people_helped', val)}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
                                         <Cell
                                             value={newRow.notes}
                                             onChange={(val) => handleCellChange('new', 'notes', val)}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
@@ -254,7 +272,7 @@ function ImpactDataEntry() {
                                         <td className="px-3 py-2">
                                             <Cell
                                                 type="date"
-                                                value={row.date}
+                                                value={getCellValue(row.id, 'date', row.date)}
                                                 onChange={(val) => handleCellChange(row.id, 'date', val)}
                                                 onBlur={(val) => handleCellBlur(row.id, 'date', val)}
                                             />
@@ -262,7 +280,7 @@ function ImpactDataEntry() {
                                         <td className="px-3 py-2">
                                             <Cell
                                                 type="number"
-                                                value={row.food_saved_kg}
+                                                value={getCellValue(row.id, 'food_saved_kg', row.food_saved_kg)}
                                                 onChange={(val) => handleCellChange(row.id, 'food_saved_kg', val)}
                                                 onBlur={(val) => handleCellBlur(row.id, 'food_saved_kg', val)}
                                             />
@@ -270,14 +288,14 @@ function ImpactDataEntry() {
                                         <td className="px-3 py-2">
                                             <Cell
                                                 type="number"
-                                                value={row.people_helped}
+                                                value={getCellValue(row.id, 'people_helped', row.people_helped)}
                                                 onChange={(val) => handleCellChange(row.id, 'people_helped', val)}
                                                 onBlur={(val) => handleCellBlur(row.id, 'people_helped', val)}
                                             />
                                         </td>
                                         <td className="px-3 py-2">
                                             <Cell
-                                                value={row.notes || ''}
+                                                value={getCellValue(row.id, 'notes', row.notes || '')}
                                                 onChange={(val) => handleCellChange(row.id, 'notes', val)}
                                                 onBlur={(val) => handleCellBlur(row.id, 'notes', val)}
                                             />
