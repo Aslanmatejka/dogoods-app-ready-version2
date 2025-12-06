@@ -153,7 +153,29 @@ function ImpactDataEntry() {
         const value = editingValues[editKey] !== undefined ? editingValues[editKey] : originalValue;
         console.log('getCellValue:', { id, field, editKey, originalValue, returnValue: value });
         return value;
-    }, [editingValues]); const exportToCSV = () => {
+    }, [editingValues]);
+
+    // Create stable callback references for new row inputs
+    const newRowCallbacks = React.useMemo(() => ({
+        date: {
+            onChange: (val) => handleCellChange('new', 'date', val),
+            onBlur: () => {}
+        },
+        food_saved_kg: {
+            onChange: (val) => handleCellChange('new', 'food_saved_kg', val),
+            onBlur: () => {}
+        },
+        people_helped: {
+            onChange: (val) => handleCellChange('new', 'people_helped', val),
+            onBlur: () => {}
+        },
+        notes: {
+            onChange: (val) => handleCellChange('new', 'notes', val),
+            onBlur: () => {}
+        }
+    }), [handleCellChange]);
+
+    const exportToCSV = () => {
         const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Notes'];
 
         const rows = data.map(row => [
@@ -284,31 +306,31 @@ function ImpactDataEntry() {
                                         <Cell
                                             type="date"
                                             value={newRow.date}
-                                            onChange={(val) => handleCellChange('new', 'date', val)}
-                                            onBlur={() => { }}
+                                            onChange={newRowCallbacks.date.onChange}
+                                            onBlur={newRowCallbacks.date.onBlur}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
                                         <Cell
                                             type="number"
                                             value={newRow.food_saved_kg}
-                                            onChange={(val) => handleCellChange('new', 'food_saved_kg', val)}
-                                            onBlur={() => { }}
+                                            onChange={newRowCallbacks.food_saved_kg.onChange}
+                                            onBlur={newRowCallbacks.food_saved_kg.onBlur}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
                                         <Cell
                                             type="number"
                                             value={newRow.people_helped}
-                                            onChange={(val) => handleCellChange('new', 'people_helped', val)}
-                                            onBlur={() => { }}
+                                            onChange={newRowCallbacks.people_helped.onChange}
+                                            onBlur={newRowCallbacks.people_helped.onBlur}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
                                         <Cell
                                             value={newRow.notes}
-                                            onChange={(val) => handleCellChange('new', 'notes', val)}
-                                            onBlur={() => { }}
+                                            onChange={newRowCallbacks.notes.onChange}
+                                            onBlur={newRowCallbacks.notes.onBlur}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
