@@ -74,7 +74,7 @@ function ImpactDataEntry() {
                 .eq('id', id);
 
             if (error) throw error;
-            
+
             // Update local data after successful save
             setData(prev => prev.map(row =>
                 row.id === id ? { ...row, [field]: value } : row
@@ -102,7 +102,7 @@ function ImpactDataEntry() {
         }
     };
 
-    const handleCellChange = (id, field, value) => {
+    const handleCellChange = React.useCallback((id, field, value) => {
         if (id === 'new') {
             setNewRow(prev => ({ ...prev, [field]: value }));
         } else {
@@ -112,9 +112,9 @@ function ImpactDataEntry() {
                 [`${id}-${field}`]: value
             }));
         }
-    };
+    }, []);
 
-    const handleCellBlur = (id, field, value) => {
+    const handleCellBlur = React.useCallback((id, field, value) => {
         if (id !== 'new') {
             handleUpdateRow(id, field, value);
             // Clear the temporary editing value
@@ -124,14 +124,12 @@ function ImpactDataEntry() {
                 return newValues;
             });
         }
-    };
+    }, []);
     
-    const getCellValue = (id, field, originalValue) => {
+    const getCellValue = React.useCallback((id, field, originalValue) => {
         const editKey = `${id}-${field}`;
         return editingValues[editKey] !== undefined ? editingValues[editKey] : originalValue;
-    };
-
-    const exportToCSV = () => {
+    }, [editingValues]);    const exportToCSV = () => {
         const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Notes'];
 
         const rows = data.map(row => [
@@ -156,19 +154,38 @@ function ImpactDataEntry() {
         document.body.removeChild(link);
     };
 
-    const Cell = ({ value, onChange, onBlur, type = 'text', className = '' }) => (
-        <input
-            type={type === 'number' ? 'text' : type}
-            inputMode={type === 'number' ? 'numeric' : undefined}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onBlur={(e) => {
-                const finalValue = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
-                onBlur(finalValue);
-            }}
-            className={`w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${className}`}
-        />
-    );
+    const Cell = React.memo(({ value, onChange, onBlur, type = 'text', className = '' }) => {
+        const [localValue, setLocalValue] = React.useState(value);
+        
+        // Update local value when external value changes (e.g., after save)
+        React.useEffect(() => {
+            setLocalValue(value);
+        }, [value]);
+        
+        const handleChange = (e) => {
+            const newValue = e.target.value;
+            setLocalValue(newValue);
+            onChange(newValue);
+        };
+        
+        const handleBlur = (e) => {
+            const finalValue = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
+            onBlur(finalValue);
+        };
+        
+        const displayValue = localValue === null || localValue === undefined ? '' : String(localValue);
+        
+        return (
+            <input
+                type={type === 'number' ? 'text' : type}
+                inputMode={type === 'number' ? 'numeric' : undefined}
+                value={displayValue}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`w-full px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${className}`}
+            />
+        );
+    });
 
     return (
         <AdminLayout active="impact">
