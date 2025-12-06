@@ -8,7 +8,7 @@ function ImpactDataEntry() {
     const { user } = useAuthContext();
     const [data, setData] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
-    
+
     // Use refs for uncontrolled inputs instead of state
     const newRowRefs = React.useRef({
         date: null,
@@ -211,7 +211,7 @@ function ImpactDataEntry() {
                                             type="date"
                                             defaultValue={new Date().toISOString().split('T')[0]}
                                             inputRef={el => newRowRefs.current.date = el}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
@@ -219,7 +219,7 @@ function ImpactDataEntry() {
                                             type="number"
                                             defaultValue=""
                                             inputRef={el => newRowRefs.current.food_saved_kg = el}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
@@ -227,14 +227,14 @@ function ImpactDataEntry() {
                                             type="number"
                                             defaultValue=""
                                             inputRef={el => newRowRefs.current.people_helped = el}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
                                         <UncontrolledCell
                                             defaultValue=""
                                             inputRef={el => newRowRefs.current.notes = el}
-                                            onBlur={() => {}}
+                                            onBlur={() => { }}
                                         />
                                     </td>
                                     <td className="px-3 py-2">
