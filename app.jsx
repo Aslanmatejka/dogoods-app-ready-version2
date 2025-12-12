@@ -60,8 +60,8 @@ function AppContent() {
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/impact-story" element={<ImpactStory />} />
                 <Route path="/sponsors" element={<SponsorsPage />} />
-                <Route path="/impact" element={<ImpactStory />} />
                 <Route path="/find" element={<ProtectedRoute><FindFoodPage /></ProtectedRoute>} />
                 <Route path="/near-me" element={<ProtectedRoute><NearMePage /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />

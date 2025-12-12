@@ -10,7 +10,7 @@ function Header({
         { label: 'Share Food', path: '/share' },
         { label: 'Find Food', path: '/find' },
         { label: 'Community', path: '/community' },
-        { label: 'Impact Story', path: '/impact' },
+        { label: 'Impact Story', path: '/impact-story' },
         { label: 'Sponsors', path: '/sponsors' }
     ]
 }) {

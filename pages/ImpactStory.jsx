@@ -1,214 +1,582 @@
-import React from 'react';
-import { useImpact } from '../utils/hooks/useImpact';
-import Card from '../components/common/Card';
-import Button from '../components/common/Button';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
 function ImpactStory() {
-    const { impact, loading } = useImpact();
-    const navigate = useNavigate();
+    const [showStoriesModal, setShowStoriesModal] = useState(false);
+    const [showInterestSection, setShowInterestSection] = useState(false);
+    const [formSuccess, setFormSuccess] = useState(false);
+    const [newsletterSuccess, setNewsletterSuccess] = useState(false);
 
-    const impactStats = [
-        {
-            icon: '🍽️',
-            label: 'Meals Provided',
-            value: impact.totalMeals?.toLocaleString() || '0',
-            description: 'Nutritious meals shared with those in need',
-            color: 'from-green-400 to-green-600'
-        },
-        {
-            icon: '🥗',
-            label: 'Food Saved',
-            value: `${(impact.foodSavedKg || 0).toLocaleString()} kg`,
-            description: 'Fresh food rescued from going to waste',
-            color: 'from-blue-400 to-blue-600'
-        },
-        {
-            icon: '👥',
-            label: 'People Helped',
-            value: impact.peopleHelped?.toLocaleString() || '0',
-            description: 'Community members received support',
-            color: 'from-purple-400 to-purple-600'
-        },
-        {
-            icon: '♻️',
-            label: 'Waste Reduced',
-            value: `${(impact.wasteReduced || 0).toLocaleString()} kg`,
-            description: 'Food waste diverted from landfills',
-            color: 'from-orange-400 to-orange-600'
-        },
-        {
-            icon: '🌍',
-            label: 'CO₂ Saved',
-            value: `${(impact.co2Saved || 0).toLocaleString()} kg`,
-            description: 'Carbon emissions prevented',
-            color: 'from-teal-400 to-teal-600'
-        },
-        {
-            icon: '🤝',
-            label: 'Volunteer Hours',
-            value: (impact.volunteerHours || 0).toLocaleString(),
-            description: 'Hours donated by amazing volunteers',
-            color: 'from-pink-400 to-pink-600'
+    // Close modal on Escape key
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape' && showStoriesModal) {
+                setShowStoriesModal(false);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, [showStoriesModal]);
+
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        if (showStoriesModal) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
         }
-    ];
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [showStoriesModal]);
 
-    const stories = [
-        {
-            title: 'Community Garden Harvest',
-            date: 'November 2025',
-            image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800',
-            description: 'Local volunteers harvested over 200kg of fresh vegetables from our community garden, distributing them to 50 families in need.',
-            impact: '200kg of fresh produce, 50 families served'
-        },
-        {
-            title: 'Restaurant Partnership',
-            date: 'October 2025',
-            image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
-            description: 'Partnered with 5 local restaurants to redistribute surplus food, preventing 150kg of quality meals from going to waste.',
-            impact: '150kg saved, 300+ meals provided'
-        },
-        {
-            title: 'Food Drive Success',
-            date: 'September 2025',
-            image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=800',
-            description: 'Community members donated non-perishable items, creating care packages for 100 households facing food insecurity.',
-            impact: '100 households supported, 500kg collected'
+    const handleImpactFormSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            interests: Array.from(e.target.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value),
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            const submissions = JSON.parse(localStorage.getItem('impactFormSubmissions') || '[]');
+            submissions.push(data);
+            localStorage.setItem('impactFormSubmissions', JSON.stringify(submissions));
+            
+            setFormSuccess(true);
+            setTimeout(() => setFormSuccess(false), 5000);
+            e.target.reset();
+            setShowInterestSection(false);
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Thank you for your interest! We will be in touch soon.');
         }
-    ];
+    };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading impact data...</p>
-                </div>
-            </div>
-        );
-    }
+    const handleNewsletterSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            consent: formData.get('consent') === 'on',
+            timestamp: new Date().toISOString(),
+            source: 'impact-story-page'
+        };
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.email)) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        try {
+            const subscriptions = JSON.parse(localStorage.getItem('newsletterSubscriptions') || '[]');
+            const alreadySubscribed = subscriptions.some(sub => sub.email === data.email);
+            
+            if (alreadySubscribed) {
+                alert('This email is already subscribed!');
+                return;
+            }
+
+            subscriptions.push(data);
+            localStorage.setItem('newsletterSubscriptions', JSON.stringify(subscriptions));
+            
+            setNewsletterSuccess(true);
+            setTimeout(() => setNewsletterSuccess(false), 5000);
+            e.target.reset();
+        } catch (error) {
+            console.error('Error submitting newsletter:', error);
+            alert('Something went wrong. Please try again.');
+        }
+    };
 
     return (
-        <div className="impact-story-page">
+        <div className="bg-gray-50 -mx-6 md:-mx-10 -my-6 md:-my-10">
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+                .stat-card { transition: transform 0.3s ease; }
+                .stat-card:hover { transform: translateY(-5px); }
+            `}</style>
+
             {/* Hero Section */}
-            <section className="relative py-16 bg-gradient-to-br from-green-500 to-green-700 text-white rounded-3xl mb-12 overflow-hidden">
-                <div className="absolute inset-0 bg-black opacity-10"></div>
-                <div className="relative container mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <section className="bg-green-600 py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 fade-in">
                         Our Impact Story
                     </h1>
-                    <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-                        Together, we're building a community where no food goes to waste and no one goes hungry
+                    <p className="text-xl text-white max-w-3xl mx-auto fade-in mb-8">
+                        Transforming food waste into community nourishment through AI-powered logistics and compassionate connections
                     </p>
-                    <div className="flex justify-center space-x-4">
-                        <Button 
-                            variant="secondary"
-                            onClick={() => navigate('/share')}
-                            className="bg-white text-green-700 hover:bg-gray-100"
-                        >
-                            Share Food
-                        </Button>
-                        <Button 
-                            variant="outline"
-                            onClick={() => navigate('/community')}
-                            className="border-white text-white hover:bg-white hover:text-green-700"
-                        >
-                            Join Community
-                        </Button>
+                    <div className="flex justify-center gap-8 mt-8">
+                        <a href="#featured" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                            Featured
+                        </a>
+                        <a href="#news" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                            News
+                        </a>
+                        <a href="#stories" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                            Stories
+                        </a>
                     </div>
                 </div>
             </section>
 
-            {/* Impact Statistics */}
-            <section className="mb-16">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                        Impact by the Numbers
-                    </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Real results from our community's commitment to reducing food waste and fighting hunger
-                    </p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {impactStats.map((stat, index) => (
-                        <Card key={index} className="relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`}></div>
-                            <div className="relative">
-                                <div className="text-5xl mb-3">{stat.icon}</div>
-                                <div className="text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                                <div className="text-lg font-semibold text-gray-800 mb-1">{stat.label}</div>
-                                <p className="text-sm text-gray-600">{stat.description}</p>
-                            </div>
-                        </Card>
-                    ))}
+            {/* Featured Section */}
+            <section id="featured" className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Food Distribution" className="rounded-2xl shadow-2xl w-full h-auto" />
+                        </div>
+                        <div>
+                            <h1 className="text-4xl font-bold text-gray-900 mb-6">
+                                Bridging the Gap Between Surplus and Need
+                            </h1>
+                            <p className="text-lg text-gray-600 leading-relaxed mb-6">
+                                Every day, restaurants, grocery stores, and food producers have perfectly good food that goes to waste, 
+                                while families in our communities struggle with food insecurity. DoGoods uses AI-powered logistics to 
+                                bridge this gap in real-time.
+                            </p>
+                            <p className="text-lg text-gray-600 leading-relaxed mb-6">
+                                Our platform connects donors with recipients within minutes, ensuring fresh food reaches those who need it 
+                                most. Through intelligent routing and automated coordination, we've created a seamless network that turns 
+                                potential waste into community nourishment.
+                            </p>
+                            <button onClick={() => window.location.href='/share'} 
+                                className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors inline-flex items-center gap-2">
+                                Join Our Network →
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* Success Stories */}
-            <section className="mb-16">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                        Community Success Stories
-                    </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Real stories from our community members making a difference
-                    </p>
-                </div>
+            {/* Stories Section */}
+            <section id="stories" className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Community Impact" className="rounded-2xl shadow-2xl w-full h-auto mb-6" />
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                                Sarah's Story: From Volunteer to Champion
+                            </h1>
+                            <p className="text-gray-600 leading-relaxed">
+                                "I started as a volunteer driver, picking up surplus food from local restaurants. Now I coordinate our 
+                                entire network in the Bay Area. Seeing families receive fresh, nutritious meals—food that would have been 
+                                wasted—gives me purpose every single day. We're not just feeding people; we're building a community that cares."
+                            </p>
+                            <p className="text-gray-600 leading-relaxed mt-4">
+                                <strong>— Sarah Martinez, Community Coordinator, Alameda</strong>
+                            </p>
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {stories.map((story, index) => (
-                        <Card key={index} className="overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                            <div className="aspect-w-16 aspect-h-9 mb-4">
-                                <img 
-                                    src={story.image} 
-                                    alt={story.title}
-                                    className="w-full h-48 object-cover rounded-lg"
-                                />
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Food Distribution" className="rounded-2xl shadow-2xl w-full h-auto mb-6" />
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                                Restaurant Partnership: A Win-Win Solution
+                            </h1>
+                            <p className="text-gray-600 leading-relaxed">
+                                "As a restaurant owner, I used to feel terrible about food waste at the end of each day. DoGoods 
+                                transformed that guilt into impact. Now, instead of throwing away perfectly good food, I know it's helping 
+                                families in our neighborhood. The platform makes it effortless—I post what I have, and within an hour, it's 
+                                picked up and distributed."
+                            </p>
+                            <p className="text-gray-600 leading-relaxed mt-4">
+                                <strong>— Michael Chen, Owner, Golden Wok Restaurant</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* News Section */}
+            <section id="news" className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="relative flex items-center">
+                        <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
+                            alt="Impact Story" className="w-full h-[400px] object-cover rounded-2xl" />
+                        
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-full md:w-1/2 bg-white bg-opacity-95 p-8 rounded-2xl shadow-2xl">
+                            <blockquote className="text-xl font-bold text-gray-900 mb-6 italic">
+                                "DoGoods helped us feed over 500 families during the holidays. The AI routing meant we could distribute 
+                                fresh food within 2 hours of donation—something that was impossible before."
+                            </blockquote>
+                            <p className="text-gray-600 mb-4">
+                                <strong>Director of Community Services</strong><br />
+                                Alameda County Food Bank
+                            </p>
+                            <p className="text-sm text-gray-500 mb-6">
+                                Thanks to our network of 150+ partners, we've prevented over 2 million pounds of food waste while providing 
+                                nutritious meals to families who need them most.
+                            </p>
+                            <button onClick={() => window.location.href='https://allgoodlivingfoundation.org/donate'} 
+                                className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                                Support Our Mission
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Gallery Section */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop" 
+                                alt="Community" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Community Centers</h3>
+                            <p className="text-gray-600">
+                                Partnering with 45+ community centers across the Bay Area to provide fresh meals and groceries to families 
+                                in need, serving over 10,000 people monthly.
+                            </p>
+                        </div>
+
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop" 
+                                alt="Food Distribution" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Restaurant Partners</h3>
+                            <p className="text-gray-600">
+                                Working with 200+ restaurants and grocers to rescue surplus food daily. Our AI routing ensures food reaches 
+                                recipients within 60 minutes of donation.
+                            </p>
+                        </div>
+
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop" 
+                                alt="Impact" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Environmental Impact</h3>
+                            <p className="text-gray-600">
+                                By preventing food waste, we've reduced over 1,200 tons of CO2 emissions and conserved resources equivalent 
+                                to 30 million gallons of water.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="text-center mt-12">
+                        <button onClick={() => setShowStoriesModal(true)} 
+                            className="bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                            View All Stories
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Parallax Form Section */}
+            <section className="relative h-[600px] overflow-hidden">
+                <div className="absolute inset-0 bg-center bg-cover" 
+                    style={{backgroundImage: "url('https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2074&auto=format&fit=crop')"}}>
+                </div>
+                <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+
+                <div className="relative h-full flex items-center justify-end pr-4 md:pr-12">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 md:mx-0">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                            Join Our Impact Network
+                        </h2>
+                        <p className="text-gray-600 mb-6">
+                            Be part of the solution. Share your story, volunteer, or stay updated on our mission to end food waste and hunger.
+                        </p>
+
+                        {formSuccess && (
+                            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-4">
+                                ✓ Thank you! We'll be in touch soon.
                             </div>
-                            <div>
-                                <div className="text-sm text-green-600 font-semibold mb-2">{story.date}</div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-3">{story.title}</h3>
-                                <p className="text-gray-600 mb-4">{story.description}</p>
-                                <div className="bg-green-50 rounded-lg p-3">
-                                    <div className="text-sm font-semibold text-green-800">Impact:</div>
-                                    <div className="text-sm text-green-700">{story.impact}</div>
+                        )}
+
+                        <form onSubmit={handleImpactFormSubmit} className="space-y-4">
+                            {!showInterestSection ? (
+                                <>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                            <input type="text" name="firstName" required 
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                            <input type="text" name="lastName" required 
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                            <input type="email" name="email" required 
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                                placeholder="your@email.com" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Phone</label>
+                                            <input type="tel" name="phone" 
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                                placeholder="+1 (555) 000-0000" />
+                                        </div>
+                                    </div>
+
+                                    <div className="text-right">
+                                        <button type="button" onClick={() => setShowInterestSection(true)} 
+                                            className="bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors">
+                                            NEXT
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <label className="block text-sm font-medium text-gray-900 mb-3">I'm interested in:</label>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center">
+                                            <input type="checkbox" name="interest" value="Volunteering" 
+                                                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                                            <span className="ml-2 text-gray-700">Volunteering</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" name="interest" value="Donating Food" 
+                                                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                                            <span className="ml-2 text-gray-700">Donating Food</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" name="interest" value="Partnership Opportunities" 
+                                                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                                            <span className="ml-2 text-gray-700">Partnership Opportunities</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" name="interest" value="Monthly Updates" 
+                                                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" />
+                                            <span className="ml-2 text-gray-700">Monthly Updates</span>
+                                        </label>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 mt-6">
+                                        <button type="button" onClick={() => setShowInterestSection(false)} 
+                                            className="bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                                            Back
+                                        </button>
+                                        <button type="submit" 
+                                            className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                                            Let's Go!
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="bg-gradient-to-r from-green-600 to-green-700 py-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Be Part of Our Story</h2>
+                    <p className="text-xl text-white/90 mb-8">
+                        Every meal shared, every pound of food saved, every life touched—it all starts with you.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/share" 
+                            className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                            Join the Platform
+                        </a>
+                        <a href="https://allgoodlivingfoundation.org/donate" 
+                            className="bg-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-700 transition-colors shadow-lg">
+                            Support Our Mission
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {/* Newsletter Section */}
+            <section className="bg-white py-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 md:p-12 shadow-xl border border-green-100">
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                                Stay Updated on Our Impact
+                            </h2>
+                            <p className="text-lg text-gray-600">
+                                Subscribe to our newsletter for inspiring stories, impact updates, and ways to get involved in fighting food waste.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                    <input type="text" name="firstName" required 
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                        placeholder="John" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                    <input type="text" name="lastName" required 
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                        placeholder="Doe" />
                                 </div>
                             </div>
-                        </Card>
-                    ))}
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" name="email" required 
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                    placeholder="john@example.com" />
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="flex items-start">
+                                    <input type="checkbox" name="consent" required 
+                                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1" />
+                                    <span className="ml-2 text-sm text-gray-600">
+                                        I agree to receive updates and newsletters from DoGoods. You can unsubscribe at any time.
+                                    </span>
+                                </label>
+                            </div>
+
+                            {newsletterSuccess && (
+                                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-4 text-center">
+                                    <strong>Success!</strong> You've been subscribed to our newsletter.
+                                </div>
+                            )}
+
+                            <button type="submit" 
+                                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg transform hover:scale-105">
+                                Subscribe to Newsletter
+                            </button>
+
+                            <p className="text-xs text-gray-500 text-center mt-4">
+                                We respect your privacy. Read our <a href="/privacy" className="text-green-600 hover:text-green-700 underline">Privacy Policy</a>.
+                            </p>
+                        </form>
+                    </div>
                 </div>
             </section>
 
-            {/* Call to Action */}
-            <section className="bg-gradient-to-r from-green-50 to-blue-50 rounded-3xl p-12 text-center">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Be Part of the Story
-                </h2>
-                <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                    Every contribution matters. Join our community today and help us create more impact stories.
-                </p>
-                <div className="flex justify-center space-x-4">
-                    <Button 
-                        variant="primary"
-                        onClick={() => navigate('/share')}
-                    >
-                        Share Food
-                    </Button>
-                    <Button 
-                        variant="secondary"
-                        onClick={() => navigate('/find')}
-                    >
-                        Find Food
-                    </Button>
-                    <Button 
-                        variant="outline"
-                        onClick={() => navigate('/signup')}
-                    >
-                        Join Now
-                    </Button>
+            {/* Stories Modal */}
+            {showStoriesModal && (
+                <div className="fixed inset-0 z-100 bg-black bg-opacity-70 flex items-center justify-center p-4" 
+                    onClick={(e) => e.target === e.currentTarget && setShowStoriesModal(false)}>
+                    <div className="bg-white rounded-2xl w-full max-w-6xl max-h-[80vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-2xl flex justify-between items-center">
+                            <h2 className="text-3xl font-bold text-gray-900">All Impact Stories</h2>
+                            <button onClick={() => setShowStoriesModal(false)} 
+                                className="text-gray-400 hover:text-gray-600 text-3xl font-bold">
+                                &times;
+                            </button>
+                        </div>
+                        <div className="p-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Story 1 */}
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop" 
+                                        alt="Community Impact" className="rounded-xl w-full h-48 object-cover mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Sarah's Story: From Volunteer to Champion</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        "I started as a volunteer driver, picking up surplus food from local restaurants. Now I coordinate our 
+                                        entire network in the Bay Area. Seeing families receive fresh, nutritious meals—food that would have been 
+                                        wasted—gives me purpose every single day. We're not just feeding people; we're building a community that cares."
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        <strong>— Sarah Martinez, Community Coordinator, Alameda</strong>
+                                    </p>
+                                </div>
+
+                                {/* Story 2 */}
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop" 
+                                        alt="Food Distribution" className="rounded-xl w-full h-48 object-cover mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Restaurant Partnership: A Win-Win Solution</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        "As a restaurant owner, I used to feel terrible about food waste at the end of each day. DoGoods 
+                                        transformed that guilt into impact. Now, instead of throwing away perfectly good food, I know it's helping 
+                                        families in our neighborhood. The platform makes it effortless—I post what I have, and within an hour, it's 
+                                        picked up and distributed."
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        <strong>— Michael Chen, Owner, Golden Wok Restaurant</strong>
+                                    </p>
+                                </div>
+
+                                {/* Story 3 */}
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop" 
+                                        alt="Food Bank" className="rounded-xl w-full h-48 object-cover mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Feeding 500 Families During the Holidays</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        "DoGoods helped us feed over 500 families during the holidays. The AI routing meant we could distribute 
+                                        fresh food within 2 hours of donation—something that was impossible before. Thanks to our network of 150+ 
+                                        partners, we've prevented over 2 million pounds of food waste while providing nutritious meals to families who need them most."
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        <strong>— Director of Community Services, Alameda County Food Bank</strong>
+                                    </p>
+                                </div>
+
+                                {/* Story 4 */}
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop" 
+                                        alt="Community" className="rounded-xl w-full h-48 object-cover mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Serving 10,000 People Monthly</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        Partnering with 45+ community centers across the Bay Area to provide fresh meals and groceries to families 
+                                        in need. Our network ensures that nutritious food reaches those who need it most, creating lasting impact 
+                                        in every neighborhood we serve.
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        <strong>— Community Centers Impact Report</strong>
+                                    </p>
+                                </div>
+
+                                {/* Story 5 */}
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop" 
+                                        alt="Food Distribution" className="rounded-xl w-full h-48 object-cover mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3">200+ Restaurant Partners</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        Working with restaurants and grocers across the region to rescue surplus food daily. Our AI routing 
+                                        ensures food reaches recipients within 60 minutes of donation, maintaining freshness and quality while reducing waste.
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        <strong>— Restaurant Partnership Program</strong>
+                                    </p>
+                                </div>
+
+                                {/* Story 6 */}
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop" 
+                                        alt="Impact" className="rounded-xl w-full h-48 object-cover mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-3">Saving the Planet, One Meal at a Time</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        By preventing food waste, we've reduced over 1,200 tons of CO2 emissions and conserved resources 
+                                        equivalent to 30 million gallons of water. Every meal saved is a step toward a more sustainable future for our communities.
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        <strong>— Environmental Impact Assessment</strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="text-center mt-8">
+                                <button onClick={() => window.location.href='/share'} 
+                                    className="bg-green-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                                    Join Our Network
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </section>
+            )}
         </div>
     );
 }
