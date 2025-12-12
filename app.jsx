@@ -24,6 +24,7 @@ import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SponsorsPage from './pages/SponsorsPage';
+import ImpactStory from './pages/ImpactStory';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ContentModeration from './pages/admin/ContentModeration.jsx';
 import DistributionAttendees from './pages/admin/DistributionAttendees.jsx';
@@ -60,6 +61,7 @@ function AppContent() {
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/sponsors" element={<SponsorsPage />} />
+                <Route path="/impact" element={<ImpactStory />} />
                 <Route path="/find" element={<ProtectedRoute><FindFoodPage /></ProtectedRoute>} />
                 <Route path="/near-me" element={<ProtectedRoute><NearMePage /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
