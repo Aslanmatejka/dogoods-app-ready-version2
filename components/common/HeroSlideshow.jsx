@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../../utils/AuthContext';
-import { supabase } from '../../utils/supabaseClient';
+import supabase from '../../utils/supabaseClient';
 
 function HeroSlideshow() {
     const { isAdmin } = useAuthContext();
