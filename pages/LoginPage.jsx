@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../utils/hooks/useSupabase";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
@@ -6,6 +6,7 @@ import React from "react";
 
 function LoginPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { signIn, loading } = useAuth();
     const [formData, setFormData] = React.useState({
         email: '',
@@ -14,7 +15,18 @@ function LoginPage() {
     });
 
     const [error, setError] = React.useState(null);
+    const [successMessage, setSuccessMessage] = React.useState(null);
     const [showPassword, setShowPassword] = React.useState(false);
+
+    React.useEffect(() => {
+        // Check for success message in URL
+        const message = searchParams.get('message');
+        if (message === 'password-reset-success') {
+            setSuccessMessage('Password reset successful! You can now log in with your new password.');
+            // Clear the message from URL
+            window.history.replaceState({}, '', '/login');
+        }
+    }, [searchParams]);
 
     const validateForm = () => {
         if (!formData.email || !formData.password) {
@@ -92,6 +104,28 @@ function LoginPage() {
 
                 <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        {successMessage && (
+                            <div className="mb-6 rounded-md bg-green-50 p-4">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <i className="fas fa-check-circle text-green-400"></i>
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm text-green-800">{successMessage}</p>
+                                    </div>
+                                    <div className="ml-auto pl-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSuccessMessage(null)}
+                                            className="inline-flex rounded-md text-green-400 hover:text-green-500"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">

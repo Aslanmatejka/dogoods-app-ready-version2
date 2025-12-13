@@ -80,10 +80,10 @@ const communities = [
     //     image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/AUSD.png?raw=true'
     //     
     // },
-    
 
 
-    
+
+
 ];
 
 export default communities;

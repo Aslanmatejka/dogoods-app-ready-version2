@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import supabase from '../utils/supabaseClient';
+import { reportError } from '../utils/helpers';
 
 function ImpactStory() {
     const [showStoriesModal, setShowStoriesModal] = useState(false);
     const [showInterestSection, setShowInterestSection] = useState(false);
     const [formSuccess, setFormSuccess] = useState(false);
     const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+    const [newsletterError, setNewsletterError] = useState('');
+    const [impactFormError, setImpactFormError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Close modal on Escape key
     useEffect(() => {
@@ -29,70 +34,156 @@ function ImpactStory() {
         };
     }, [showStoriesModal]);
 
-    const handleImpactFormSubmit = (e) => {
+    const handleImpactFormSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        setImpactFormError('');
+        
         const formData = new FormData(e.target);
         const data = {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
+            first_name: formData.get('firstName'),
+            last_name: formData.get('lastName'),
             email: formData.get('email'),
             phone: formData.get('phone'),
             interests: Array.from(e.target.querySelectorAll('input[type="checkbox"]:checked'))
                 .map(cb => cb.value),
-            timestamp: new Date().toISOString()
+            source: 'impact-story'
         };
 
         try {
-            const submissions = JSON.parse(localStorage.getItem('impactFormSubmissions') || '[]');
-            submissions.push(data);
-            localStorage.setItem('impactFormSubmissions', JSON.stringify(submissions));
+            const { data: result, error } = await supabase
+                .from('impact_form_submissions')
+                .insert([data])
+                .select();
+
+            if (error) {
+                console.error('Error submitting impact form:', error);
+                setImpactFormError('Failed to submit form. Please try again.');
+                
+                // Fallback to localStorage
+                const submissions = JSON.parse(localStorage.getItem('impactFormSubmissions') || '[]');
+                submissions.push({ ...data, timestamp: new Date().toISOString() });
+                localStorage.setItem('impactFormSubmissions', JSON.stringify(submissions));
+            } else {
+                console.log('Impact form submitted successfully:', result);
+            }
             
             setFormSuccess(true);
-            setTimeout(() => setFormSuccess(false), 5000);
+            setTimeout(() => {
+                setFormSuccess(false);
+                setImpactFormError('');
+            }, 5000);
             e.target.reset();
             setShowInterestSection(false);
         } catch (error) {
             console.error('Error submitting form:', error);
-            alert('Thank you for your interest! We will be in touch soon.');
+            reportError(error, { context: 'Impact form submission' });
+            setImpactFormError('An error occurred. Your submission has been saved locally.');
+            
+            // Fallback to localStorage
+            const submissions = JSON.parse(localStorage.getItem('impactFormSubmissions') || '[]');
+            submissions.push({ ...data, timestamp: new Date().toISOString() });
+            localStorage.setItem('impactFormSubmissions', JSON.stringify(submissions));
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    const handleNewsletterSubmit = (e) => {
+    const handleNewsletterSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        setNewsletterError('');
+        setNewsletterSuccess(false);
+        
         const formData = new FormData(e.target);
         const data = {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
+            first_name: formData.get('firstName'),
+            last_name: formData.get('lastName'),
             email: formData.get('email'),
             consent: formData.get('consent') === 'on',
-            timestamp: new Date().toISOString(),
             source: 'impact-story-page'
         };
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(data.email)) {
-            alert('Please enter a valid email address.');
+            setNewsletterError('Please enter a valid email address.');
+            setIsSubmitting(false);
             return;
         }
 
         try {
-            const subscriptions = JSON.parse(localStorage.getItem('newsletterSubscriptions') || '[]');
-            const alreadySubscribed = subscriptions.some(sub => sub.email === data.email);
-            
-            if (alreadySubscribed) {
-                alert('This email is already subscribed!');
-                return;
+            // Check if already subscribed
+            const { data: existing, error: checkError } = await supabase
+                .from('newsletter_subscriptions')
+                .select('email, is_active')
+                .eq('email', data.email)
+                .maybeSingle();
+
+            if (checkError && checkError.code !== 'PGRST116') {
+                console.error('Error checking subscription:', checkError);
             }
 
-            subscriptions.push(data);
-            localStorage.setItem('newsletterSubscriptions', JSON.stringify(subscriptions));
-            
+            if (existing) {
+                if (existing.is_active) {
+                    setNewsletterError('This email is already subscribed!');
+                    setIsSubmitting(false);
+                    return;
+                } else {
+                    // Reactivate subscription
+                    const { error: updateError } = await supabase
+                        .from('newsletter_subscriptions')
+                        .update({ 
+                            is_active: true, 
+                            subscribed_at: new Date().toISOString(),
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            consent: data.consent 
+                        })
+                        .eq('email', data.email);
+
+                    if (updateError) {
+                        throw updateError;
+                    }
+                }
+            } else {
+                // New subscription
+                const { error: insertError } = await supabase
+                    .from('newsletter_subscriptions')
+                    .insert([data]);
+
+                if (insertError) {
+                    throw insertError;
+                }
+            }
+
             setNewsletterSuccess(true);
             setTimeout(() => setNewsletterSuccess(false), 5000);
             e.target.reset();
+            
+            console.log('Newsletter subscription successful:', data.email);
         } catch (error) {
             console.error('Error submitting newsletter:', error);
-            alert('Something went wrong. Please try again.');
+            reportError(error, { context: 'Newsletter subscription' });
+            
+            // Fallback to localStorage
+            try {
+                const subscriptions = JSON.parse(localStorage.getItem('newsletterSubscriptions') || '[]');
+                const alreadySubscribed = subscriptions.some(sub => sub.email === data.email);
+                
+                if (!alreadySubscribed) {
+                    subscriptions.push({ ...data, timestamp: new Date().toISOString() });
+                    localStorage.setItem('newsletterSubscriptions', JSON.stringify(subscriptions));
+                    setNewsletterSuccess(true);
+                    setTimeout(() => setNewsletterSuccess(false), 5000);
+                    e.target.reset();
+                } else {
+                    setNewsletterError('This email is already subscribed!');
+                }
+            } catch (localError) {
+                setNewsletterError('Something went wrong. Please try again.');
+            }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -297,6 +388,12 @@ function ImpactStory() {
                             </div>
                         )}
 
+                        {impactFormError && (
+                            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
+                                {impactFormError}
+                            </div>
+                        )}
+
                         <form onSubmit={handleImpactFormSubmit} className="space-y-4">
                             {!showInterestSection ? (
                                 <>
@@ -366,9 +463,9 @@ function ImpactStory() {
                                             className="bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
                                             Back
                                         </button>
-                                        <button type="submit" 
-                                            className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-                                            Let's Go!
+                                        <button type="submit" disabled={isSubmitting}
+                                            className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                            {isSubmitting ? 'Submitting...' : "Let's Go!"}
                                         </button>
                                     </div>
                                 </>
@@ -446,13 +543,22 @@ function ImpactStory() {
 
                             {newsletterSuccess && (
                                 <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-4 text-center">
+                                    <svg className="inline-block w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
                                     <strong>Success!</strong> You've been subscribed to our newsletter.
                                 </div>
                             )}
 
-                            <button type="submit" 
-                                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg transform hover:scale-105">
-                                Subscribe to Newsletter
+                            {newsletterError && (
+                                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4 text-center">
+                                    <strong>Error!</strong> {newsletterError}
+                                </div>
+                            )}
+
+                            <button type="submit" disabled={isSubmitting}
+                                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                {isSubmitting ? 'Subscribing...' : 'Subscribe to Newsletter'}
                             </button>
 
                             <p className="text-xs text-gray-500 text-center mt-4">
