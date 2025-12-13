@@ -4,6 +4,7 @@ import Button from "../components/common/Button";
 import CategoryCard from "../components/food/CategoryCard";
 import Card from "../components/common/Card";
 import ErrorBoundary from "../components/common/ErrorBoundary";
+import HeroSlideshow from "../components/common/HeroSlideshow";
 import { useFoodListings } from "../utils/hooks/useSupabase";
 import { formatDate, reportError } from "../utils/helpers";
 import { DonateVolunteerButtons } from "./CommunityPage";
@@ -56,6 +57,9 @@ function HomePage() {
         return (
             <ErrorBoundary>
                 <div data-name="home-page" role="main">
+                    {/* Hero Slideshow */}
+                    <HeroSlideshow />
+
                     {/* Hero Section */}
                     <section 
                         className="hero-banner relative py-24"
