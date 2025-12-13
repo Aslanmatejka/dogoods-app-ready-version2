@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthContext } from '../../utils/AuthContext';
 import supabase from '../../utils/supabaseClient';
 
-function HeroSlideshow() {
+function HeroSlideshow({ children }) {
     const { isAdmin } = useAuthContext();
     const [slides, setSlides] = useState([]);
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -168,7 +168,7 @@ function HeroSlideshow() {
     }
 
     return (
-        <div className="relative h-[500px] overflow-hidden bg-gray-900">
+        <div className="relative min-h-[600px] overflow-hidden bg-gray-900">
             {/* Slides */}
             {slides.map((slide, index) => (
                 <div
@@ -182,18 +182,14 @@ function HeroSlideshow() {
                         alt={slide.caption || `Slide ${index + 1}`}
                         className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/30" />
-                    
-                    {/* Caption */}
-                    {slide.caption && (
-                        <div className="absolute bottom-20 left-0 right-0 text-center">
-                            <h2 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg px-4">
-                                {slide.caption}
-                            </h2>
-                        </div>
-                    )}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40" />
                 </div>
             ))}
+
+            {/* Hero Content - Rendered above slideshow */}
+            <div className="relative z-10">
+                {children}
+            </div>
 
             {/* Navigation Arrows */}
             {slides.length > 1 && (

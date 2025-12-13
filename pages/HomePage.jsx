@@ -57,45 +57,44 @@ function HomePage() {
         return (
             <ErrorBoundary>
                 <div data-name="home-page" role="main">
-                    {/* Hero Slideshow */}
-                    <HeroSlideshow />
-
-                    {/* Hero Section */}
-                    <section 
-                        className="hero-banner relative py-24"
-                        aria-labelledby="hero-heading"
-                    >
-                        <div className="hero-overlay" aria-hidden="true"></div>
-                        <div className="container mx-auto px-4 hero-content">
-                            <div className="max-w-3xl">
-                                <h1 
-                                    id="hero-heading"
-                                    className="text-4xl md:text-5xl font-bold mb-6"
-                                >
-                                    Share Food, Reduce Waste, Build Community
-                                </h1>
-                                <p className="text-xl mb-8">
-                                    Join our movement to combat food waste and hunger through community-driven food sharing .
-                                </p>
-                                <div className="flex space-x-4">
-                                    <Button 
-                                        variant="secondary"
-                                        onClick={() => handleNavigation('/share')}
-                                        aria-label="Share food with the community"
+                    {/* Hero Section with Slideshow Background */}
+                    <HeroSlideshow>
+                        <section 
+                            className="py-24"
+                            aria-labelledby="hero-heading"
+                        >
+                            <div className="container mx-auto px-4">
+                                <div className="max-w-3xl">
+                                    <h1 
+                                        id="hero-heading"
+                                        className="text-4xl md:text-5xl font-bold mb-6 text-white drop-shadow-lg"
                                     >
-                                        Share Food
-                                    </Button>
-                                    <Button 
-                                        variant="outline"
-                                        onClick={() => handleNavigation('/find')}
-                                        aria-label="Find food in your area"
-                                    >
-                                        Find Food
-                                    </Button>
+                                        Share Food, Reduce Waste, Build Community
+                                    </h1>
+                                    <p className="text-xl mb-8 text-white drop-shadow-md">
+                                        Join our movement to combat food waste and hunger through community-driven food sharing.
+                                    </p>
+                                    <div className="flex space-x-4">
+                                        <Button 
+                                            variant="secondary"
+                                            onClick={() => handleNavigation('/share')}
+                                            aria-label="Share food with the community"
+                                        >
+                                            Share Food
+                                        </Button>
+                                        <Button 
+                                            variant="outline"
+                                            onClick={() => handleNavigation('/find')}
+                                            aria-label="Find food in your area"
+                                            className="bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white hover:text-gray-900"
+                                        >
+                                            Find Food
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                        </section>
+                    </HeroSlideshow>
 
                     {/* How It Works Schematic */}
                     <section
