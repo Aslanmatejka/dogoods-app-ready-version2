@@ -196,7 +196,7 @@ function HeroSlideshow({ children }) {
                 <>
                     <button
                         onClick={prevSlide}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white p-3 rounded-full transition-all backdrop-blur-sm"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white p-3 rounded-full transition-all backdrop-blur-sm z-20"
                         aria-label="Previous slide"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -205,7 +205,7 @@ function HeroSlideshow({ children }) {
                     </button>
                     <button
                         onClick={nextSlide}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white p-3 rounded-full transition-all backdrop-blur-sm"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white p-3 rounded-full transition-all backdrop-blur-sm z-20"
                         aria-label="Next slide"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -217,7 +217,7 @@ function HeroSlideshow({ children }) {
 
             {/* Dot Indicators */}
             {slides.length > 1 && (
-                <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-2">
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-2 z-20">
                     {slides.map((_, index) => (
                         <button
                             key={index}
@@ -238,7 +238,7 @@ function HeroSlideshow({ children }) {
                 <>
                     <button
                         onClick={() => setIsEditMode(!isEditMode)}
-                        className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                        className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg z-50 cursor-pointer"
                         title="Manage Slides"
                     >
                         {isEditMode ? 'Close' : 'Manage Slides'}
@@ -246,7 +246,7 @@ function HeroSlideshow({ children }) {
 
                     {/* Admin Panel */}
                     {isEditMode && (
-                        <div className="absolute top-16 right-4 bg-white rounded-lg shadow-2xl p-6 w-96 max-h-[400px] overflow-y-auto">
+                        <div className="absolute top-16 right-4 bg-white rounded-lg shadow-2xl p-6 w-96 max-h-[400px] overflow-y-auto z-50">
                             <h3 className="text-xl font-bold text-gray-900 mb-4">Manage Slideshow</h3>
                             
                             {/* Add New Slide */}
