@@ -362,7 +362,7 @@ function HomePage() {
                                     <Card>
                                         <div className="text-center p-6">
                                             <div className="text-4xl font-bold text-green-600 mb-2">
-                                                {Math.round(impact.foodSavedKg * 2.20462).toLocaleString()}
+                                                {Math.round(impact.foodSavedFromWaste).toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">Pounds of Food Saved from Waste</div>
                                         </div>
@@ -370,7 +370,7 @@ function HomePage() {
                                     <Card>
                                         <div className="text-center p-6">
                                             <div className="text-4xl font-bold text-green-600 mb-2">
-                                                {Math.round(impact.foodSavedKg * 2.20462).toLocaleString()}
+                                                {Math.round(impact.foodProvided).toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">Pounds of Food Provided</div>
                                         </div>
@@ -386,7 +386,7 @@ function HomePage() {
                                     <Card>
                                         <div className="text-center p-6">
                                             <div className="text-4xl font-bold text-blue-600 mb-2">
-                                                {Math.round(impact.partnerOrganizations * 0.15).toLocaleString()}
+                                                {impact.schoolsServed.toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">Schools We Serve</div>
                                         </div>
@@ -394,7 +394,7 @@ function HomePage() {
                                     <Card>
                                         <div className="text-center p-6">
                                             <div className="text-4xl font-bold text-blue-600 mb-2">
-                                                {impact.partnerOrganizations.toLocaleString()}
+                                                {impact.nonprofitsHelped.toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">Non-Profits We Help</div>
                                         </div>

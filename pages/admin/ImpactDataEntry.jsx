@@ -12,10 +12,12 @@ function ImpactDataEntry() {
     // Use refs for uncontrolled inputs instead of state
     const newRowRefs = React.useRef({
         date: null,
-        food_saved_kg: null,
+        food_saved_from_waste_lb: null,
+        food_provided_lb: null,
         people_helped: null,
+        schools_served: null,
+        nonprofits_helped: null,
         meals_provided: null,
-        partner_organizations: null,
         waste_diverted_kg: null,
         co2_reduced_kg: null,
         volunteer_hours: null,
@@ -49,10 +51,12 @@ function ImpactDataEntry() {
             // Get values from refs (uncontrolled inputs)
             const newRowData = {
                 date: newRowRefs.current.date?.value || new Date().toISOString().split('T')[0],
-                food_saved_kg: newRowRefs.current.food_saved_kg?.value || 0,
+                food_saved_from_waste_lb: newRowRefs.current.food_saved_from_waste_lb?.value || 0,
+                food_provided_lb: newRowRefs.current.food_provided_lb?.value || 0,
                 people_helped: newRowRefs.current.people_helped?.value || 0,
+                schools_served: newRowRefs.current.schools_served?.value || 0,
+                nonprofits_helped: newRowRefs.current.nonprofits_helped?.value || 0,
                 meals_provided: newRowRefs.current.meals_provided?.value || 0,
-                partner_organizations: newRowRefs.current.partner_organizations?.value || 0,
                 waste_diverted_kg: newRowRefs.current.waste_diverted_kg?.value || 0,
                 co2_reduced_kg: newRowRefs.current.co2_reduced_kg?.value || 0,
                 volunteer_hours: newRowRefs.current.volunteer_hours?.value || 0,
@@ -68,10 +72,12 @@ function ImpactDataEntry() {
 
             // Clear input fields
             if (newRowRefs.current.date) newRowRefs.current.date.value = new Date().toISOString().split('T')[0];
-            if (newRowRefs.current.food_saved_kg) newRowRefs.current.food_saved_kg.value = '';
+            if (newRowRefs.current.food_saved_from_waste_lb) newRowRefs.current.food_saved_from_waste_lb.value = '';
+            if (newRowRefs.current.food_provided_lb) newRowRefs.current.food_provided_lb.value = '';
             if (newRowRefs.current.people_helped) newRowRefs.current.people_helped.value = '';
+            if (newRowRefs.current.schools_served) newRowRefs.current.schools_served.value = '';
+            if (newRowRefs.current.nonprofits_helped) newRowRefs.current.nonprofits_helped.value = '';
             if (newRowRefs.current.meals_provided) newRowRefs.current.meals_provided.value = '';
-            if (newRowRefs.current.partner_organizations) newRowRefs.current.partner_organizations.value = '';
             if (newRowRefs.current.waste_diverted_kg) newRowRefs.current.waste_diverted_kg.value = '';
             if (newRowRefs.current.co2_reduced_kg) newRowRefs.current.co2_reduced_kg.value = '';
             if (newRowRefs.current.volunteer_hours) newRowRefs.current.volunteer_hours.value = '';
@@ -126,14 +132,16 @@ function ImpactDataEntry() {
     // Simple update handler for existing rows - uses uncontrolled inputs too
 
     const exportToCSV = () => {
-        const headers = ['Date', 'Food Saved (Lb)', 'People Helped', 'Meals Provided', 'Partner Orgs', 'Waste Diverted (Lb)', 'CO2 Reduced (Lb)', 'Volunteer Hours', 'Notes'];
+        const headers = ['Date', 'Food Saved from Waste (Lb)', 'Food Provided (Lb)', 'People Helped', 'Schools Served', 'Non-Profits Helped', 'Meals Provided', 'Waste Diverted (Lb)', 'CO2 Reduced (Lb)', 'Volunteer Hours', 'Notes'];
 
         const rows = data.map(row => [
             row.date,
-            row.food_saved_kg,
-            row.people_helped,
+            row.food_saved_from_waste_lb || 0,
+            row.food_provided_lb || 0,
+            row.people_helped || 0,
+            row.schools_served || 0,
+            row.nonprofits_helped || 0,
             row.meals_provided || 0,
-            row.partner_organizations || 0,
             row.waste_diverted_kg || 0,
             row.co2_reduced_kg || 0,
             row.volunteer_hours || 0,
@@ -218,11 +226,24 @@ function ImpactDataEntry() {
                         
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Food Saved/Provided (LB)
+                                Pounds of Food Saved from Waste
                             </label>
                             <input
                                 type="number"
-                                ref={el => newRowRefs.current.food_saved_kg = el}
+                                ref={el => newRowRefs.current.food_saved_from_waste_lb = el}
+                                placeholder="0"
+                                step="0.01"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Pounds of Food Provided
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.food_provided_lb = el}
                                 placeholder="0"
                                 step="0.01"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -243,11 +264,11 @@ function ImpactDataEntry() {
                         
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Meals Provided
+                                Schools We Serve
                             </label>
                             <input
                                 type="number"
-                                ref={el => newRowRefs.current.meals_provided = el}
+                                ref={el => newRowRefs.current.schools_served = el}
                                 placeholder="0"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             />
@@ -255,15 +276,26 @@ function ImpactDataEntry() {
                         
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Partner Organizations
+                                Non-Profits We Help
                             </label>
                             <input
                                 type="number"
-                                ref={el => newRowRefs.current.partner_organizations = el}
+                                ref={el => newRowRefs.current.nonprofits_helped = el}
                                 placeholder="0"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             />
-                            <p className="text-xs text-gray-500 mt-1">Includes schools, non-profits, etc.</p>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Total Meals Provided
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.meals_provided = el}
+                                placeholder="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
                         </div>
                         
                         <div>
@@ -340,31 +372,37 @@ function ImpactDataEntry() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50 sticky top-0">
                                 <tr>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                                         Date
                                     </th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Food (LB)
+                                        Saved Waste
+                                    </th>
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                        Provided
                                     </th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                                         People
                                     </th>
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                        Schools
+                                    </th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                        Non-Profits
+                                    </th>
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                                         Meals
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Partners
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                        Waste
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Waste (LB)
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                        CO2
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        CO2 (LB)
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                        Vol.Hrs
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Vol. Hrs
-                                    </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                                         Notes
                                     </th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
@@ -386,7 +424,15 @@ function ImpactDataEntry() {
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
-                                            inputRef={el => newRowRefs.current.food_saved_kg = el}
+                                            inputRef={el => newRowRefs.current.food_saved_from_waste_lb = el}
+                                            onBlur={() => { }}
+                                        />
+                                    </td>
+                                    <td className="px-2 py-2">
+                                        <UncontrolledCell
+                                            type="number"
+                                            defaultValue=""
+                                            inputRef={el => newRowRefs.current.food_provided_lb = el}
                                             onBlur={() => { }}
                                         />
                                     </td>
@@ -402,7 +448,7 @@ function ImpactDataEntry() {
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
-                                            inputRef={el => newRowRefs.current.meals_provided = el}
+                                            inputRef={el => newRowRefs.current.schools_served = el}
                                             onBlur={() => { }}
                                         />
                                     </td>
@@ -410,7 +456,15 @@ function ImpactDataEntry() {
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
-                                            inputRef={el => newRowRefs.current.partner_organizations = el}
+                                            inputRef={el => newRowRefs.current.nonprofits_helped = el}
+                                            onBlur={() => { }}
+                                        />
+                                    </td>
+                                    <td className="px-2 py-2">
+                                        <UncontrolledCell
+                                            type="number"
+                                            defaultValue=""
+                                            inputRef={el => newRowRefs.current.meals_provided = el}
                                             onBlur={() => { }}
                                         />
                                     </td>
@@ -468,15 +522,36 @@ function ImpactDataEntry() {
                                         <td className="px-2 py-2">
                                             <UncontrolledCell
                                                 type="number"
-                                                defaultValue={row.food_saved_kg}
-                                                onBlur={(val) => handleUpdateRow(row.id, 'food_saved_kg', val)}
+                                                defaultValue={row.food_saved_from_waste_lb || 0}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'food_saved_from_waste_lb', val)}
                                             />
                                         </td>
                                         <td className="px-2 py-2">
                                             <UncontrolledCell
                                                 type="number"
-                                                defaultValue={row.people_helped}
+                                                defaultValue={row.food_provided_lb || 0}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'food_provided_lb', val)}
+                                            />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <UncontrolledCell
+                                                type="number"
+                                                defaultValue={row.people_helped || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'people_helped', val)}
+                                            />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <UncontrolledCell
+                                                type="number"
+                                                defaultValue={row.schools_served || 0}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'schools_served', val)}
+                                            />
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <UncontrolledCell
+                                                type="number"
+                                                defaultValue={row.nonprofits_helped || 0}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'nonprofits_helped', val)}
                                             />
                                         </td>
                                         <td className="px-2 py-2">
@@ -484,13 +559,6 @@ function ImpactDataEntry() {
                                                 type="number"
                                                 defaultValue={row.meals_provided || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'meals_provided', val)}
-                                            />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <UncontrolledCell
-                                                type="number"
-                                                defaultValue={row.partner_organizations || 0}
-                                                onBlur={(val) => handleUpdateRow(row.id, 'partner_organizations', val)}
                                             />
                                         </td>
                                         <td className="px-2 py-2">
@@ -520,7 +588,12 @@ function ImpactDataEntry() {
                                                 onBlur={(val) => handleUpdateRow(row.id, 'notes', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">\n                                            <Button\n                                                variant="danger"\n                                                size="sm"\n                                                onClick={() => handleDeleteRow(row.id)}\n                                            >
+                                        <td className="px-2 py-2">
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                onClick={() => handleDeleteRow(row.id)}
+                                            >
                                                 <i className="fas fa-trash"></i>
                                             </Button>
                                         </td>
@@ -529,8 +602,8 @@ function ImpactDataEntry() {
 
                                 {data.length === 0 && (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                                            No data entries yet. Add your first entry using the row above.
+                                        <td colSpan="12" className="px-6 py-8 text-center text-gray-500">
+                                            No data entries yet. Add your first entry using the row above or the form.
                                         </td>
                                     </tr>
                                 )}

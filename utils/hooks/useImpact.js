@@ -4,12 +4,14 @@ import impactService from '../impactService';
 export function useImpact() {
     const [impact, setImpact] = useState({
         totalMeals: 0,
-        foodSavedKg: 0,
+        foodSavedFromWaste: 0,
+        foodProvided: 0,
         peopleHelped: 0,
+        schoolsServed: 0,
+        nonprofitsHelped: 0,
         wasteReduced: 0,
         co2Saved: 0,
-        volunteerHours: 0,
-        partnerOrganizations: 0
+        volunteerHours: 0
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
