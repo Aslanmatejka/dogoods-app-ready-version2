@@ -358,13 +358,21 @@ function HomePage() {
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                                     <Card>
                                         <div className="text-center p-6">
                                             <div className="text-4xl font-bold text-green-600 mb-2">
-                                                {Math.round(impact.foodSavedKg).toLocaleString()}
+                                                {Math.round(impact.foodSavedKg * 2.20462).toLocaleString()}
                                             </div>
-                                            <div className="text-sm text-gray-600">Food Saved (LB)</div>
+                                            <div className="text-sm text-gray-600">Pounds of Food Saved from Waste</div>
+                                        </div>
+                                    </Card>
+                                    <Card>
+                                        <div className="text-center p-6">
+                                            <div className="text-4xl font-bold text-green-600 mb-2">
+                                                {Math.round(impact.foodSavedKg * 2.20462).toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Pounds of Food Provided</div>
                                         </div>
                                     </Card>
                                     <Card>
@@ -373,6 +381,30 @@ function HomePage() {
                                                 {impact.peopleHelped.toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">People Helped</div>
+                                        </div>
+                                    </Card>
+                                    <Card>
+                                        <div className="text-center p-6">
+                                            <div className="text-4xl font-bold text-blue-600 mb-2">
+                                                {Math.round(impact.partnerOrganizations * 0.15).toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Schools We Serve</div>
+                                        </div>
+                                    </Card>
+                                    <Card>
+                                        <div className="text-center p-6">
+                                            <div className="text-4xl font-bold text-blue-600 mb-2">
+                                                {impact.partnerOrganizations.toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Non-Profits We Help</div>
+                                        </div>
+                                    </Card>
+                                    <Card>
+                                        <div className="text-center p-6">
+                                            <div className="text-4xl font-bold text-purple-600 mb-2">
+                                                {impact.totalMeals.toLocaleString()}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Total Meals Provided</div>
                                         </div>
                                     </Card>
                                 </div>
