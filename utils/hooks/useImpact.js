@@ -3,7 +3,7 @@ import impactService from '../impactService';
 
 export function useImpact() {
     const [impact, setImpact] = useState({
-        totalMeals: 0,
+        totalMealsProvided: 0,
         foodSavedFromWaste: 0,
         foodProvided: 0,
         peopleHelped: 0,

@@ -402,7 +402,7 @@ function HomePage() {
                                     <Card>
                                         <div className="text-center p-6">
                                             <div className="text-4xl font-bold text-purple-600 mb-2">
-                                                {impact.totalMeals.toLocaleString()}
+                                                {impact.totalMealsProvided.toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">Total Meals Provided</div>
                                         </div>

@@ -17,10 +17,7 @@ function ImpactDataEntry() {
         people_helped: null,
         schools_served: null,
         nonprofits_helped: null,
-        meals_provided: null,
-        waste_diverted_kg: null,
-        co2_reduced_kg: null,
-        volunteer_hours: null,
+        total_meals_provided: null,
         notes: null
     });
 
@@ -56,10 +53,7 @@ function ImpactDataEntry() {
                 people_helped: newRowRefs.current.people_helped?.value || 0,
                 schools_served: newRowRefs.current.schools_served?.value || 0,
                 nonprofits_helped: newRowRefs.current.nonprofits_helped?.value || 0,
-                meals_provided: newRowRefs.current.meals_provided?.value || 0,
-                waste_diverted_kg: newRowRefs.current.waste_diverted_kg?.value || 0,
-                co2_reduced_kg: newRowRefs.current.co2_reduced_kg?.value || 0,
-                volunteer_hours: newRowRefs.current.volunteer_hours?.value || 0,
+                total_meals_provided: newRowRefs.current.total_meals_provided?.value || 0,
                 notes: newRowRefs.current.notes?.value || '',
                 created_by: user?.id
             };
@@ -77,10 +71,7 @@ function ImpactDataEntry() {
             if (newRowRefs.current.people_helped) newRowRefs.current.people_helped.value = '';
             if (newRowRefs.current.schools_served) newRowRefs.current.schools_served.value = '';
             if (newRowRefs.current.nonprofits_helped) newRowRefs.current.nonprofits_helped.value = '';
-            if (newRowRefs.current.meals_provided) newRowRefs.current.meals_provided.value = '';
-            if (newRowRefs.current.waste_diverted_kg) newRowRefs.current.waste_diverted_kg.value = '';
-            if (newRowRefs.current.co2_reduced_kg) newRowRefs.current.co2_reduced_kg.value = '';
-            if (newRowRefs.current.volunteer_hours) newRowRefs.current.volunteer_hours.value = '';
+            if (newRowRefs.current.total_meals_provided) newRowRefs.current.total_meals_provided.value = '';
             if (newRowRefs.current.notes) newRowRefs.current.notes.value = '';
 
             await fetchData();
@@ -132,7 +123,7 @@ function ImpactDataEntry() {
     // Simple update handler for existing rows - uses uncontrolled inputs too
 
     const exportToCSV = () => {
-        const headers = ['Date', 'Food Saved from Waste (Lb)', 'Food Provided (Lb)', 'People Helped', 'Schools Served', 'Non-Profits Helped', 'Meals Provided', 'Waste Diverted (Lb)', 'CO2 Reduced (Lb)', 'Volunteer Hours', 'Notes'];
+        const headers = ['Date', 'Food Saved from Waste (lb)', 'Food Provided (lb)', 'People Helped', 'Schools Served', 'Non-Profits Helped', 'Total Meals Provided', 'Notes'];
 
         const rows = data.map(row => [
             row.date,
@@ -141,10 +132,7 @@ function ImpactDataEntry() {
             row.people_helped || 0,
             row.schools_served || 0,
             row.nonprofits_helped || 0,
-            row.meals_provided || 0,
-            row.waste_diverted_kg || 0,
-            row.co2_reduced_kg || 0,
-            row.volunteer_hours || 0,
+            row.total_meals_provided || 0,
             row.notes || ''
         ]);
 
@@ -205,163 +193,6 @@ function ImpactDataEntry() {
                     </div>
                 </div>
 
-                {/* Quick Entry Form */}
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                        <i className="fas fa-plus-circle text-green-600 mr-2"></i>
-                        Quick Impact Entry
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Date *
-                            </label>
-                            <input
-                                type="date"
-                                ref={el => newRowRefs.current.date = el}
-                                defaultValue={new Date().toISOString().split('T')[0]}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Pounds of Food Saved from Waste
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.food_saved_from_waste_lb = el}
-                                placeholder="0"
-                                step="0.01"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Pounds of Food Provided
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.food_provided_lb = el}
-                                placeholder="0"
-                                step="0.01"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                People Helped
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.people_helped = el}
-                                placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Schools We Serve
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.schools_served = el}
-                                placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Non-Profits We Help
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.nonprofits_helped = el}
-                                placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Total Meals Provided
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.meals_provided = el}
-                                placeholder="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Waste Diverted (LB)
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.waste_diverted_kg = el}
-                                placeholder="0"
-                                step="0.01"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                CO2 Reduced (LB)
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.co2_reduced_kg = el}
-                                placeholder="0"
-                                step="0.01"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Volunteer Hours
-                            </label>
-                            <input
-                                type="number"
-                                ref={el => newRowRefs.current.volunteer_hours = el}
-                                placeholder="0"
-                                step="0.5"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <div className="md:col-span-2 lg:col-span-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Notes
-                            </label>
-                            <input
-                                type="text"
-                                ref={el => newRowRefs.current.notes = el}
-                                placeholder="Optional notes..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                            />
-                        </div>
-                    </div>
-                    
-                    <div className="mt-4 flex justify-end">
-                        <Button
-                            variant="primary"
-                            onClick={handleAddRow}
-                            size="lg"
-                        >
-                            <i className="fas fa-plus-circle mr-2"></i>
-                            Add Impact Record
-                        </Button>
-                    </div>
-                </div>
-
                 {loading ? (
                     <div className="p-8 text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
@@ -372,47 +203,38 @@ function ImpactDataEntry() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50 sticky top-0">
                                 <tr>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                                         Date
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Saved Waste
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-28">
+                                        Food Saved from Waste (lb)
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Provided
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-28">
+                                        Food Provided (lb)
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        People
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-28">
+                                        People Helped
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                                        Schools
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider w-24">
+                                        Schools Served
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                                        Non-Profits
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider w-24">
+                                        Non-Profits Helped
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                                        Meals
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider w-28">
+                                        Total Meals
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                                        Waste
-                                    </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                                        CO2
-                                    </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                                        Vol.Hrs
-                                    </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                                         Notes
                                     </th>
-                                    <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 <tr className="bg-green-50">
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="date"
                                             defaultValue={new Date().toISOString().split('T')[0]}
@@ -420,7 +242,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -428,7 +250,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -436,7 +258,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -444,7 +266,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -452,7 +274,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -460,46 +282,22 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
-                                            inputRef={el => newRowRefs.current.meals_provided = el}
+                                            inputRef={el => newRowRefs.current.total_meals_provided = el}
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
-                                        <UncontrolledCell
-                                            type="number"
-                                            defaultValue=""
-                                            inputRef={el => newRowRefs.current.waste_diverted_kg = el}
-                                            onBlur={() => { }}
-                                        />
-                                    </td>
-                                    <td className="px-2 py-2">
-                                        <UncontrolledCell
-                                            type="number"
-                                            defaultValue=""
-                                            inputRef={el => newRowRefs.current.co2_reduced_kg = el}
-                                            onBlur={() => { }}
-                                        />
-                                    </td>
-                                    <td className="px-2 py-2">
-                                        <UncontrolledCell
-                                            type="number"
-                                            defaultValue=""
-                                            inputRef={el => newRowRefs.current.volunteer_hours = el}
-                                            onBlur={() => { }}
-                                        />
-                                    </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <UncontrolledCell
                                             defaultValue=""
                                             inputRef={el => newRowRefs.current.notes = el}
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-2 py-2">
+                                    <td className="px-3 py-2">
                                         <Button
                                             variant="primary"
                                             size="sm"
@@ -512,83 +310,62 @@ function ImpactDataEntry() {
 
                                 {data.map((row) => (
                                     <tr key={row.id} className="hover:bg-gray-50">
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="date"
                                                 defaultValue={row.date}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'date', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.food_saved_from_waste_lb || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'food_saved_from_waste_lb', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.food_provided_lb || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'food_provided_lb', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.people_helped || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'people_helped', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.schools_served || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'schools_served', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.nonprofits_helped || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'nonprofits_helped', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="number"
-                                                defaultValue={row.meals_provided || 0}
-                                                onBlur={(val) => handleUpdateRow(row.id, 'meals_provided', val)}
+                                                defaultValue={row.total_meals_provided || 0}
+                                                onBlur={(val) => handleUpdateRow(row.id, 'total_meals_provided', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
-                                            <UncontrolledCell
-                                                type="number"
-                                                defaultValue={row.waste_diverted_kg || 0}
-                                                onBlur={(val) => handleUpdateRow(row.id, 'waste_diverted_kg', val)}
-                                            />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <UncontrolledCell
-                                                type="number"
-                                                defaultValue={row.co2_reduced_kg || 0}
-                                                onBlur={(val) => handleUpdateRow(row.id, 'co2_reduced_kg', val)}
-                                            />
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            <UncontrolledCell
-                                                type="number"
-                                                defaultValue={row.volunteer_hours || 0}
-                                                onBlur={(val) => handleUpdateRow(row.id, 'volunteer_hours', val)}
-                                            />
-                                        </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 defaultValue={row.notes || ''}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'notes', val)}
                                             />
                                         </td>
-                                        <td className="px-2 py-2">
+                                        <td className="px-3 py-2">
                                             <Button
                                                 variant="danger"
                                                 size="sm"
@@ -602,8 +379,8 @@ function ImpactDataEntry() {
 
                                 {data.length === 0 && (
                                     <tr>
-                                        <td colSpan="12" className="px-6 py-8 text-center text-gray-500">
-                                            No data entries yet. Add your first entry using the row above or the form.
+                                        <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
+                                            No data entries yet. Add your first entry using the row above.
                                         </td>
                                     </tr>
                                 )}

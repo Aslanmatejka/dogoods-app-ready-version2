@@ -16,7 +16,7 @@ class ImpactService {
 
             if (!data || data.length === 0) {
                 return {
-                    totalMeals: 0,
+                    totalMealsProvided: 0,
                     foodSavedFromWaste: 0,
                     foodProvided: 0,
                     peopleHelped: 0,
@@ -29,7 +29,7 @@ class ImpactService {
             }
 
             const aggregated = data.reduce((acc, entry) => ({
-                totalMeals: acc.totalMeals + (parseFloat(entry.meals_provided) || 0),
+                totalMealsProvided: acc.totalMealsProvided + (parseInt(entry.total_meals_provided) || 0),
                 foodSavedFromWaste: acc.foodSavedFromWaste + (parseFloat(entry.food_saved_from_waste_lb) || 0),
                 foodProvided: acc.foodProvided + (parseFloat(entry.food_provided_lb) || 0),
                 peopleHelped: acc.peopleHelped + (parseInt(entry.people_helped) || 0),
@@ -39,7 +39,7 @@ class ImpactService {
                 co2Saved: acc.co2Saved + (parseFloat(entry.co2_reduced_kg) || 0),
                 volunteerHours: acc.volunteerHours + (parseFloat(entry.volunteer_hours) || 0)
             }), {
-                totalMeals: 0,
+                totalMealsProvided: 0,
                 foodSavedFromWaste: 0,
                 foodProvided: 0,
                 peopleHelped: 0,
@@ -55,7 +55,7 @@ class ImpactService {
         } catch (error) {
             console.error('[ImpactService] Error in getAggregatedImpact:', error);
             return {
-                totalMeals: 0,
+                totalMealsProvided: 0,
                 foodSavedFromWaste: 0,
                 foodProvided: 0,
                 peopleHelped: 0,
