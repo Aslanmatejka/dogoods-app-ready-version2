@@ -197,6 +197,139 @@ function ImpactDataEntry() {
                     </div>
                 </div>
 
+                {/* Quick Entry Form */}
+                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                        <i className="fas fa-plus-circle text-green-600 mr-2"></i>
+                        Quick Impact Entry
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Date *
+                            </label>
+                            <input
+                                type="date"
+                                ref={el => newRowRefs.current.date = el}
+                                defaultValue={new Date().toISOString().split('T')[0]}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Food Saved/Provided (LB)
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.food_saved_kg = el}
+                                placeholder="0"
+                                step="0.01"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                People Helped
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.people_helped = el}
+                                placeholder="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Meals Provided
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.meals_provided = el}
+                                placeholder="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Partner Organizations
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.partner_organizations = el}
+                                placeholder="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Includes schools, non-profits, etc.</p>
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Waste Diverted (LB)
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.waste_diverted_kg = el}
+                                placeholder="0"
+                                step="0.01"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                CO2 Reduced (LB)
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.co2_reduced_kg = el}
+                                placeholder="0"
+                                step="0.01"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Volunteer Hours
+                            </label>
+                            <input
+                                type="number"
+                                ref={el => newRowRefs.current.volunteer_hours = el}
+                                placeholder="0"
+                                step="0.5"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                        
+                        <div className="md:col-span-2 lg:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Notes
+                            </label>
+                            <input
+                                type="text"
+                                ref={el => newRowRefs.current.notes = el}
+                                placeholder="Optional notes..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="mt-4 flex justify-end">
+                        <Button
+                            variant="primary"
+                            onClick={handleAddRow}
+                            size="lg"
+                        >
+                            <i className="fas fa-plus-circle mr-2"></i>
+                            Add Impact Record
+                        </Button>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div className="p-8 text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
