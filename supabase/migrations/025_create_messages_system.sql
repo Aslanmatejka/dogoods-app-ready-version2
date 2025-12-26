@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS messages (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     conversation_id UUID NOT NULL,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     message TEXT NOT NULL,
     is_from_admin BOOLEAN DEFAULT FALSE,
     read_at TIMESTAMPTZ,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS messages (
 -- Create conversations table to track message threads
 CREATE TABLE IF NOT EXISTS conversations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
     subject TEXT,
     status TEXT DEFAULT 'open' CHECK (status IN ('open', 'closed')),
     last_message_at TIMESTAMPTZ DEFAULT NOW(),
