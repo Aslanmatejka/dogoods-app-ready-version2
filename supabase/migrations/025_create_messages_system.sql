@@ -35,12 +35,12 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 -- Users can see their own messages
 CREATE POLICY "Users can view their own messages"
     ON messages FOR SELECT
-    USING (auth.uid() = user_id);
+    USING (auth.uid() = messages.user_id);
 
 -- Users can insert their own messages (not from admin)
 CREATE POLICY "Users can send messages"
     ON messages FOR INSERT
-    WITH CHECK (auth.uid() = user_id AND is_from_admin = FALSE);
+    WITH CHECK (auth.uid() = messages.user_id AND messages.is_from_admin = FALSE);
 
 -- Admins can view all messages
 CREATE POLICY "Admins can view all messages"
@@ -85,12 +85,12 @@ ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 -- Users can see their own conversations
 CREATE POLICY "Users can view their own conversations"
     ON conversations FOR SELECT
-    USING (auth.uid() = user_id);
+    USING (auth.uid() = conversations.user_id);
 
 -- Users can create conversations
 CREATE POLICY "Users can create conversations"
     ON conversations FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (auth.uid() = conversations.user_id);
 
 -- Admins can view all conversations
 CREATE POLICY "Admins can view all conversations"
