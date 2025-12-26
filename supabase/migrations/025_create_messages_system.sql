@@ -58,13 +58,13 @@ CREATE POLICY "Admins can view all messages"
 CREATE POLICY "Admins can send messages"
     ON messages FOR INSERT
     WITH CHECK (
-        EXISTS (
+        messages.is_from_admin = TRUE
+        AND EXISTS (
             SELECT 1 FROM auth.users
             WHERE auth.users.id = auth.uid()
             AND (auth.users.raw_user_meta_data->>'role' = 'admin'
                  OR auth.users.raw_user_meta_data->>'is_admin' = 'true')
         )
-        AND is_from_admin = TRUE
     );
 
 -- Admins can update messages (mark as read)
