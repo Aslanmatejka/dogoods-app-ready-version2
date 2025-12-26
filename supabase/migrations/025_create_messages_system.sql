@@ -47,10 +47,9 @@ CREATE POLICY "Admins can view all messages"
     ON messages FOR SELECT
     USING (
         EXISTS (
-            SELECT 1 FROM auth.users
-            WHERE auth.users.id = auth.uid()
-            AND (auth.users.raw_user_meta_data->>'role' = 'admin'
-                 OR auth.users.raw_user_meta_data->>'is_admin' = 'true')
+            SELECT 1 FROM public.users
+            WHERE public.users.id = auth.uid()
+            AND public.users.is_admin = true
         )
     );
 
@@ -60,10 +59,9 @@ CREATE POLICY "Admins can send messages"
     WITH CHECK (
         messages.is_from_admin = TRUE
         AND EXISTS (
-            SELECT 1 FROM auth.users
-            WHERE auth.users.id = auth.uid()
-            AND (auth.users.raw_user_meta_data->>'role' = 'admin'
-                 OR auth.users.raw_user_meta_data->>'is_admin' = 'true')
+            SELECT 1 FROM public.users
+            WHERE public.users.id = auth.uid()
+            AND public.users.is_admin = true
         )
     );
 
@@ -72,10 +70,9 @@ CREATE POLICY "Admins can update messages"
     ON messages FOR UPDATE
     USING (
         EXISTS (
-            SELECT 1 FROM auth.users
-            WHERE auth.users.id = auth.uid()
-            AND (auth.users.raw_user_meta_data->>'role' = 'admin'
-                 OR auth.users.raw_user_meta_data->>'is_admin' = 'true')
+            SELECT 1 FROM public.users
+            WHERE public.users.id = auth.uid()
+            AND public.users.is_admin = true
         )
     );
 
@@ -97,10 +94,9 @@ CREATE POLICY "Admins can view all conversations"
     ON conversations FOR SELECT
     USING (
         EXISTS (
-            SELECT 1 FROM auth.users
-            WHERE auth.users.id = auth.uid()
-            AND (auth.users.raw_user_meta_data->>'role' = 'admin'
-                 OR auth.users.raw_user_meta_data->>'is_admin' = 'true')
+            SELECT 1 FROM public.users
+            WHERE public.users.id = auth.uid()
+            AND public.users.is_admin = true
         )
     );
 
@@ -109,10 +105,9 @@ CREATE POLICY "Admins can update conversations"
     ON conversations FOR UPDATE
     USING (
         EXISTS (
-            SELECT 1 FROM auth.users
-            WHERE auth.users.id = auth.uid()
-            AND (auth.users.raw_user_meta_data->>'role' = 'admin'
-                 OR auth.users.raw_user_meta_data->>'is_admin' = 'true')
+            SELECT 1 FROM public.users
+            WHERE public.users.id = auth.uid()
+            AND public.users.is_admin = true
         )
     );
 
