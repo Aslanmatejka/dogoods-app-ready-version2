@@ -1797,6 +1797,213 @@ class DataService {
     this.subscriptions.set('post_likes', subscription)
     return subscription
   }
+
+  // Messaging functions
+  async getOrCreateConversation(userId) {
+    try {
+      // Check if conversation already exists for this user
+      const { data: existing, error: checkError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'open')
+        .maybeSingle()
+
+      if (checkError) throw checkError
+
+      if (existing) {
+        return existing
+      }
+
+      // Create new conversation
+      const { data: newConversation, error: createError } = await supabase
+        .from('conversations')
+        .insert({
+          user_id: userId,
+          subject: 'Support Request',
+          status: 'open'
+        })
+        .select()
+        .single()
+
+      if (createError) throw createError
+
+      return newConversation
+    } catch (error) {
+      console.error('Get or create conversation error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async getConversationMessages(conversationId) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true })
+
+      if (error) throw error
+
+      return data || []
+    } catch (error) {
+      console.error('Get conversation messages error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async sendMessage(conversationId, message, isFromAdmin = false) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User must be authenticated to send messages')
+
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          message: message,
+          is_from_admin: isFromAdmin
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return data
+    } catch (error) {
+      console.error('Send message error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async getAdminConversations() {
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          users!conversations_user_id_fkey (
+            id,
+            name,
+            email,
+            avatar_url
+          ),
+          messages (
+            id,
+            message,
+            is_from_admin,
+            read_at,
+            created_at
+          )
+        `)
+        .order('last_message_at', { ascending: false })
+
+      if (error) throw error
+
+      return data || []
+    } catch (error) {
+      console.error('Get admin conversations error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async markMessageAsRead(messageId) {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', messageId)
+        .is('read_at', null)
+
+      if (error) throw error
+
+      return { success: true }
+    } catch (error) {
+      console.error('Mark message as read error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async closeConversation(conversationId) {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ status: 'closed', updated_at: new Date().toISOString() })
+        .eq('id', conversationId)
+
+      if (error) throw error
+
+      return { success: true }
+    } catch (error) {
+      console.error('Close conversation error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async reopenConversation(conversationId) {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ status: 'open', updated_at: new Date().toISOString() })
+        .eq('id', conversationId)
+
+      if (error) throw error
+
+      return { success: true }
+    } catch (error) {
+      console.error('Reopen conversation error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  subscribeToMessages(conversationId, callback) {
+    console.log('Setting up messages subscription for conversation:', conversationId)
+    const subscription = supabase
+      .channel(`messages_${conversationId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`
+      }, (payload) => {
+        console.log('Message change detected:', payload.eventType)
+        callback(payload)
+      })
+      .subscribe((status) => {
+        console.log('Messages subscription status:', status)
+      })
+
+    this.subscriptions.set(`messages_${conversationId}`, subscription)
+    return subscription
+  }
+
+  subscribeToConversations(callback) {
+    console.log('Setting up conversations subscription')
+    const subscription = supabase
+      .channel('conversations_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'conversations'
+      }, (payload) => {
+        console.log('Conversation change detected:', payload.eventType)
+        callback(payload)
+      })
+      .subscribe((status) => {
+        console.log('Conversations subscription status:', status)
+      })
+
+    this.subscriptions.set('conversations', subscription)
+    return subscription
+  }
 }
 
 // Create singleton instance
