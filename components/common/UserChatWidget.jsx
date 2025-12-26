@@ -48,10 +48,13 @@ function UserChatWidget() {
     const loadConversation = async () => {
         try {
             setLoading(true);
+            console.log('Loading conversation for user:', user.id);
             const conv = await dataService.getOrCreateConversation(user.id);
+            console.log('Conversation loaded:', conv);
             setConversation(conv);
         } catch (error) {
             console.error('Failed to load conversation:', error);
+            alert('Failed to load conversation. Please refresh the page and try again.');
         } finally {
             setLoading(false);
         }
@@ -68,11 +71,22 @@ function UserChatWidget() {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !conversation?.id || sending) return;
+        console.log('Send message clicked:', { newMessage, conversationId: conversation?.id, sending });
+        
+        if (!newMessage.trim() || !conversation?.id || sending) {
+            console.log('Send blocked:', { 
+                hasMessage: !!newMessage.trim(), 
+                hasConversation: !!conversation?.id, 
+                isSending: sending 
+            });
+            return;
+        }
 
         try {
             setSending(true);
+            console.log('Sending message to conversation:', conversation.id);
             await dataService.sendMessage(conversation.id, newMessage.trim(), false);
+            console.log('Message sent successfully');
             setNewMessage('');
         } catch (error) {
             console.error('Failed to send message:', error);
