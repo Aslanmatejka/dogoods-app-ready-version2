@@ -1882,11 +1882,27 @@ class DataService {
 
   async getAdminConversations() {
     try {
+      console.log('dataService: getAdminConversations called')
+
+      // First check if user is authenticated
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      console.log('dataService: Current user:', currentUser?.email)
+
+      // Check if user is admin
+      if (currentUser) {
+        const { data: userProfile } = await supabase
+          .from('users')
+          .select('is_admin, role')
+          .eq('id', currentUser.id)
+          .single()
+        console.log('dataService: User profile:', userProfile)
+      }
+
       const { data, error } = await supabase
         .from('conversations')
         .select(`
           *,
-          users!conversations_user_id_fkey (
+          users:user_id (
             id,
             name,
             email,
@@ -1902,11 +1918,22 @@ class DataService {
         `)
         .order('last_message_at', { ascending: false })
 
-      if (error) throw error
+      console.log('dataService: Query result:', { data, error })
 
+      if (error) {
+        console.error('dataService: Supabase error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        })
+        throw error
+      }
+
+      console.log('dataService: Returning conversations:', data?.length || 0)
       return data || []
     } catch (error) {
-      console.error('Get admin conversations error:', error)
+      console.error('dataService: Get admin conversations error:', error)
       reportError(error)
       throw error
     }

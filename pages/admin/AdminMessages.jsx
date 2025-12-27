@@ -63,10 +63,19 @@ function AdminMessages() {
     const loadConversations = async () => {
         try {
             setLoading(true);
+            console.log('AdminMessages: Loading conversations...');
             const data = await dataService.getAdminConversations();
+            console.log('AdminMessages: Received conversations data:', data);
+            console.log('AdminMessages: Number of conversations:', data?.length || 0);
             setConversations(data);
         } catch (error) {
-            console.error('Failed to load conversations:', error);
+            console.error('AdminMessages: Failed to load conversations:', error);
+            console.error('AdminMessages: Error details:', {
+                message: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint
+            });
         } finally {
             setLoading(false);
         }
