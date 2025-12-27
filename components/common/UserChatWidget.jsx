@@ -105,7 +105,7 @@ function UserChatWidget() {
             {/* Chat Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-green-600 text-white rounded-full shadow-lg hover:bg-green-700 transition-all duration-300 flex items-center justify-center group"
+                className="fixed bottom-6 right-24 z-40 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center group"
                 aria-label="Open chat with admin"
             >
                 {isOpen ? (
@@ -123,16 +123,16 @@ function UserChatWidget() {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-40 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+                <div className="fixed bottom-24 right-24 z-40 w-96 max-w-[calc(100vw-3rem)] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden border border-gray-200">
                     {/* Header */}
-                    <div className="bg-green-600 text-white px-4 py-3 flex items-center justify-between">
+                    <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
                                 <i className="fas fa-headset text-sm"></i>
                             </div>
                             <div>
                                 <h3 className="font-semibold text-sm">Chat with Admin</h3>
-                                <p className="text-xs text-green-100">We're here to help!</p>
+                                <p className="text-xs text-blue-100">We're here to help!</p>
                             </div>
                         </div>
                         <button
@@ -167,13 +167,13 @@ function UserChatWidget() {
                                 >
                                     <div className={`flex items-start space-x-2 max-w-[80%] ${msg.is_from_admin ? 'flex-row' : 'flex-row-reverse space-x-reverse'}`}>
                                         {msg.is_from_admin && (
-                                            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                                 <i className="fas fa-user-shield text-white text-xs"></i>
                                             </div>
                                         )}
-                                        <div className={`rounded-lg px-4 py-2 ${msg.is_from_admin ? 'bg-white border border-gray-200' : 'bg-green-600 text-white'}`}>
+                                        <div className={`rounded-lg px-4 py-2 ${msg.is_from_admin ? 'bg-white border border-gray-200' : 'bg-blue-600 text-white'}`}>
                                             <p className="text-sm break-words">{msg.message}</p>
-                                            <p className={`text-xs mt-1 ${msg.is_from_admin ? 'text-gray-400' : 'text-green-100'}`}>
+                                            <p className={`text-xs mt-1 ${msg.is_from_admin ? 'text-gray-400' : 'text-blue-100'}`}>
                                                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
@@ -201,7 +201,7 @@ function UserChatWidget() {
                             <button
                                 type="submit"
                                 disabled={!newMessage.trim() || sending || loading}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                             >
                                 {sending ? (
                                     <i className="fas fa-spinner fa-spin"></i>
