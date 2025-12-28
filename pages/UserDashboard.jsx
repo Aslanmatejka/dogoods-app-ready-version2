@@ -76,6 +76,13 @@ function UserDashboard() {
             icon: 'fa-search',
             path: '/find',
             color: 'bg-blue-500'
+        },
+        {
+            title: 'Donation Schedules',
+            description: 'Set up recurring donations',
+            icon: 'fa-calendar',
+            path: '/donations',
+            color: 'bg-purple-500'
         }
     ];
 

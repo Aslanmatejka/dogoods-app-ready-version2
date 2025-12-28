@@ -25,6 +25,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SponsorsPage from './pages/SponsorsPage';
 import ImpactStory from './pages/ImpactStory';
+import DonationSchedules from './pages/DonationSchedules';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ContentModeration from './pages/admin/ContentModeration.jsx';
 import DistributionAttendees from './pages/admin/DistributionAttendees.jsx';
@@ -80,6 +81,7 @@ function AppContent() {
                 <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                 <Route path="/listings" element={<ProtectedRoute><UserListings /></ProtectedRoute>} />
+                <Route path="/donations" element={<ProtectedRoute><DonationSchedules /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/admin/posts" element={<AdminRoute><AdminContentManagement /></AdminRoute>} />
                 <Route path="/admin/content" element={<AdminRoute><ContentModeration /></AdminRoute>} />

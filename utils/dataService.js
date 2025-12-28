@@ -2031,6 +2031,195 @@ class DataService {
     this.subscriptions.set('conversations', subscription)
     return subscription
   }
+
+  async createDonationSchedule(scheduleData) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const { data, error } = await supabase
+        .from('donation_schedules')
+        .insert({
+          user_id: user.id,
+          ...scheduleData
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Create donation schedule error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async getUserDonationSchedules(userId = null) {
+    try {
+      let query = supabase
+        .from('donation_schedules')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (userId) {
+        query = query.eq('user_id', userId)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Get donation schedules error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async getDonationSchedule(scheduleId) {
+    try {
+      const { data, error } = await supabase
+        .from('donation_schedules')
+        .select('*')
+        .eq('id', scheduleId)
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Get donation schedule error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async updateDonationSchedule(scheduleId, updates) {
+    try {
+      const { data, error } = await supabase
+        .from('donation_schedules')
+        .update(updates)
+        .eq('id', scheduleId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Update donation schedule error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async deleteDonationSchedule(scheduleId) {
+    try {
+      const { error } = await supabase
+        .from('donation_schedules')
+        .delete()
+        .eq('id', scheduleId)
+
+      if (error) throw error
+      return { success: true }
+    } catch (error) {
+      console.error('Delete donation schedule error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async pauseDonationSchedule(scheduleId) {
+    try {
+      return await this.updateDonationSchedule(scheduleId, { status: 'paused' })
+    } catch (error) {
+      console.error('Pause donation schedule error:', error)
+      throw error
+    }
+  }
+
+  async resumeDonationSchedule(scheduleId) {
+    try {
+      return await this.updateDonationSchedule(scheduleId, { status: 'active' })
+    } catch (error) {
+      console.error('Resume donation schedule error:', error)
+      throw error
+    }
+  }
+
+  async getDonationHistory(userId = null, scheduleId = null) {
+    try {
+      let query = supabase
+        .from('donation_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (userId) {
+        query = query.eq('user_id', userId)
+      }
+
+      if (scheduleId) {
+        query = query.eq('schedule_id', scheduleId)
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Get donation history error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async getUserDonationStats(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('donation_schedules')
+        .select('total_donated, donation_count')
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      const stats = {
+        totalDonated: data?.reduce((sum, schedule) => sum + (parseFloat(schedule.total_donated) || 0), 0) || 0,
+        totalDonations: data?.reduce((sum, schedule) => sum + (schedule.donation_count || 0), 0) || 0,
+        activeSchedules: data?.filter(s => s.status === 'active').length || 0
+      }
+
+      return stats
+    } catch (error) {
+      console.error('Get donation stats error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  calculateNextDonationDate(startDate, frequency, currentDate = new Date()) {
+    const date = new Date(startDate)
+    const now = new Date(currentDate)
+
+    while (date <= now) {
+      switch (frequency) {
+        case 'daily':
+          date.setDate(date.getDate() + 1)
+          break
+        case 'weekly':
+          date.setDate(date.getDate() + 7)
+          break
+        case 'monthly':
+          date.setMonth(date.getMonth() + 1)
+          break
+        case 'yearly':
+          date.setFullYear(date.getFullYear() + 1)
+          break
+        default:
+          throw new Error(`Invalid frequency: ${frequency}`)
+      }
+    }
+
+    return date.toISOString().split('T')[0]
+  }
 }
 
 // Create singleton instance
