@@ -25,6 +25,9 @@ function AdminMessages() {
     React.useEffect(() => {
         loadConversations();
 
+        // Unsubscribe from any previous subscription first
+        dataService.unsubscribe('conversations');
+
         // Subscribe to conversation changes
         const subscription = dataService.subscribeToConversations((payload) => {
             if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
@@ -40,6 +43,9 @@ function AdminMessages() {
     React.useEffect(() => {
         if (selectedConversation?.id) {
             loadMessages();
+
+            // Unsubscribe from any previous subscription first
+            dataService.unsubscribe(`messages_${selectedConversation.id}`);
 
             // Subscribe to messages for this conversation
             const subscription = dataService.subscribeToMessages(selectedConversation.id, (payload) => {

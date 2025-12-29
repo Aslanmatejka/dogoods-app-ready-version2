@@ -1388,14 +1388,22 @@ class DataService {
   unsubscribe(channelName) {
     const subscription = this.subscriptions.get(channelName)
     if (subscription) {
-      subscription.unsubscribe()
-      this.subscriptions.delete(channelName)
+      try {
+        supabase.removeChannel(subscription)
+        this.subscriptions.delete(channelName)
+      } catch (error) {
+        console.error(`Error unsubscribing from ${channelName}:`, error)
+      }
     }
   }
 
   unsubscribeAll() {
-    this.subscriptions.forEach(subscription => {
-      subscription.unsubscribe()
+    this.subscriptions.forEach((subscription, channelName) => {
+      try {
+        supabase.removeChannel(subscription)
+      } catch (error) {
+        console.error(`Error unsubscribing from ${channelName}:`, error)
+      }
     })
     this.subscriptions.clear()
   }

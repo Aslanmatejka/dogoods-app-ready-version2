@@ -31,6 +31,9 @@ function UserChatWidget() {
         if (conversation?.id) {
             loadMessages();
 
+            // Unsubscribe from any previous subscription first
+            dataService.unsubscribe(`messages_${conversation.id}`);
+
             // Subscribe to real-time updates
             const subscription = dataService.subscribeToMessages(conversation.id, (payload) => {
                 if (payload.eventType === 'INSERT') {
