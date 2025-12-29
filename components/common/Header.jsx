@@ -113,24 +113,38 @@ function Header({
                                         role="menu"
                                     >
                                         <div className="py-1">
-                                            <a 
-                                                href="/profile" 
+                                            <a
+                                                href="/dashboard"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem"
+                                            >
+                                                Dashboard
+                                            </a>
+                                            <a
+                                                href="/profile"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 role="menuitem"
                                             >
                                                 Your Profile
                                             </a>
+                                            <a
+                                                href="/listings"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem"
+                                            >
+                                                My Listings
+                                            </a>
                                             {authUser?.role === 'admin' && (
-                                                <a 
-                                                    href="/admin" 
+                                                <a
+                                                    href="/admin"
                                                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                     role="menuitem"
                                                 >
                                                     Admin Panel
                                                 </a>
                                             )}
-                                            <a 
-                                                href="/settings" 
+                                            <a
+                                                href="/settings"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 role="menuitem"
                                             >
@@ -199,6 +213,90 @@ function Header({
                                             </a>
                                         </li>
                                     ))}
+                                    {isAuthenticated && (
+                                        <>
+                                            <li className="border-t border-gray-200 mt-2 pt-2">
+                                                <a
+                                                    href="/dashboard"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    Dashboard
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="/profile"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    Your Profile
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="/listings"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    My Listings
+                                                </a>
+                                            </li>
+                                            {authUser?.role === 'admin' && (
+                                                <li>
+                                                    <a
+                                                        href="/admin"
+                                                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                        onClick={() => setIsMenuOpen(false)}
+                                                    >
+                                                        Admin Panel
+                                                    </a>
+                                                </li>
+                                            )}
+                                            <li>
+                                                <a
+                                                    href="/settings"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    Settings
+                                                </a>
+                                            </li>
+                                            <li className="border-t border-gray-200 mt-2 pt-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setIsMenuOpen(false);
+                                                        handleLogout();
+                                                    }}
+                                                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                                >
+                                                    Sign out
+                                                </button>
+                                            </li>
+                                        </>
+                                    )}
+                                    {!isAuthenticated && (
+                                        <>
+                                            <li className="border-t border-gray-200 mt-2 pt-2">
+                                                <a
+                                                    href="/login"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    Sign In
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a
+                                                    href="/signup"
+                                                    className="block px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg text-center"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    Sign Up
+                                                </a>
+                                            </li>
+                                        </>
+                                    )}
                                 </ul>
                             </nav>
                         </div>
