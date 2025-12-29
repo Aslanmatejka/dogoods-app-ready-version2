@@ -3,7 +3,7 @@
  * Handles before/after pickup verification with photo uploads and status tracking
  */
 
-import { supabase } from './supabaseClient';
+import supabase from './supabaseClient';
 import { reportError } from './helpers';
 
 export const VERIFICATION_TYPES = {

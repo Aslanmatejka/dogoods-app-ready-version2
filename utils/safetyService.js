@@ -3,7 +3,7 @@
  * Manages user safety, trust scores, reviews, and safety reports
  */
 
-import { supabase } from './supabaseClient';
+import supabase from './supabaseClient';
 import { reportError } from './helpers';
 
 export const VERIFICATION_LEVELS = {
