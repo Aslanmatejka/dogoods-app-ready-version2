@@ -1906,7 +1906,8 @@ class DataService {
         console.log('dataService: User profile:', userProfile)
       }
 
-      const { data, error } = await supabase
+      // Fetch conversations without all messages - huge performance improvement
+      const { data: conversations, error } = await supabase
         .from('conversations')
         .select(`
           *,
@@ -1915,18 +1916,9 @@ class DataService {
             name,
             email,
             avatar_url
-          ),
-          messages (
-            id,
-            message,
-            is_from_admin,
-            read_at,
-            created_at
           )
         `)
         .order('last_message_at', { ascending: false })
-
-      console.log('dataService: Query result:', { data, error })
 
       if (error) {
         console.error('dataService: Supabase error:', {
@@ -1938,8 +1930,37 @@ class DataService {
         throw error
       }
 
-      console.log('dataService: Returning conversations:', data?.length || 0)
-      return data || []
+      // For each conversation, get just the unread count and last message
+      const conversationsWithMetadata = await Promise.all(
+        conversations.map(async (conv) => {
+          // Get unread message count (only from users, not admin messages)
+          const { count: unreadCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('conversation_id', conv.id)
+            .eq('is_from_admin', false)
+            .is('read_at', null)
+
+          // Get last message preview
+          const { data: lastMessage } = await supabase
+            .from('messages')
+            .select('message, is_from_admin, created_at')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+          return {
+            ...conv,
+            unread_count: unreadCount || 0,
+            last_message: lastMessage,
+            messages: [] // Don't load all messages here
+          }
+        })
+      )
+
+      console.log('dataService: Returning conversations:', conversationsWithMetadata?.length || 0)
+      return conversationsWithMetadata || []
     } catch (error) {
       console.error('dataService: Get admin conversations error:', error)
       reportError(error)

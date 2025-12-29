@@ -37,7 +37,25 @@ function UserChatWidget() {
             // Subscribe to real-time updates
             const subscription = dataService.subscribeToMessages(conversation.id, (payload) => {
                 if (payload.eventType === 'INSERT') {
-                    setMessages(prev => [...prev, payload.new]);
+                    setMessages(prev => {
+                        // Check if we already have this message (optimistic update)
+                        const exists = prev.some(m => m.id === payload.new.id);
+                        if (exists) {
+                            return prev; // Already have it
+                        }
+
+                        // Check if we have a temp message for this (replace it)
+                        const hasTempMessage = prev.some(m => String(m.id).startsWith('temp-'));
+                        if (hasTempMessage && !payload.new.is_from_admin) {
+                            // Replace temp message with real one
+                            return prev.map(m =>
+                                String(m.id).startsWith('temp-') ? payload.new : m
+                            );
+                        }
+
+                        // Add new message
+                        return [...prev, payload.new];
+                    });
                     scrollToBottom();
                 }
             });
@@ -85,12 +103,28 @@ function UserChatWidget() {
             return;
         }
 
+        const messageText = newMessage.trim();
+
         try {
             setSending(true);
-            console.log('Sending message to conversation:', conversation.id);
-            const result = await dataService.sendMessage(conversation.id, newMessage.trim(), false);
-            console.log('Message sent successfully:', result);
+
+            // Optimistic UI update - add message immediately
+            const tempMessage = {
+                id: 'temp-' + Date.now(),
+                conversation_id: conversation.id,
+                message: messageText,
+                is_from_admin: false,
+                created_at: new Date().toISOString(),
+                read_at: null
+            };
+            setMessages(prev => [...prev, tempMessage]);
             setNewMessage('');
+
+            console.log('Sending message to conversation:', conversation.id);
+            await dataService.sendMessage(conversation.id, messageText, false);
+            console.log('Message sent successfully');
+
+            // Subscription will update with real message, no need to reload
         } catch (error) {
             console.error('Failed to send message:', error);
             console.error('Error details:', {
@@ -98,6 +132,11 @@ function UserChatWidget() {
                 code: error.code,
                 details: error.details
             });
+
+            // Remove optimistic message on error
+            setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
+            setNewMessage(messageText); // Restore message text
+
             alert(`Failed to send message: ${error.message || 'Unknown error'}. Please try again.`);
         } finally {
             setSending(false);

@@ -203,17 +203,15 @@ function AdminMessages() {
     }, [conversations, filter]);
 
     const getUnreadCount = (conversation) => {
-        if (!conversation.messages) return 0;
-        return conversation.messages.filter(m => !m.is_from_admin && !m.read_at).length;
+        return conversation.unread_count || 0;
     };
 
     const getLastMessage = (conversation) => {
-        if (!conversation.messages || conversation.messages.length === 0) {
+        if (!conversation.last_message) {
             return 'No messages yet';
         }
-        const lastMsg = conversation.messages[conversation.messages.length - 1];
-        const preview = lastMsg.message.substring(0, 50);
-        return lastMsg.message.length > 50 ? `${preview}...` : preview;
+        const preview = conversation.last_message.message.substring(0, 50);
+        return conversation.last_message.message.length > 50 ? `${preview}...` : preview;
     };
 
     return (
