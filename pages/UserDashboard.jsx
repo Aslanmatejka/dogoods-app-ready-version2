@@ -5,7 +5,7 @@ import Avatar from "../components/common/Avatar";
 import Card from "../components/common/Card";
 import TrustBadge from "../components/user/TrustBadge";
 import { useAuth, useFoodListings, useNotifications } from "../utils/hooks/useSupabase";
-import { useImpact } from "../utils/hooks/useImpact";
+import supabase from "../utils/supabaseClient";
 
 // Helper function for date formatting
 const formatDate = (date) => {
@@ -23,30 +23,82 @@ function UserDashboard() {
     const navigate = useNavigate();
     const { user: authUser, isAuthenticated } = useAuth();
     const { listings: userListings, loading: listingsLoading, error: listingsError } = useFoodListings({ user_id: authUser?.id });
-
     const { notifications, loading: notificationsLoading, error: notificationsError } = useNotifications(authUser?.id);
-    const { impact } = useImpact();
 
-    const loading = listingsLoading || notificationsLoading;
+    const [userStats, setUserStats] = React.useState({
+        donations: 0,
+        foodSaved: 0,
+        peopleHelped: 0
+    });
+    const [statsLoading, setStatsLoading] = React.useState(true);
+
+    const loading = listingsLoading || notificationsLoading || statsLoading;
     const error = listingsError || notificationsError;
     const user = authUser;
 
-    // Calculate stats from Supabase data
-    const stats = React.useMemo(() => {
-        if (!userListings) return {
-            listings: 0,
-            donations: 0,
-            foodSaved: 0,
-            peopleHelped: 0
-        };
+    React.useEffect(() => {
+        if (authUser?.id) {
+            fetchUserStats();
+        }
+    }, [authUser?.id]);
 
+    const fetchUserStats = async () => {
+        try {
+            setStatsLoading(true);
+
+            const { data: donatedListings, error: donationsError } = await supabase
+                .from('food_listings')
+                .select('quantity, quantity_unit')
+                .eq('user_id', authUser.id)
+                .eq('status', 'completed');
+
+            if (donationsError) throw donationsError;
+
+            const { data: claims, error: claimsError } = await supabase
+                .from('food_claims')
+                .select('members_count, food_id')
+                .eq('claimer_id', authUser.id)
+                .eq('status', 'approved');
+
+            if (claimsError) throw claimsError;
+
+            let totalFoodSaved = 0;
+            if (donatedListings && donatedListings.length > 0) {
+                totalFoodSaved = donatedListings.reduce((sum, item) => {
+                    const qty = parseFloat(item.quantity) || 0;
+                    return sum + qty;
+                }, 0);
+            }
+
+            let totalPeopleHelped = 0;
+            if (claims && claims.length > 0) {
+                totalPeopleHelped = claims.reduce((sum, claim) => {
+                    return sum + (parseInt(claim.members_count) || 0);
+                }, 0);
+            }
+
+            const completedDonations = (donatedListings?.length || 0) + (claims?.length || 0);
+
+            setUserStats({
+                donations: completedDonations,
+                foodSaved: Math.round(totalFoodSaved),
+                peopleHelped: totalPeopleHelped
+            });
+        } catch (err) {
+            console.error('Error fetching user stats:', err);
+        } finally {
+            setStatsLoading(false);
+        }
+    };
+
+    const stats = React.useMemo(() => {
         return {
-            listings: userListings.length,
-            donations: userListings.length,
-            foodSaved: Math.round(impact.foodSavedKg),
-            peopleHelped: impact.peopleHelped
+            listings: userListings?.filter(l => l.status === 'available').length || 0,
+            donations: userStats.donations,
+            foodSaved: userStats.foodSaved,
+            peopleHelped: userStats.peopleHelped
         };
-    }, [userListings, impact]);
+    }, [userListings, userStats]);
     const recentActivity = React.useMemo(() => {
         if (!userListings) return [];
         
@@ -176,14 +228,15 @@ function UserDashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" role="region" aria-label="Activity Statistics">
                 {[
-                    { label: 'Active Listings', value: stats.listings, icon: 'fa-list' },
-                    { label: 'Food Saved', value: `${stats.foodSaved}kg`, icon: 'fa-apple-whole' },
-                    { label: 'People Helped', value: stats.peopleHelped, icon: 'fa-users' }
+                    { label: 'Active Listings', value: stats.listings, icon: 'fa-list', color: 'bg-blue-100', iconColor: 'text-blue-600' },
+                    { label: 'Completed Donations', value: stats.donations, icon: 'fa-check-circle', color: 'bg-green-100', iconColor: 'text-green-600' },
+                    { label: 'Food Donated', value: `${stats.foodSaved} lbs`, icon: 'fa-apple-whole', color: 'bg-orange-100', iconColor: 'text-orange-600' },
+                    { label: 'People Helped', value: stats.peopleHelped, icon: 'fa-users', color: 'bg-purple-100', iconColor: 'text-purple-600' }
                 ].map((stat, index) => (
                     <div key={index} className="bg-white rounded-lg shadow-sm p-6" role="article">
                         <div className="flex items-center">
-                            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                                <i className={`fas ${stat.icon} text-green-600 text-xl`} aria-hidden="true"></i>
+                            <div className={`w-12 h-12 rounded-full ${stat.color} flex items-center justify-center`}>
+                                <i className={`fas ${stat.icon} ${stat.iconColor} text-xl`} aria-hidden="true"></i>
                             </div>
                             <div className="ml-4">
                                 <p className="text-sm text-gray-500">{stat.label}</p>
