@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import FoodDietaryTags from './FoodDietaryTags';
+import FoodSafetyChecklist from './FoodSafetyChecklist';
 
 function FoodForm({
     initialData = null,
@@ -29,6 +30,12 @@ function FoodForm({
         dietary_tags: [],
         allergens: [],
         ingredients: '',
+        // Food safety fields
+        storage_requirements: 'room_temperature',
+        packaging_type: 'sealed_original',
+        current_condition: 'good',
+        is_perishable: false,
+        allergen_info: [],
         ...initialData
     });
     // Show approval info
@@ -478,6 +485,26 @@ function FoodForm({
                     selectedAllergens={formData.allergens}
                     ingredients={formData.ingredients}
                     onChange={handleDietaryChange}
+                />
+            </div>
+
+            {/* Food Safety Checklist Section */}
+            <div className="mt-8 p-6 bg-yellow-50 rounded-xl border border-yellow-200">
+                <h3 className="text-lg font-bold text-yellow-900 mb-4">
+                    🛡️ Food Safety Information
+                </h3>
+                <p className="text-sm text-yellow-700 mb-4">
+                    Ensure food safety by providing storage, temperature, and packaging details
+                </p>
+                <FoodSafetyChecklist
+                    onUpdate={(safetyData) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            ...safetyData
+                        }));
+                    }}
+                    initialData={initialData}
+                    mode={initialData ? 'edit' : 'create'}
                 />
             </div>
 

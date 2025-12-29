@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
 import Avatar from "../components/common/Avatar";
 import Card from "../components/common/Card";
+import TrustBadge from "../components/user/TrustBadge";
 import { useAuth, useFoodListings, useNotifications } from "../utils/hooks/useSupabase";
 import { useImpact } from "../utils/hooks/useImpact";
 
@@ -159,9 +160,12 @@ function UserDashboard() {
                         alt={`${user?.name}'s avatar`}
                     />
                     <div className="ml-6">
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Welcome back, {user?.name}!
-                        </h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-bold text-gray-900">
+                                Welcome back, {user?.name}!
+                            </h1>
+                            <TrustBadge userId={user?.id} size="sm" showLabel={false} />
+                        </div>
                         <p className="text-gray-600">
                             Here's what's happening with your food sharing activities
                         </p>

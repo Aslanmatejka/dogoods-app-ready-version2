@@ -4,6 +4,7 @@ import Avatar from "../components/common/Avatar";
 import Button from "../components/common/Button";
 import ProfileStats from "../components/profile/ProfileStats";
 import ListingsTab from "../components/profile/ListingsTab";
+import TrustBadge from "../components/user/TrustBadge";
 import { useAuthContext } from "../utils/AuthContext";
 import { useFoodListings, useUserProfile } from "../utils/hooks/useSupabase";
 import ErrorBoundary from "../components/common/ErrorBoundary";
@@ -216,7 +217,10 @@ function ProfilePageContent() {
                                 />
                             </div>
                             <div className="ml-4">
-                                <h1 className="text-2xl font-bold text-gray-900">{profile.name}</h1>
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-2xl font-bold text-gray-900">{profile.name}</h1>
+                                    <TrustBadge userId={profile.id} size="md" showLabel={true} />
+                                </div>
                                 <p className="text-gray-600">{profile.email}</p>
                             </div>
                         </div>
