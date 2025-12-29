@@ -7,6 +7,8 @@ import Button from "../common/Button";
 import { useAI } from "../../utils/hooks/useSupabase";
 import { UrgencyIndicator } from "./UrgencyBadge";
 import VerificationStatus from "./VerificationStatus";
+import { SafetyBadge } from "./FoodSafetyChecklist";
+import FoodDietaryTags from "./FoodDietaryTags";
 
 const formatDistance = (dist) => {
     if (!dist) return '';
@@ -127,6 +129,9 @@ function FoodCard({
                         {food.verification_status && (
                             <VerificationStatus status={food.verification_status} compact={true} />
                         )}
+                        {food.passed_safety_check !== undefined && food.passed_safety_check !== null && (
+                            <SafetyBadge score={food.safety_score || 0} size="sm" />
+                        )}
                         <span 
                             className={`badge badge-${expirationStatus.status}`}
                             role="status"
@@ -138,6 +143,12 @@ function FoodCard({
                             {expiry_date ? formatDate(expiry_date) : 'No expiry date'}
                         </span>
                     </div>
+                    {/* Dietary Tags */}
+                    {(food.dietary_tags?.length > 0 || food.allergen_info?.length > 0) && (
+                        <div className="mt-2">
+                            <FoodDietaryTags food={food} compact={true} />
+                        </div>
+                    )}
                 </div>
             }
             footer={

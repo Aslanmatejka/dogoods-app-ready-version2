@@ -37,6 +37,9 @@ import AdminReports from './pages/admin/AdminReports.jsx';
 import ImpactDataEntry from './pages/admin/ImpactDataEntry.jsx';
 import AdminMessages from './pages/admin/AdminMessages.jsx';
 import UserFeedback from './pages/admin/UserFeedback.jsx';
+import SafetyManagement from './pages/admin/SafetyManagement.jsx';
+import VerificationManagement from './pages/admin/VerificationManagement.jsx';
+import FoodSafetyMonitoring from './pages/admin/FoodSafetyMonitoring.jsx';
 import { AuthProvider, useAuthContext } from './utils/AuthContext';
 import { GoodsProvider } from './utils/stores/goodsStore.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
@@ -94,6 +97,9 @@ function AppContent() {
                 <Route path="/admin/impact" element={<AdminRoute><ImpactDataEntry /></AdminRoute>} />
                 <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
                 <Route path="/admin/feedback" element={<AdminRoute><UserFeedback /></AdminRoute>} />
+                <Route path="/admin/safety" element={<AdminRoute><SafetyManagement /></AdminRoute>} />
+                <Route path="/admin/verifications" element={<AdminRoute><VerificationManagement /></AdminRoute>} />
+                <Route path="/admin/food-safety" element={<AdminRoute><FoodSafetyMonitoring /></AdminRoute>} />
                 <Route path="*" element={<div>Page Not Found</div>} />
             </Routes>
         </MainLayout>

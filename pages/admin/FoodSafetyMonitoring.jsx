@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import FoodSafetyService from '../../utils/foodSafetyService';
-import { SafetyBadge } from '../food/FoodSafetyChecklist';
+import { SafetyBadge } from '../../components/food/FoodSafetyChecklist';
 import { toast } from 'react-toastify';
 
 /**
