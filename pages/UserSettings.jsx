@@ -25,7 +25,9 @@ function UserSettings() {
         },
         dietary_restrictions: [],
         allergies: [],
-        dietary_preferences: []
+        dietary_preferences: [],
+        pickup_reminder_enabled: true,
+        default_reminder_hours: 24
     });
     const [successMessage, setSuccessMessage] = React.useState('');
 
@@ -52,7 +54,9 @@ function UserSettings() {
                     },
                     dietary_restrictions: profile?.dietary_restrictions || [],
                     allergies: profile?.allergies || [],
-                    dietary_preferences: profile?.dietary_preferences || []
+                    dietary_preferences: profile?.dietary_preferences || [],
+                    pickup_reminder_enabled: profile?.pickup_reminder_enabled !== false,
+                    default_reminder_hours: profile?.default_reminder_hours || 24
                 });
             }
         };
@@ -101,13 +105,22 @@ function UserSettings() {
         try {
             // Update user profile in Supabase
             if (section === 'Dietary') {
-                // Update dietary preferences in database
                 const { error: updateError } = await supabase
                     .from('users')
                     .update({
                         dietary_restrictions: formData.dietary_restrictions,
                         allergies: formData.allergies,
                         dietary_preferences: formData.dietary_preferences
+                    })
+                    .eq('id', authUser.id);
+
+                if (updateError) throw updateError;
+            } else if (section === 'Reminders') {
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({
+                        pickup_reminder_enabled: formData.pickup_reminder_enabled,
+                        default_reminder_hours: formData.default_reminder_hours
                     })
                     .eq('id', authUser.id);
 
@@ -254,6 +267,62 @@ function UserSettings() {
                                 aria-label="Save notification settings"
                             >
                                 {loading ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Pickup Reminders */}
+                <Card>
+                    <div className="p-6">
+                        <h2 className="text-xl font-semibold mb-6">Pickup Reminders</h2>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Get notified before your scheduled food pickups so you never miss a collection.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="pickupReminders"
+                                    checked={formData.pickup_reminder_enabled}
+                                    onChange={() => handleInputChange('pickup_reminder_enabled', !formData.pickup_reminder_enabled)}
+                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    aria-label="Enable pickup reminders"
+                                />
+                                <label htmlFor="pickupReminders" className="ml-2 block text-sm text-gray-900">
+                                    Enable pickup reminders
+                                </label>
+                            </div>
+
+                            {formData.pickup_reminder_enabled && (
+                                <div className="ml-6 mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Remind me before pickup
+                                    </label>
+                                    <select
+                                        value={formData.default_reminder_hours}
+                                        onChange={(e) => handleInputChange('default_reminder_hours', parseInt(e.target.value))}
+                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
+                                        aria-label="Select reminder time"
+                                    >
+                                        <option value={1}>1 hour before</option>
+                                        <option value={2}>2 hours before</option>
+                                        <option value={4}>4 hours before</option>
+                                        <option value={12}>12 hours before</option>
+                                        <option value={24}>24 hours before (1 day)</option>
+                                        <option value={48}>48 hours before (2 days)</option>
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                        <div className="mt-6 flex justify-end">
+                            <Button
+                                variant="primary"
+                                onClick={() => handleSaveSettings('Reminders')}
+                                disabled={loading}
+                                aria-label="Save reminder preferences"
+                            >
+                                {loading ? 'Saving...' : 'Save Reminder Preferences'}
                             </Button>
                         </div>
                     </div>

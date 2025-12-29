@@ -27,9 +27,35 @@ export default function ClaimFoodForm() {
         students: "",
         school_staff: "",
         food_title: food?.title || food?.name || "",
-        food_description: food?.description || ""
+        food_description: food?.description || "",
+        pickup_date: "",
+        reminder_hours_before: 24
     });
     const [submitted, setSubmitted] = React.useState(false);
+    const [userReminderPreference, setUserReminderPreference] = React.useState(24);
+
+    React.useEffect(() => {
+        const loadUserPreferences = async () => {
+            const userResult = await supabase.auth.getUser();
+            const user = userResult.data?.user;
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('default_reminder_hours')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.default_reminder_hours) {
+                    setUserReminderPreference(profile.default_reminder_hours);
+                    setFormData(prev => ({
+                        ...prev,
+                        reminder_hours_before: profile.default_reminder_hours
+                    }));
+                }
+            }
+        };
+        loadUserPreferences();
+    }, []);
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
@@ -56,7 +82,6 @@ export default function ClaimFoodForm() {
             // Compose claim data, exclude food_description, food_title, and pickup_dropoff
             const { food_description, food_title, pickup_dropoff, ...restFormData } = formData;
 
-            // Convert empty strings to 0 for numeric fields
             const claimData = {
                 ...restFormData,
                 food_id: food?.id || food?.objectId || null,
@@ -65,7 +90,9 @@ export default function ClaimFoodForm() {
                 people: parseInt(formData.people) || 0,
                 students: parseInt(formData.students) || 0,
                 school_staff: parseInt(formData.school_staff) || 0,
-                members_count: parseInt(formData.members_count) || 0
+                members_count: parseInt(formData.members_count) || 0,
+                pickup_date: formData.pickup_date || null,
+                reminder_hours_before: parseInt(formData.reminder_hours_before) || 24
             };
             await dataService.createFoodClaim(claimData);
             setSubmitted(true);
@@ -179,9 +206,52 @@ export default function ClaimFoodForm() {
                 ) : (
                     <div className="mt-8 p-6 bg-green-50 rounded-xl border border-green-200">
                         <h3 className="text-lg font-bold text-green-700 mb-4">Pickup Details</h3>
-                        <Input label="Pickup Time" name="pickup_time" type="time" value={formData.pickup_time || ''} onChange={handleFormChange} required helperText="Select pickup time." />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                label="Pickup Date"
+                                name="pickup_date"
+                                type="date"
+                                value={formData.pickup_date || ''}
+                                onChange={handleFormChange}
+                                required
+                                min={new Date().toISOString().split('T')[0]}
+                                helperText="Select the date for pickup."
+                            />
+                            <Input
+                                label="Pickup Time"
+                                name="pickup_time"
+                                type="time"
+                                value={formData.pickup_time || ''}
+                                onChange={handleFormChange}
+                                required
+                                helperText="Select pickup time."
+                            />
+                        </div>
                         <Input label="Pickup Place" name="pickup_place" value={formData.pickup_place || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter pickup location." />
                         <Input label="Pickup Contact" name="pickup_contact" value={formData.pickup_contact || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter contact for pickup." />
+
+                        <div className="mt-4 pt-4 border-t border-green-200">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <i className="fas fa-bell mr-2 text-green-600"></i>
+                                Remind me before pickup
+                            </label>
+                            <select
+                                name="reminder_hours_before"
+                                value={formData.reminder_hours_before}
+                                onChange={handleFormChange}
+                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
+                            >
+                                <option value={1}>1 hour before</option>
+                                <option value={2}>2 hours before</option>
+                                <option value={4}>4 hours before</option>
+                                <option value={12}>12 hours before</option>
+                                <option value={24}>24 hours before (1 day)</option>
+                                <option value={48}>48 hours before (2 days)</option>
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                You'll receive a notification reminder before your scheduled pickup time.
+                            </p>
+                        </div>
                     </div>
                 )}
                 <div className="flex justify-end mt-8">
