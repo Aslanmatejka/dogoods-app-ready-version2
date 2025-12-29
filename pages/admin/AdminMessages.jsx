@@ -108,11 +108,25 @@ function AdminMessages() {
 
         try {
             setSending(true);
-            await dataService.sendMessage(selectedConversation.id, newMessage.trim(), true);
+            console.log('Admin sending message:', {
+                conversationId: selectedConversation.id,
+                message: newMessage.trim(),
+                isFromAdmin: true
+            });
+            const result = await dataService.sendMessage(selectedConversation.id, newMessage.trim(), true);
+            console.log('Message sent successfully:', result);
             setNewMessage('');
+
+            await loadMessages();
         } catch (error) {
             console.error('Failed to send message:', error);
-            alert('Failed to send message. Please try again.');
+            console.error('Error details:', {
+                message: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint
+            });
+            alert(`Failed to send message: ${error.message || 'Unknown error'}. Please try again.`);
         } finally {
             setSending(false);
         }

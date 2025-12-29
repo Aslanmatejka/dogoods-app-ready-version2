@@ -75,12 +75,12 @@ function UserChatWidget() {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         console.log('Send message clicked:', { newMessage, conversationId: conversation?.id, sending });
-        
+
         if (!newMessage.trim() || !conversation?.id || sending) {
-            console.log('Send blocked:', { 
-                hasMessage: !!newMessage.trim(), 
-                hasConversation: !!conversation?.id, 
-                isSending: sending 
+            console.log('Send blocked:', {
+                hasMessage: !!newMessage.trim(),
+                hasConversation: !!conversation?.id,
+                isSending: sending
             });
             return;
         }
@@ -88,12 +88,17 @@ function UserChatWidget() {
         try {
             setSending(true);
             console.log('Sending message to conversation:', conversation.id);
-            await dataService.sendMessage(conversation.id, newMessage.trim(), false);
-            console.log('Message sent successfully');
+            const result = await dataService.sendMessage(conversation.id, newMessage.trim(), false);
+            console.log('Message sent successfully:', result);
             setNewMessage('');
         } catch (error) {
             console.error('Failed to send message:', error);
-            alert('Failed to send message. Please try again.');
+            console.error('Error details:', {
+                message: error.message,
+                code: error.code,
+                details: error.details
+            });
+            alert(`Failed to send message: ${error.message || 'Unknown error'}. Please try again.`);
         } finally {
             setSending(false);
         }
