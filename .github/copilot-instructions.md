@@ -1,117 +1,150 @@
 # DoGoods App - AI Coding Agent Instructions
 
 ## Project Overview
-A React-based community food sharing platform with Supabase backend, AI-powered matching, and admin management features. Built with Vite, Tailwind CSS, and modern React patterns.
+React-based community food sharing platform with Supabase backend, AI-powered matching (DeepSeek), and comprehensive admin management. Built with Vite, Tailwind CSS, React Router v6, and modern React patterns (Context API + useReducer).
 
 ## Core Architecture Patterns
 
-### Authentication & Authorization
-- **Context-based auth**: `utils/AuthContext.jsx` provides `useAuthContext()` hook
-- **Service layer**: `utils/authService.js` handles Supabase auth with localStorage persistence
-- **Admin routes**: Use `AdminRoute` wrapper component, checks `isAdmin` flag from user profile
-- **Protected routes**: Use inline `ProtectedRoute` wrapper in `app.jsx`
+### Authentication & Authorization Flow
+- **Context provider**: `AuthProvider` from `utils/AuthContext.jsx` wraps app in `app.jsx`
+- **Hook access**: `useAuthContext()` returns `{ user, isAuthenticated, isAdmin, loading, signIn, signUp, signOut }`
+- **Service layer**: `utils/authService.js` manages Supabase auth + localStorage persistence + profile sync
+- **Auto-profile creation**: On signup, trigger creates user record in `users` table; service manually creates if trigger fails
+- **Admin flag**: `is_admin` boolean column in `users` table (not JWT claim in client)
+- **Route protection**: 
+  - `AdminRoute` component checks `isAdmin` from context, redirects to `/login?redirect=/admin` or `/` 
+  - Inline `ProtectedRoute` wrapper in `app.jsx` for general auth checks
 
-### State Management
-- **Context + useReducer**: See `utils/stores/goodsStore.jsx` for goods state management pattern
-- **Custom hooks**: Auth, goods, and other domain-specific hooks in `utils/hooks/`
-- **Service layer**: Business logic separated into `utils/services/` and standalone service files
+### State Management Pattern
+- **Context + useReducer**: Example in `utils/stores/goodsStore.jsx` (claimed/requested goods)
+  - Actions: `SET_LOADING`, `SET_ERROR`, `ADD_CLAIMED_GOOD`, etc.
+  - Export provider component and hook: `GoodsProvider`, `useGoods()`
+- **Custom hooks**: Stored in `utils/hooks/` for domain logic (auth, AI, Supabase operations)
+- **Service layer**: Standalone services (`authService.js`, `dataService.js`, `utils/services/goodsService.js`)
 
-### AI Integration
-- **Matching Engine**: `utils/MatchingEngine.js` - AI-powered food matching with DeepSeek integration
-- **Circuit breaker**: Built-in failure handling for AI API calls
-- **Rate limiting**: Configurable limits per client in `utils/aiAgent.js`
-- **Assistant**: Floating AI chat widget via `components/assistant/AIAssistant`
+### AI Integration Architecture
+- **Primary API**: DeepSeek (configured in `utils/config.js` with `DEEPSEEK_API_KEY`)
+- **Matching engine**: `utils/MatchingEngine.js` class with circuit breaker pattern for AI failures
+- **Chat interface**: `components/assistant/AIAssistant.jsx` - floating widget via `AssistantButton` in `MainLayout`
+- **Streaming support**: `streamDeepseekChat()` in `utils/deepseekChat.js` for real-time responses
+- **Graceful degradation**: API key validation on init; features disable when key missing/invalid
 
-## Development Workflows
+## Critical Development Workflows
 
-### Environment Setup
+### Environment Setup & First Run
 ```bash
 cp config/env.example .env.local
-npm run dev                    # Start dev server on :3001
-npm run supabase:start        # Local Supabase (optional)
-npm run dev:local             # Both together
+# Edit .env.local: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+npm install
+npm run dev                    # Starts on port 3001, auto-opens browser
 ```
 
-### Database Operations
+### Supabase Local Development (Optional)
 ```bash
-npm run supabase:reset        # Reset local DB with migrations
-npm run supabase:studio       # Open Supabase Studio
+npm run supabase:start         # Starts local Supabase (requires Docker)
+npm run supabase:studio        # Opens Studio at http://localhost:54323
+npm run supabase:reset         # Resets DB and runs all migrations in order
+npm run dev:local              # Starts both Supabase and Vite dev server
 ```
+
+### Database Migrations
+- Migration files in `supabase/migrations/` (numbered: `001_initial_schema.sql`, `002_create_profile_trigger.sql`, etc.)
+- **Run order matters**: Migrations execute sequentially by filename
+- **RLS policies**: Defined in migrations (e.g., `fix_permissions_safe.sql`, `013_community_posts_likes_system.sql`)
+- **Setting admin**: Use `supabase/migrations/set_admin.sql` to promote user via SQL
 
 ### Testing & Build
 ```bash
-npm test                      # Jest with jsdom
-npm run build                 # Vite build
-./deploy.sh                   # Full CI pipeline
+npm test                       # Jest + React Testing Library (jsdom env)
+npm run build                  # Vite build → dist/
+./deploy.sh                    # Runs tests, builds, optionally deploys to Vercel/Netlify
 ```
 
-## File Organization Conventions
+## File Organization & Conventions
 
 ### Component Structure
-- `pages/` - Route components, direct mapping to React Router routes
-- `components/[domain]/` - Feature-specific components (admin, food, user, etc.)
-- `components/layout/` - Layout wrappers (`MainLayout` with AI assistant integration)
-- `components/common/` - Shared UI components
+- **Pages** (`pages/`): Route components matching React Router paths in `app.jsx`
+  - Admin pages: `pages/admin/AdminDashboard.jsx`, `ContentModeration.jsx`, etc.
+- **Domain components** (`components/[domain]/`): `admin/`, `food/`, `user/`, `assistant/`, `profile/`
+- **Layout** (`components/layout/`): `MainLayout.jsx` wraps pages, includes AI assistant + chat widget
+- **Common** (`components/common/`): Reusable UI (`Header`, `Footer`, `ErrorBoundary`, `UserChatWidget`)
 
 ### Utility Organization
-- `utils/[serviceName].js` - Single-responsibility services (authService, dataService)
-- `utils/stores/` - Context-based state management
-- `utils/hooks/` - Custom React hooks
-- `utils/services/` - Domain business logic
+- **Services**: `utils/authService.js`, `dataService.js`, `utils/services/goodsService.js`
+- **Stores**: `utils/stores/goodsStore.jsx` (Context providers with useReducer)
+- **Hooks**: `utils/hooks/` (custom hooks for features)
+- **Helpers**: `utils/helpers.js` exports `reportError()`, `formatDate()`, `timeAgo()`, `calculateDistance()`, etc.
 
-### Configuration
-- `config/env.*` - Environment-specific configs
-- `utils/config.js` - Centralized config with environment handling
-- `public/config.*.js` - Client-side config injection
+### Configuration Hierarchy
+1. `config/env.example` → Template for environment vars
+2. `.env.local` → Local dev secrets (gitignored)
+3. `utils/config.js` → Runtime config, reads from `window.__ENV__` or `import.meta.env`
+4. `public/config.*.js` → Client-side config injection for deployments (loaded by `index.html`)
 
-## Key Integration Points
+## Integration Points & External Dependencies
 
-### Supabase Integration
-- Client: `utils/supabaseClient.js` with auto-refresh and realtime config
-- RLS policies: Migrations in `supabase/migrations/` handle permissions
-- Storage: User avatars and food images with bucket policies
+### Supabase Client Setup
+- **Client**: `utils/supabaseClient.js` creates singleton with `autoRefreshToken: true`, `persistSession: true`
+- **Environment vars**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (fallback to `process.env` for build scripts)
+- **RLS enforcement**: All tables use Row Level Security; policies in migrations grant access based on `auth.uid()`
+- **Storage buckets**: User avatars (`avatars`), food images (`food-images`) with public read policies
 
-### AI Services
-- **Primary**: DeepSeek API for matching and chat
-- **Fallback**: OpenAI client in `utils/openaiClient.js`
-- **Configuration**: API keys via environment, graceful degradation when missing
+### DeepSeek API Integration
+- **Config**: `utils/config.js` exports `API_CONFIG.DEEPSEEK` with key, endpoint, model, timeout, retries
+- **Validation**: On init, checks if `DEEPSEEK_API_KEY` starts with `sk-` and isn't placeholder
+- **Rate limiting**: Configured in `utils/aiAgent.js` (default: 50 req/min, premium: 100 req/min)
+- **Fallback**: `utils/openaiClient.js` exists but DeepSeek is primary
 
-### Admin System
-- Role-based: `is_admin` column in users table
-- Route protection: `AdminRoute` component
-- Comprehensive dashboard: `pages/admin/` with moderation, reports, and settings
+### User Notifications
+- **Library**: `react-toastify` (imported in select pages: `FindFoodPage.jsx`, `admin/AdminSettings.jsx`)
+- **Usage**: `import { toast } from 'react-toastify'; toast.success('...')` or `toast.error('...')`
+- **Pattern**: Use for user-facing success/error feedback (not console errors)
 
-## Common Patterns
+## Project-Specific Patterns & Conventions
 
-### Error Handling
+### Error Handling Standard
 ```javascript
 import { reportError } from './utils/helpers.js';
-// Use reportError() for consistent error logging
+
+try {
+  // risky operation
+} catch (error) {
+  reportError(error);  // Centralized error logging
+  console.error('Context-specific message:', error);
+}
 ```
 
-### Data Fetching
-- Service layer pattern: Import specific service, use async/await
-- Loading states: Context-based loading flags in stores
-- Error boundaries: `ErrorBoundary` component for React error catching
+### Data Fetching Pattern
+1. Import service: `import authService from './utils/authService.js'`
+2. Use async/await in component or hook
+3. Manage loading state via Context or local state
+4. Catch and report errors with `reportError()`
 
-### Styling
-- Tailwind CSS with custom component classes in `styles/components.css`
-- Consistent design: Green theme, glassmorphism effects via backdrop-blur
-- Responsive: Mobile-first approach
+### Styling Approach
+- **Tailwind utility classes**: Primary styling method
+- **Custom components**: `styles/components.css` for reusable patterns (glassmorphism: `bg-white/80 backdrop-blur-md`)
+- **Theme**: Green palette (`green-50`, `green-500`, `green-600`), gradients (`from-green-50 via-white to-green-100`)
+- **Responsive**: Mobile-first breakpoints (`md:`, `lg:`)
 
-## Development Notes
+### Admin Privilege Checks
+- **Database**: `users.is_admin` boolean column
+- **Component**: Render admin UI only when `const { isAdmin } = useAuthContext(); if (isAdmin) { ... }`
+- **Route**: Wrap in `<AdminRoute>...</AdminRoute>` to enforce navigation guard
 
-### Local vs Production
-- Environment detection via `import.meta.env.MODE`
-- Supabase: Can run local instance or connect to remote project
-- AI APIs: Graceful degradation when keys missing in development
+## Environment & Deployment Notes
 
-### Testing Strategy
-- Jest + React Testing Library setup in `jest.config.js`
-- Test files in `tests/` directory
-- Component-specific test patterns in `tests/setup.js`
+### Development vs Production
+- **Mode detection**: `import.meta.env.MODE` returns `'development'` or `'production'`
+- **Supabase**: Local instance via `supabase start` or remote project URL
+- **AI API keys**: Log warnings when missing; features gracefully disable
 
-### Deployment
-- Multi-stage Docker build with Nginx
-- Static hosting ready (Vercel, Netlify compatible)
-- Environment variables injected via `public/config.*.js` pattern
+### Testing Configuration
+- **Framework**: Jest 29 + React Testing Library + jsdom
+- **Config**: `jest.config.js` with `testEnvironment: 'jsdom'`, `setupFilesAfterEnv: ['<rootDir>/tests/setup.js']`
+- **Test location**: `tests/` directory (e.g., `AIAssistant.test.js`, `MatchingEngine.test.js`)
+
+### Deployment Targets
+- **Build output**: `npm run build` → `dist/` (Vite bundle)
+- **Docker**: Multi-stage `Dockerfile` with Nginx for production serving
+- **Static hosts**: Vercel/Netlify compatible via `netlify.toml` and history API fallback
+- **Env injection**: Production reads config from `public/config.production.js` loaded in `index.html`

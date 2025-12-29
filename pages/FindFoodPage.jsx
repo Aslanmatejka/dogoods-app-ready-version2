@@ -7,6 +7,7 @@ import FoodCard from "../components/food/FoodCard";
 import { toast } from "react-toastify";
 import { useFoodListings, useSearch } from "../utils/hooks/useSupabase";
 import { useGeoLocation } from "../utils/hooks/useLocation";
+import UrgencyService from "../utils/urgencyService";
 
 // Category mapping for URL parameters
 const CATEGORY_MAPPING = {
@@ -45,7 +46,8 @@ function FindFoodPage({ initialCategory }) {
     const [filters, setFilters] = useState({
         category: initialCategory || '',
         type: 'all',
-        radius: '10'
+        radius: '10',
+        sortBy: 'urgency' // New: default to urgency sorting
     });
     const [formData, setFormData] = useState({
         requester_name: '',
@@ -214,6 +216,16 @@ function FindFoodPage({ initialCategory }) {
             result.sort((a, b) => (a.distance || 0) - (b.distance || 0));
         }
 
+        // Apply sorting based on selected option
+        if (filters.sortBy === 'urgency') {
+            // Sort by urgency (most urgent first)
+            result = UrgencyService.sortByUrgency(result);
+        } else if (filters.sortBy === 'distance' && currentLocation) {
+            // Already sorted by distance above
+        } else if (filters.sortBy === 'newest') {
+            result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+
         // If we have search results with scores, sort by them
         if (isSearchActive && searchResults.length > 0) {
             // Check if search results have scores
@@ -293,6 +305,19 @@ function FindFoodPage({ initialCategory }) {
                             <option value="bakery">Bakery</option>
                             <option value="pantry">Pantry Items</option>
                             <option value="meat">Meat & Poultry</option>
+                        </select>
+                    </div>
+                    <div className="flex-1 w-full md:w-auto">
+                        <select
+                            name="sortBy"
+                            value={filters.sortBy}
+                            onChange={handleFilterChange}
+                            className="border border-gray-300 rounded px-4 py-2 w-full md:w-48"
+                            aria-label="Sort by"
+                        >
+                            <option value="urgency">🚨 Most Urgent</option>
+                            <option value="newest">🆕 Newest First</option>
+                            <option value="distance">📍 Nearest</option>
                         </select>
                     </div>
                     <Button variant="primary" onClick={handleSearch} disabled={searchLoading}>Search</Button>

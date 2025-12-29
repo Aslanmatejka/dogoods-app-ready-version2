@@ -3,6 +3,8 @@ import Card from "../components/common/Card";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import { useAuth } from "../utils/hooks/useSupabase";
+import DietaryPreferences from "../components/profile/DietaryPreferences";
+import supabase from "../utils/supabaseClient";
 
 function UserSettings() {
     const { user: authUser, isAuthenticated, updateProfile } = useAuth();
@@ -20,25 +22,41 @@ function UserSettings() {
         privacy: {
             profileVisibility: false,
             locationSharing: false
-        }
+        },
+        dietary_restrictions: [],
+        allergies: [],
+        dietary_preferences: []
     });
     const [successMessage, setSuccessMessage] = React.useState('');
 
     React.useEffect(() => {
-        if (authUser) {
-            setFormData({
-                name: authUser.name || '',
-                email: authUser.email || '',
-                notifications: authUser.notifications || {
-                    email: false,
-                    push: false
-                },
-                privacy: authUser.privacy || {
-                    profileVisibility: false,
-                    locationSharing: false
-                }
-            });
-        }
+        const loadUserData = async () => {
+            if (authUser) {
+                // Fetch full user profile from database
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', authUser.id)
+                    .single();
+
+                setFormData({
+                    name: authUser.name || profile?.name || '',
+                    email: authUser.email || '',
+                    notifications: authUser.notifications || {
+                        email: false,
+                        push: false
+                    },
+                    privacy: authUser.privacy || {
+                        profileVisibility: false,
+                        locationSharing: false
+                    },
+                    dietary_restrictions: profile?.dietary_restrictions || [],
+                    allergies: profile?.allergies || [],
+                    dietary_preferences: profile?.dietary_preferences || []
+                });
+            }
+        };
+        loadUserData();
     }, [authUser]);
 
     const handleInputChange = (field, value) => {
@@ -68,6 +86,13 @@ function UserSettings() {
         }));
     };
 
+    const handleDietaryChange = (dietaryData) => {
+        setFormData(prev => ({
+            ...prev,
+            ...dietaryData
+        }));
+    };
+
     const handleSaveSettings = async (section) => {
         setLoading(true);
         setError(null);
@@ -75,7 +100,19 @@ function UserSettings() {
         
         try {
             // Update user profile in Supabase
-            if (updateProfile) {
+            if (section === 'Dietary') {
+                // Update dietary preferences in database
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({
+                        dietary_restrictions: formData.dietary_restrictions,
+                        allergies: formData.allergies,
+                        dietary_preferences: formData.dietary_preferences
+                    })
+                    .eq('id', authUser.id);
+
+                if (updateError) throw updateError;
+            } else if (updateProfile) {
                 await updateProfile(formData);
             }
             
@@ -217,6 +254,32 @@ function UserSettings() {
                                 aria-label="Save notification settings"
                             >
                                 {loading ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Dietary Preferences */}
+                <Card>
+                    <div className="p-6">
+                        <h2 className="text-xl font-semibold mb-6">Dietary Preferences & Allergies</h2>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Help us match you with suitable food by setting your dietary restrictions, allergies, and preferences.
+                        </p>
+                        <DietaryPreferences
+                            initialRestrictions={formData.dietary_restrictions}
+                            initialAllergies={formData.allergies}
+                            initialPreferences={formData.dietary_preferences}
+                            onChange={handleDietaryChange}
+                        />
+                        <div className="mt-6 flex justify-end">
+                            <Button
+                                variant="primary"
+                                onClick={() => handleSaveSettings('Dietary')}
+                                disabled={loading}
+                                aria-label="Save dietary preferences"
+                            >
+                                {loading ? 'Saving...' : 'Save Dietary Preferences'}
                             </Button>
                         </div>
                     </div>

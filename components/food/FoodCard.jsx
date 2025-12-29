@@ -5,6 +5,8 @@ import Card from "../common/Card";
 import Avatar from "../common/Avatar";
 import Button from "../common/Button";
 import { useAI } from "../../utils/hooks/useSupabase";
+import { UrgencyIndicator } from "./UrgencyBadge";
+import VerificationStatus from "./VerificationStatus";
 
 const formatDistance = (dist) => {
     if (!dist) return '';
@@ -120,7 +122,11 @@ function FoodCard({
                             {distance && <span className="ml-1 text-gray-500">({formatDistance(distance)})</span>}
                         </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-wrap gap-2">
+                        <UrgencyIndicator foodListing={food} />
+                        {food.verification_status && (
+                            <VerificationStatus status={food.verification_status} compact={true} />
+                        )}
                         <span 
                             className={`badge badge-${expirationStatus.status}`}
                             role="status"

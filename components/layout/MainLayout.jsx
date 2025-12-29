@@ -4,6 +4,7 @@ import Footer from "../common/Footer";
 import AssistantButton from "../assistant/AssistantButton";
 import AIAssistant from "../assistant/AIAssistant";
 import UserChatWidget from "../common/UserChatWidget";
+import FeedbackButton from "../common/FeedbackButton";
 
 
 function MainLayout({ children }) {
@@ -35,6 +36,9 @@ function MainLayout({ children }) {
 
             {/* User Chat Widget (for messaging admin) */}
             <UserChatWidget />
+
+            {/* Feedback Button */}
+            <FeedbackButton />
         </div>
     );
 }

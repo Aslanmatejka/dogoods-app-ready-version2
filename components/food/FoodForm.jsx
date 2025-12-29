@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import FoodDietaryTags from './FoodDietaryTags';
 
 function FoodForm({
     initialData = null,
@@ -15,6 +16,7 @@ function FoodForm({
         unit: 'lb', // Only pounds allowed
         category: '',
         expiry_date: '',
+        pickup_by: '',
         donor_type: '', // 'individual' or 'organization'
         donor_zip: '',
         donor_city: '',
@@ -24,6 +26,9 @@ function FoodForm({
         longitude: null,
         image: null,
         status: 'pending',
+        dietary_tags: [],
+        allergens: [],
+        ingredients: '',
         ...initialData
     });
     // Show approval info
@@ -131,6 +136,13 @@ function FoodForm({
                 image: null
             }));
         }
+    };
+
+    const handleDietaryChange = (dietaryData) => {
+        setFormData(prev => ({
+            ...prev,
+            ...dietaryData
+        }));
     };
 
     const validateForm = () => {
@@ -405,6 +417,18 @@ function FoodForm({
                     />
                 )}
 
+                <Input
+                    label="Pickup Deadline (Optional)"
+                    name="pickup_by"
+                    type="datetime-local"
+                    value={formData.pickup_by}
+                    onChange={handleChange}
+                    error={errors.pickup_by}
+                    min={new Date().toISOString().slice(0, 16)}
+                    aria-describedby="pickup_by-error"
+                    helperText="Set a specific time when food must be picked up by. Creates urgency for recipients!"
+                />
+
                 {/* Location field removed */}
 
                 <div className="md:col-span-2">
@@ -439,6 +463,22 @@ function FoodForm({
                 </div>
 
                 {/* Listing Type field removed */}
+            </div>
+
+            {/* Dietary Information Section */}
+            <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
+                <h3 className="text-lg font-bold text-blue-900 mb-4">
+                    🥗 Dietary Information & Allergens
+                </h3>
+                <p className="text-sm text-blue-700 mb-4">
+                    Help recipients with dietary restrictions find suitable food by adding tags and allergen information
+                </p>
+                <FoodDietaryTags
+                    selectedTags={formData.dietary_tags}
+                    selectedAllergens={formData.allergens}
+                    ingredients={formData.ingredients}
+                    onChange={handleDietaryChange}
+                />
             </div>
 
             <div className="flex justify-end space-x-4">

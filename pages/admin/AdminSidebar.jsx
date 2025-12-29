@@ -10,6 +10,7 @@ function AdminSidebar({ active, onNavigate }) {
             { id: 'content', label: 'Content Moderation', icon: 'fa-shield-alt', path: '/admin/content' },
             { id: 'posts', label: 'Posts & Blog', icon: 'fa-newspaper', path: '/admin/posts' },
             { id: 'messages', label: 'Messages', icon: 'fa-comments', path: '/admin/messages' },
+            { id: 'feedback', label: 'User Feedback', icon: 'fa-comment-dots', path: '/admin/feedback' },
             { id: 'distribution', label: 'Food Distribution', icon: 'fa-box-open', path: '/admin/distribution' },
             { id: 'attendees', label: 'Distribution Attendees', icon: 'fa-users-cog', path: '/admin/attendees' },
             { id: 'impact', label: 'Impact Data Entry', icon: 'fa-table', path: '/admin/impact' },
