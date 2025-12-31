@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 
 function Header({
     menuItems = [
-        { label: 'Home', path: '/' },
         { label: 'Share Food', path: '/share' },
         { label: 'Find Food', path: '/find' },
         { label: 'Community', path: '/community' },
