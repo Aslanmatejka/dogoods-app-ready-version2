@@ -20,8 +20,8 @@ function HomePage() {
         const foodCategories = [
             {
                 id: 'produce',
-                title: 'Fruits and vegetables',
-                description: 'all fruits and vegetables',
+                title: 'Fruits & Vegetables',
+                description: 'Fresh produce and vegetables',
                 image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
                 itemCount: 67
             },
@@ -40,11 +40,39 @@ function HomePage() {
                 itemCount: 19
             },
             {
+                id: 'meat',
+                title: 'Meat & Poultry',
+                description: 'Fresh and frozen meats',
+                image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                itemCount: 15
+            },
+            {
                 id: 'pantry',
                 title: 'Pantry Items',
                 description: 'Non-perishable food items',
                 image: 'https://images.unsplash.com/photo-1584473457406-6240486418e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
                 itemCount: 34
+            },
+            {
+                id: 'canned',
+                title: 'Canned Goods',
+                description: 'Canned vegetables, fruits, and more',
+                image: 'https://images.unsplash.com/photo-1593759608892-b0033064e78c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                itemCount: 28
+            },
+            {
+                id: 'frozen',
+                title: 'Frozen Foods',
+                description: 'Frozen meals and ingredients',
+                image: 'https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                itemCount: 21
+            },
+            {
+                id: 'prepared',
+                title: 'Prepared Foods',
+                description: 'Ready-to-eat meals',
+                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                itemCount: 12
             },
         ];
 
@@ -228,7 +256,7 @@ function HomePage() {
                             </div>
 
                             <div
-                                className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto"
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
                                 role="list"
                                 aria-label="Food categories"
                             >
@@ -240,6 +268,39 @@ function HomePage() {
                                         />
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* All Available Food Card */}
+                            <div className="mt-6 max-w-7xl mx-auto">
+                                <button
+                                    onClick={() => handleNavigation('/find')}
+                                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-8 flex items-center justify-center gap-3"
+                                    aria-label="View all available food"
+                                >
+                                    <i className="fas fa-utensils text-2xl"></i>
+                                    <span className="text-2xl font-bold">All Available Food</span>
+                                    <i className="fas fa-arrow-right text-2xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Featured Listings */}
+                    <section 
+                        className="py-16 bg-gray-50"
+                        aria-labelledby="featured-heading"
+                    >
+                        <div className="container mx-auto px-4">
+                            <div className="text-center mb-12">
+                                <h2 
+                                    id="featured-heading"
+                                    className="text-3xl font-bold text-gray-900 mb-4"
+                                >
+                                    Featured Food Listings
+                                </h2>
+                                <p className="text-xl text-gray-600">
+                                    Fresh food available now in your community
+                                </p>
                             </div>
 
                             <div className="text-center mt-8">
