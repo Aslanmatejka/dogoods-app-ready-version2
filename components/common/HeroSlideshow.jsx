@@ -35,11 +35,49 @@ function HeroSlideshow({ children }) {
 
     // Load slides from database
     useEffect(() => {
+        let mounted = true;
+        
+        const loadSlides = async () => {
+            try {
+                setLoading(true);
+                const { data, error } = await supabase
+                    .from('hero_slides')
+                    .select('*')
+                    .order('order_index', { ascending: true });
+
+                if (!mounted) return;
+
+                if (error) {
+                    console.error('Error loading slides:', error);
+                    setSlides(defaultSlides);
+                } else if (data && data.length > 0) {
+                    setSlides(data);
+                } else {
+                    setSlides(defaultSlides);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                if (mounted) {
+                    setSlides(defaultSlides);
+                }
+            } finally {
+                if (mounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
         loadSlides();
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
-    const loadSlides = async () => {
+    // Separate loadSlides function for manual reloads (admin use)
+    const reloadSlides = async () => {
         try {
+            setLoading(true);
             const { data, error } = await supabase
                 .from('hero_slides')
                 .select('*')
@@ -109,6 +147,7 @@ function HeroSlideshow({ children }) {
                 setNewSlideUrl('');
                 setNewSlideCaption('');
                 alert('Slide added successfully!');
+                await reloadSlides();
             }
         } catch (err) {
             console.error('Error:', err);
@@ -129,11 +168,11 @@ function HeroSlideshow({ children }) {
                 console.error('Error removing slide:', error);
                 alert('Failed to remove slide.');
             } else {
-                setSlides(slides.filter(s => s.id !== slideId));
                 if (currentSlide >= slides.length - 1) {
                     setCurrentSlide(Math.max(0, slides.length - 2));
                 }
                 alert('Slide removed successfully!');
+                await reloadSlides();
             }
         } catch (err) {
             console.error('Error:', err);
