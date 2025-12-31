@@ -4,12 +4,15 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 import FoodDietaryTags from './FoodDietaryTags';
 import FoodSafetyChecklist from './FoodSafetyChecklist';
+import { useAuthContext } from '../../utils/AuthContext';
 
 function FoodForm({
     initialData = null,
     onSubmit,
     loading = false
 }) {
+    const { user } = useAuthContext();
+    
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -22,7 +25,9 @@ function FoodForm({
         donor_zip: '',
         donor_city: '',
         donor_state: '',
-    school_district: '',
+        school_district: '',
+        donor_email: '',
+        donor_phone: '',
         latitude: null,
         longitude: null,
         image: null,
@@ -38,6 +43,20 @@ function FoodForm({
         allergen_info: [],
         ...initialData
     });
+
+    // Pre-fill donor information from user profile
+    useEffect(() => {
+        if (user && !initialData) {
+            setFormData(prev => ({
+                ...prev,
+                donor_email: user.email || '',
+                donor_phone: user.phone || '',
+                donor_city: user.city || '',
+                donor_state: user.state || '',
+                donor_zip: user.zip_code || '',
+            }));
+        }
+    }, [user, initialData]);
     // Show approval info
     const approvalInfo = (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
