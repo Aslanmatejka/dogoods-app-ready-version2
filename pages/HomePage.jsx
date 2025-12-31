@@ -223,7 +223,7 @@ function HomePage() {
                                     Browse by Category
                                 </h2>
                                 <p className="text-xl text-gray-600">
-                                    Discover food available for sharing in your area
+                                    Need food now? Browse available food by category
                                 </p>
                             </div>
 
