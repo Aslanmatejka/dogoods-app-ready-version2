@@ -71,25 +71,26 @@ function HomePage() {
                                     >
                                         Share Food, Reduce Waste, Build Community
                                     </h1>
-                                    <p className="text-xl mb-8 text-white drop-shadow-md">
+                                    <p className="text-xl mb-12 text-white drop-shadow-md">
                                         Join our movement to combat food waste and hunger through community-driven food sharing.
                                     </p>
-                                    <div className="flex space-x-4">
-                                        <Button 
-                                            variant="secondary"
-                                            onClick={() => handleNavigation('/share')}
-                                            aria-label="Share food with the community"
-                                        >
-                                            Share Food
-                                        </Button>
-                                        <Button 
-                                            variant="outline"
+                                    <div className="flex gap-6 justify-center items-center max-w-4xl mx-auto">
+                                        <button 
                                             onClick={() => handleNavigation('/find')}
                                             aria-label="Find food in your area"
-                                            className="bg-white/10 backdrop-blur-sm border-white text-white hover:bg-white hover:text-gray-900"
+                                            className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-green-600 text-white rounded-2xl shadow-2xl hover:bg-green-700 hover:scale-105 transition-all duration-300 transform hover:shadow-green-500/50"
                                         >
+                                            <i className="fas fa-search mr-3"></i>
                                             Find Food
-                                        </Button>
+                                        </button>
+                                        <button 
+                                            onClick={() => handleNavigation('/share')}
+                                            aria-label="Share food with the community"
+                                            className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-orange-600 text-white rounded-2xl shadow-2xl hover:bg-orange-700 hover:scale-105 transition-all duration-300 transform hover:shadow-orange-500/50"
+                                        >
+                                            <i className="fas fa-share-alt mr-3"></i>
+                                            Share Food
+                                        </button>
                                     </div>
                                 </div>
                             </div>
