@@ -10,6 +10,13 @@ function Header({
         { label: 'Share Food', path: '/share' },
         { label: 'Find Food', path: '/find' },
         { label: 'Community', path: '/community' },
+        { 
+            label: 'Support', 
+            dropdown: [
+                { label: 'Donate', path: '/donate' },
+                { label: 'Volunteer', path: '/volunteer' }
+            ]
+        },
         { label: 'Impact Story', path: '/impact-story' },
         { label: 'Sponsors', path: '/sponsors' }
     ]
@@ -18,12 +25,17 @@ function Header({
     
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+    const [supportDropdownOpen, setSupportDropdownOpen] = React.useState(false);
     const dropdownRef = React.useRef(null);
+    const supportDropdownRef = React.useRef(null);
 
     React.useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
+            }
+            if (supportDropdownRef.current && !supportDropdownRef.current.contains(event.target)) {
+                setSupportDropdownOpen(false);
             }
         };
 
@@ -74,13 +86,46 @@ function Header({
 
                     <nav data-name="desktop-nav" className="hidden md:flex space-x-6">
                         {menuItems.map((item, index) => (
-                            <a 
-                                key={index}
-                                href={item.path}
-                                className="nav-link hover:text-green-600 transition-colors duration-200"
-                            >
-                                {item.label}
-                            </a>
+                            item.dropdown ? (
+                                <div 
+                                    key={index}
+                                    className="relative"
+                                    ref={supportDropdownRef}
+                                >
+                                    <button
+                                        onClick={() => setSupportDropdownOpen(!supportDropdownOpen)}
+                                        className="nav-link hover:text-green-600 transition-colors duration-200 flex items-center"
+                                    >
+                                        {item.label}
+                                        <i className={`fas fa-chevron-down text-xs ml-1 transform transition-transform ${supportDropdownOpen ? 'rotate-180' : ''}`}></i>
+                                    </button>
+                                    {supportDropdownOpen && (
+                                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1" role="menu">
+                                                {item.dropdown.map((subItem, subIndex) => (
+                                                    <a
+                                                        key={subIndex}
+                                                        href={subItem.path}
+                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600"
+                                                        role="menuitem"
+                                                        onClick={() => setSupportDropdownOpen(false)}
+                                                    >
+                                                        {subItem.label}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <a 
+                                    key={index}
+                                    href={item.path}
+                                    className="nav-link hover:text-green-600 transition-colors duration-200"
+                                >
+                                    {item.label}
+                                </a>
+                            )
                         ))}
                     </nav>
 
@@ -203,15 +248,36 @@ function Header({
                             <nav className="p-4">
                                 <ul className="space-y-2">
                                     {menuItems.map((item, index) => (
-                                        <li key={index}>
-                                            <a
-                                                href={item.path}
-                                                className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
-                                                onClick={() => setIsMenuOpen(false)}
-                                            >
-                                                {item.label}
-                                            </a>
-                                        </li>
+                                        item.dropdown ? (
+                                            <li key={index}>
+                                                <div className="px-4 py-2 text-gray-900 font-semibold">
+                                                    {item.label}
+                                                </div>
+                                                <ul className="ml-4 space-y-1 mt-1">
+                                                    {item.dropdown.map((subItem, subIndex) => (
+                                                        <li key={subIndex}>
+                                                            <a
+                                                                href={subItem.path}
+                                                                className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                                onClick={() => setIsMenuOpen(false)}
+                                                            >
+                                                                {subItem.label}
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </li>
+                                        ) : (
+                                            <li key={index}>
+                                                <a
+                                                    href={item.path}
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-lg"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                >
+                                                    {item.label}
+                                                </a>
+                                            </li>
+                                        )
                                     ))}
                                     {isAuthenticated && (
                                         <>
