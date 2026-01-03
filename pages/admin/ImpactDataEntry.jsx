@@ -203,31 +203,31 @@ function ImpactDataEntry() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50 sticky top-0">
                                 <tr>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                                         Date
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-28">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-48">
                                         Food Saved from Waste (lb)
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-28">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-48">
                                         Food Provided (lb)
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-28">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider w-48">
                                         People Helped
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider w-24">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider w-40">
                                         Schools Served
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider w-24">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider w-40">
                                         Non-Profits Helped
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider w-28">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider w-48">
                                         Total Meals
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                                         Notes
                                     </th>
-                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                                         Actions
                                     </th>
                                 </tr>
