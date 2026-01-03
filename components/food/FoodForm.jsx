@@ -320,6 +320,16 @@ function FoodForm({
                         helperText="Enter your phone number."
                     />
                     <Input
+                        label="Occupation / Role"
+                        name="donor_occupation"
+                        value={formData.donor_occupation}
+                        onChange={handleChange}
+                        error={errors.donor_occupation}
+                        required
+                        maxLength={100}
+                        helperText="Your occupation or role in the organization."
+                    />
+                    <Input
                     label="Donor Type"
                     name="donor_type"
                     type="select"
