@@ -152,7 +152,7 @@ function ImpactDataEntry() {
     };
 
     // Uncontrolled input component - no state, no re-renders
-    const UncontrolledCell = ({ defaultValue, onBlur, type = 'text', inputRef }) => {
+    const UncontrolledCell = ({ defaultValue, onBlur, type = 'text', inputRef, isNote = false }) => {
         return (
             <input
                 ref={inputRef}
@@ -162,8 +162,11 @@ function ImpactDataEntry() {
                     const value = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
                     onBlur(value);
                 }}
-                className="w-full px-4 py-6 text-2xl font-bold border-2 border-gray-400 rounded focus:outline-none focus:ring-4 focus:ring-green-500 focus:border-green-600 transition-all bg-white"
-                style={{ minHeight: '80px', lineHeight: '1.2' }}
+                className={`w-full h-24 px-4 py-3 border-2 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    type === 'number' ? 'text-2xl font-semibold text-right text-gray-900' : 'text-lg text-gray-900'
+                } ${isNote ? 'text-left' : ''} bg-white hover:bg-gray-50 transition-colors`}
+                placeholder={type === 'number' ? '0' : (isNote ? 'Enter notes...' : '')}
+                step={type === 'number' ? '0.01' : undefined}
             />
         );
     };
@@ -201,41 +204,41 @@ function ImpactDataEntry() {
                     </div>
                 ) : (
                     <div className="bg-white rounded-lg shadow overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50 sticky top-0">
+                        <table className="min-w-full divide-y divide-gray-200 border-collapse">
+                            <thead className="bg-gradient-to-r from-gray-100 to-gray-200 sticky top-0">
                                 <tr>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider w-40">
+                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-r-2 border-gray-300 w-40">
                                         Date
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-green-600 uppercase tracking-wider w-36">
-                                        Food Saved from Waste (lb)
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-green-700 uppercase tracking-wider border-r-2 border-gray-300 w-36">
+                                        Food Saved<br/>(lb)
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-green-600 uppercase tracking-wider w-36">
-                                        Food Provided (lb)
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-green-700 uppercase tracking-wider border-r-2 border-gray-300 w-36">
+                                        Food Provided<br/>(lb)
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-green-600 uppercase tracking-wider w-32">
-                                        People Helped
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-blue-700 uppercase tracking-wider border-r-2 border-gray-300 w-32">
+                                        People<br/>Helped
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-blue-600 uppercase tracking-wider w-32">
-                                        Schools Served
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-blue-700 uppercase tracking-wider border-r-2 border-gray-300 w-32">
+                                        Schools<br/>Served
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-blue-600 uppercase tracking-wider w-32">
-                                        Non-Profits Helped
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-blue-700 uppercase tracking-wider border-r-2 border-gray-300 w-32">
+                                        Non-Profits<br/>Helped
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-purple-600 uppercase tracking-wider w-32">
-                                        Total Meals
+                                    <th className="px-4 py-4 text-right text-sm font-bold text-purple-700 uppercase tracking-wider border-r-2 border-gray-300 w-32">
+                                        Total<br/>Meals
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider w-64">
+                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider border-r-2 border-gray-300 w-64">
                                         Notes
                                     </th>
-                                    <th className="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider w-28">
+                                    <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider w-24">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                <tr className="bg-green-50" style={{ height: '100px' }}>
-                                    <td className="px-4 py-5">
+                            <tbody className="bg-white divide-y-2 divide-gray-300">
+                                <tr className="bg-gradient-to-r from-green-50 to-green-100">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="date"
                                             defaultValue={new Date().toISOString().split('T')[0]}
@@ -243,7 +246,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -251,7 +254,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -259,7 +262,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -267,7 +270,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -275,7 +278,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -283,7 +286,7 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             type="number"
                                             defaultValue=""
@@ -291,88 +294,92 @@ function ImpactDataEntry() {
                                             onBlur={() => { }}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 border-r-2 border-gray-200">
                                         <UncontrolledCell
                                             defaultValue=""
                                             inputRef={el => newRowRefs.current.notes = el}
                                             onBlur={() => { }}
+                                            isNote={true}
                                         />
                                     </td>
-                                    <td className="px-4 py-5">
+                                    <td className="px-2 py-2 text-center">
                                         <Button
                                             variant="primary"
                                             size="sm"
                                             onClick={handleAddRow}
+                                            className="h-24"
                                         >
-                                            <i className="fas fa-plus"></i>
+                                            <i className="fas fa-plus text-xl"></i>
                                         </Button>
                                     </td>
                                 </tr>
 
                                 {data.map((row) => (
-                                    <tr key={row.id} className="hover:bg-gray-50" style={{ height: '100px' }}>
-                                        <td className="px-4 py-5">
+                                    <tr key={row.id} className="hover:bg-blue-50 transition-colors">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="date"
                                                 defaultValue={row.date}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'date', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.food_saved_from_waste_lb || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'food_saved_from_waste_lb', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.food_provided_lb || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'food_provided_lb', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.people_helped || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'people_helped', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.schools_served || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'schools_served', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.nonprofits_helped || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'nonprofits_helped', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 type="number"
                                                 defaultValue={row.total_meals_provided || 0}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'total_meals_provided', val)}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 border-r-2 border-gray-200">
                                             <UncontrolledCell
                                                 defaultValue={row.notes || ''}
                                                 onBlur={(val) => handleUpdateRow(row.id, 'notes', val)}
+                                                isNote={true}
                                             />
                                         </td>
-                                        <td className="px-4 py-5">
+                                        <td className="px-2 py-2 text-center">
                                             <Button
                                                 variant="danger"
                                                 size="sm"
                                                 onClick={() => handleDeleteRow(row.id)}
+                                                className="h-24"
                                             >
-                                                <i className="fas fa-trash"></i>
+                                                <i className="fas fa-trash text-xl"></i>
                                             </Button>
                                         </td>
                                     </tr>
