@@ -22,6 +22,8 @@ function FoodForm({
         expiry_date: '',
         pickup_by: '',
         donor_type: '', // 'individual' or 'organization'
+        donor_name: '',
+        donor_occupation: '',
         donor_zip: '',
         donor_city: '',
         donor_state: '',
@@ -49,6 +51,7 @@ function FoodForm({
         if (user && !initialData) {
             setFormData(prev => ({
                 ...prev,
+                donor_name: user.name || '',
                 donor_email: user.email || '',
                 donor_phone: user.phone || '',
                 donor_city: user.city || '',
