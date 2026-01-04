@@ -9,6 +9,7 @@ import { UrgencyIndicator } from "./UrgencyBadge";
 import VerificationStatus from "./VerificationStatus";
 import { SafetyBadge } from "./FoodSafetyChecklist";
 import FoodDietaryTags from "./FoodDietaryTags";
+import FoodSafetyService from "../../utils/foodSafetyService";
 
 const formatDistance = (dist) => {
     if (!dist) return '';
@@ -55,6 +56,19 @@ function FoodCard({
 
     // Use expiry_date from DB, fallback to empty string if missing
     const expirationStatus = getExpirationStatus(expiry_date || '');
+
+    // Calculate safety score if not provided
+    const safetyScore = React.useMemo(() => {
+        if (food.passed_safety_check !== undefined && food.passed_safety_check !== null) {
+            const safetyService = new FoodSafetyService();
+            const checkData = {
+                temperature: food.current_storage_temp
+            };
+            const result = safetyService.calculateSafetyScore(food, checkData);
+            return result.score;
+        }
+        return null;
+    }, [food]);
 
     const handleClaim = () => {
         if (typeof onClaim === 'function') {
@@ -129,8 +143,8 @@ function FoodCard({
                         {food.verification_status && (
                             <VerificationStatus status={food.verification_status} compact={true} />
                         )}
-                        {food.passed_safety_check !== undefined && food.passed_safety_check !== null && (
-                            <SafetyBadge score={food.safety_score || 0} size="sm" />
+                        {safetyScore !== null && (
+                            <SafetyBadge score={safetyScore} size="sm" />
                         )}
                         <span 
                             className={`badge badge-${expirationStatus.status}`}
