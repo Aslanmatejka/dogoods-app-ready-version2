@@ -148,53 +148,6 @@ export default function ClaimFoodForm() {
                     <Input label="Total Members" name="members_count" type="number" value={formData.members_count} onChange={handleFormChange} required min={1} max={1000} helperText="Total number of people this food will serve." />
                 </div>
 
-                {/* Impact Tracking Section */}
-                <div className="mt-6 p-6 bg-blue-50 rounded-xl border border-blue-200">
-                    <h3 className="text-lg font-bold text-blue-700 mb-4">
-                        <i className="fas fa-chart-line mr-2"></i>
-                        Impact Tracking (Optional)
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                        Help us track our community impact by providing a breakdown. These are optional but help us measure our reach.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Input
-                            label="General People"
-                            name="people"
-                            type="number"
-                            value={formData.people}
-                            onChange={handleFormChange}
-                            min={0}
-                            max={1000}
-                            helperText="Number of general community members."
-                        />
-                        <Input
-                            label="Students"
-                            name="students"
-                            type="number"
-                            value={formData.students}
-                            onChange={handleFormChange}
-                            min={0}
-                            max={1000}
-                            helperText="Number of students being served."
-                        />
-                        <Input
-                            label="School Staff"
-                            name="school_staff"
-                            type="number"
-                            value={formData.school_staff}
-                            onChange={handleFormChange}
-                            min={0}
-                            max={1000}
-                            helperText="Number of school staff members."
-                        />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-3">
-                        <i className="fas fa-info-circle mr-1"></i>
-                        Note: The sum of these values should not exceed the total members count above.
-                    </p>
-                </div>
-
                 {/* Conditional Drop Off or Pickup Form */}
                 {formData.school_district === 'AUSD' ? (
                     <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
