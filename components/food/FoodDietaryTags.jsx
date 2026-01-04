@@ -7,8 +7,15 @@ function FoodDietaryTags({
     selectedAllergens = [],
     ingredients = '',
     onChange,
-    readOnly = false
+    readOnly = false,
+    compact = false,
+    food = null
 }) {
+    // If food object is passed and compact mode, use it directly for display
+    const displayTags = food?.dietary_tags || selectedTags;
+    const displayAllergens = food?.allergen_info || food?.allergens || selectedAllergens;
+    const displayIngredients = food?.ingredients || ingredients;
+
     const [dietaryTags, setDietaryTags] = React.useState(selectedTags);
     const [allergens, setAllergens] = React.useState(selectedAllergens);
     const [ingredientsText, setIngredientsText] = React.useState(ingredients);
@@ -25,6 +32,47 @@ function FoodDietaryTags({
         { value: 'sugar-free', label: '🚫 Sugar-Free' },
         { value: 'low-sodium', label: '🧂 Low Sodium' }
     ];
+
+    // Compact display mode - only show selected tags/allergens
+    if (compact) {
+        const hasAnyInfo = displayTags.length > 0 || displayAllergens.length > 0 || displayIngredients;
+        
+        if (!hasAnyInfo) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-2 text-sm">
+                {displayTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                        {displayTags.map(tag => {
+                            const tagInfo = commonDietaryTags.find(t => t.value === tag);
+                            return (
+                                <span 
+                                    key={tag}
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                >
+                                    {tagInfo?.label || tag}
+                                </span>
+                            );
+                        })}
+                    </div>
+                )}
+                {displayAllergens.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            ⚠ Contains: {displayAllergens.join(', ')}
+                        </span>
+                    </div>
+                )}
+                {displayIngredients && (
+                    <div className="text-xs text-gray-600">
+                        <span className="font-medium">Ingredients:</span> {displayIngredients}
+                    </div>
+                )}
+            </div>
+        );
+    }
 
     React.useEffect(() => {
         if (onChange) {
@@ -164,7 +212,9 @@ FoodDietaryTags.propTypes = {
     selectedAllergens: PropTypes.arrayOf(PropTypes.string),
     ingredients: PropTypes.string,
     onChange: PropTypes.func,
-    readOnly: PropTypes.bool
+    readOnly: PropTypes.bool,
+    compact: PropTypes.bool,
+    food: PropTypes.object
 };
 
 export default FoodDietaryTags;
