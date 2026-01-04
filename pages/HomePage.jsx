@@ -286,13 +286,13 @@ function HomePage() {
                     </section>
 
                     {/* Featured Listings */}
-                    <section 
+                    <section
                         className="py-16 bg-gray-50"
                         aria-labelledby="featured-heading"
                     >
                         <div className="container mx-auto px-4">
                             <div className="text-center mb-12">
-                                <h2 
+                                <h2
                                     id="featured-heading"
                                     className="text-3xl font-bold text-gray-900 mb-4"
                                 >
@@ -303,14 +303,33 @@ function HomePage() {
                                 </p>
                             </div>
 
+                            {featuredListings && featuredListings.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                    {featuredListings.map((listing) => (
+                                        <FoodCard
+                                            key={listing.id}
+                                            food={listing}
+                                            onClaim={(food) => {
+                                                navigate('/claim', { state: { food } });
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-white rounded-lg shadow-sm">
+                                    <i className="fas fa-box-open text-gray-400 text-4xl mb-3"></i>
+                                    <p className="text-gray-500">No featured listings available at the moment</p>
+                                </div>
+                            )}
+
                             <div className="text-center mt-8">
-                                <Button 
-                                    variant="secondary"
+                                <Button
+                                    variant="primary"
                                     onClick={() => handleNavigation('/find')}
-                                    className="text-green-600 font-semibold hover:text-green-700 flex items-center mx-auto"
-                                    aria-label="View all food categories"
+                                    className="font-semibold"
+                                    aria-label="View all available food"
                                 >
-                                    View all categories
+                                    View All Available Food
                                     <i className="fas fa-arrow-right ml-2" aria-hidden="true"></i>
                                 </Button>
                             </div>
