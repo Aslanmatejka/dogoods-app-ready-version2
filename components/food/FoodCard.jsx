@@ -59,13 +59,17 @@ function FoodCard({
 
     // Calculate safety score if not provided
     const safetyScore = React.useMemo(() => {
-        if (food.passed_safety_check !== undefined && food.passed_safety_check !== null) {
-            const safetyService = new FoodSafetyService();
-            const checkData = {
-                temperature: food.current_storage_temp
-            };
-            const result = safetyService.calculateSafetyScore(food, checkData);
-            return result.score;
+        if (food.storage_requirements || food.current_storage_temp) {
+            try {
+                const checkData = {
+                    temperature: food.current_storage_temp
+                };
+                const result = FoodSafetyService.calculateSafetyScore(food, checkData);
+                return result.score;
+            } catch (error) {
+                console.error('Error calculating safety score:', error);
+                return null;
+            }
         }
         return null;
     }, [food]);
