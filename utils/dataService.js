@@ -529,15 +529,7 @@ class DataService {
         if (match) {
           listing.community_id = match.id;
         }
-        // keep school_district on the object if you want to store it as well; otherwise remove
-        delete listing.school_district;
       }
-
-      // Remove other donor fields that are stored in users table
-      delete listing.donor_name;
-      delete listing.donor_email;
-      delete listing.donor_phone;
-      delete listing.donor_occupation;
 
       const result = await supabase
         .from('food_listings')
@@ -555,8 +547,6 @@ class DataService {
 
       if (result.error) throw result.error
       return result.data
-
-      return data
     } catch (error) {
       console.error('Create food listing error:', error)
       reportError(error)
