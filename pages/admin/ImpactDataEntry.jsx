@@ -579,7 +579,7 @@ function ImpactDataEntry() {
                                             </td>
                                             <td className="px-3 py-2">
                                                 <select
-                                                    defaultValue={row.organization || ''}
+                                                    value={row.organization || ''}
                                                     onChange={(e) => handleUpdateRow(row.id, 'organization', e.target.value)}
                                                     className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                                 >
@@ -735,7 +735,7 @@ function ImpactDataEntry() {
                                             </td>
                                             <td className="px-3 py-2">
                                                 <select
-                                                    defaultValue={row.communities_served || ''}
+                                                    value={row.communities_served || ''}
                                                     onChange={(e) => handleUpdateRow(row.id, 'communities_served', e.target.value)}
                                                     className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                 >
