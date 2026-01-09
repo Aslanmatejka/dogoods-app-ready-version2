@@ -1,0 +1,666 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import supabase from '../utils/supabaseClient';
+import { reportError } from '../utils/helpers';
+import { useAuthContext } from '../utils/AuthContext';
+
+function ImpactStory() {
+    const { isAdmin } = useAuthContext();
+    const navigate = useNavigate();
+    const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+    const [newsletterError, setNewsletterError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editableContent, setEditableContent] = useState({});
+    const [originalContent, setOriginalContent] = useState({});
+
+    // Load saved content on mount
+    useEffect(() => {
+        const loadSavedContent = async () => {
+            try {
+                // Try loading from Supabase first
+                const { data, error } = await supabase
+                    .from('page_content')
+                    .select('content')
+                    .eq('page_name', 'impact-story')
+                    .maybeSingle();
+
+                if (data && !error) {
+                    setEditableContent(data.content);
+                } else {
+                    // Fallback to localStorage
+                    const saved = localStorage.getItem('impactStoryContent');
+                    if (saved) {
+                        setEditableContent(JSON.parse(saved));
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+                const saved = localStorage.getItem('impactStoryContent');
+                if (saved) {
+                    setEditableContent(JSON.parse(saved));
+                }
+            }
+        };
+
+        loadSavedContent();
+    }, []);
+
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setNewsletterError('');
+        setNewsletterSuccess(false);
+        
+        const formData = new FormData(e.target);
+        const data = {
+            first_name: formData.get('firstName'),
+            last_name: formData.get('lastName'),
+            email: formData.get('email'),
+            consent: formData.get('consent') === 'on',
+            source: 'impact-story-page'
+        };
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.email)) {
+            setNewsletterError('Please enter a valid email address.');
+            setIsSubmitting(false);
+            return;
+        }
+
+        try {
+            // Check if already subscribed
+            const { data: existing, error: checkError } = await supabase
+                .from('newsletter_subscriptions')
+                .select('email, is_active')
+                .eq('email', data.email)
+                .maybeSingle();
+
+            if (checkError && checkError.code !== 'PGRST116') {
+                console.error('Error checking subscription:', checkError);
+            }
+
+            if (existing) {
+                if (existing.is_active) {
+                    setNewsletterError('This email is already subscribed!');
+                    setIsSubmitting(false);
+                    return;
+                } else {
+                    // Reactivate subscription
+                    const { error: updateError } = await supabase
+                        .from('newsletter_subscriptions')
+                        .update({ 
+                            is_active: true, 
+                            subscribed_at: new Date().toISOString(),
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            consent: data.consent 
+                        })
+                        .eq('email', data.email);
+
+                    if (updateError) {
+                        throw updateError;
+                    }
+                }
+            } else {
+                // New subscription
+                const { error: insertError } = await supabase
+                    .from('newsletter_subscriptions')
+                    .insert([data]);
+
+                if (insertError) {
+                    throw insertError;
+                }
+            }
+
+            setNewsletterSuccess(true);
+            setTimeout(() => setNewsletterSuccess(false), 5000);
+            e.target.reset();
+            
+            console.log('Newsletter subscription successful:', data.email);
+        } catch (error) {
+            console.error('Error submitting newsletter:', error);
+            reportError(error, { context: 'Newsletter subscription' });
+            
+            // Fallback to localStorage
+            try {
+                const subscriptions = JSON.parse(localStorage.getItem('newsletterSubscriptions') || '[]');
+                const alreadySubscribed = subscriptions.some(sub => sub.email === data.email);
+                
+                if (!alreadySubscribed) {
+                    subscriptions.push({ ...data, timestamp: new Date().toISOString() });
+                    localStorage.setItem('newsletterSubscriptions', JSON.stringify(subscriptions));
+                    setNewsletterSuccess(true);
+                    setTimeout(() => setNewsletterSuccess(false), 5000);
+                    e.target.reset();
+                } else {
+                    setNewsletterError('This email is already subscribed!');
+                }
+            } catch (localError) {
+                setNewsletterError('Something went wrong. Please try again.');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Admin edit functions
+    const toggleEditMode = () => {
+        if (!isAdmin) return;
+        
+        if (!isEditMode) {
+            // Entering edit mode - save original content
+            setOriginalContent({ ...editableContent });
+        }
+        setIsEditMode(!isEditMode);
+    };
+
+    const handleContentEdit = (key, value) => {
+        setEditableContent(prev => ({
+            ...prev,
+            [key]: value
+        }));
+    };
+
+    const saveChanges = async () => {
+        try {
+            // Save to Supabase
+            const { error } = await supabase
+                .from('page_content')
+                .upsert({
+                    page_name: 'impact-story',
+                    content: editableContent,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) {
+                console.error('Error saving to Supabase:', error);
+                // Fallback to localStorage
+                localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+            }
+
+            // Also save to localStorage as backup
+            localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+            
+            alert('Changes saved successfully!');
+            setIsEditMode(false);
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            reportError(error, { context: 'Impact story edit' });
+            // Still save to localStorage
+            localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+            alert('Saved to local storage. Changes may not persist across sessions.');
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditableContent({ ...originalContent });
+        setIsEditMode(false);
+    };
+
+    const getContent = (key, defaultValue) => {
+        return editableContent[key] || defaultValue;
+    };
+
+    return (
+        <div className="bg-gray-50 -mx-6 md:-mx-10 -my-6 md:-my-10">
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+                .stat-card { transition: transform 0.3s ease; }
+                .stat-card:hover { transform: translateY(-5px); }
+                
+                .editable {
+                    position: relative;
+                }
+                
+                .edit-mode .editable {
+                    outline: 2px dashed #3b82f6;
+                    outline-offset: 4px;
+                    cursor: text;
+                    min-height: 30px;
+                    padding: 4px;
+                }
+                
+                .edit-mode .editable:hover {
+                    outline-color: #1d4ed8;
+                    background: rgba(59, 130, 246, 0.05);
+                }
+                
+                .edit-mode .editable:focus {
+                    outline-color: #10b981;
+                    background: rgba(16, 185, 129, 0.05);
+                }
+                
+                .admin-edit-btn {
+                    position: fixed;
+                    bottom: 2rem;
+                    right: 2rem;
+                    z-index: 1000;
+                    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 60px;
+                    height: 60px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+                    transition: all 0.3s ease;
+                }
+                
+                .admin-edit-btn:hover {
+                    transform: scale(1.1) rotate(90deg);
+                    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.7);
+                }
+                
+                .admin-edit-btn.editing {
+                    background: linear-gradient(135deg, #ef4444, #dc2626);
+                }
+                
+                .edit-toolbar {
+                    position: fixed;
+                    top: 100px;
+                    right: 2rem;
+                    z-index: 1000;
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+                    padding: 1rem;
+                    display: none;
+                }
+                
+                .edit-mode .edit-toolbar {
+                    display: block;
+                }
+            `}</style>
+
+            {/* Admin Edit Button */}
+            {isAdmin && (
+                <>
+                    <button
+                        onClick={toggleEditMode}
+                        className={`admin-edit-btn ${isEditMode ? 'editing' : ''}`}
+                        title="Admin Edit Mode"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+
+                    {isEditMode && (
+                        <div className="edit-toolbar">
+                            <h3 className="font-bold text-gray-900 mb-3">Edit Mode Active</h3>
+                            <p className="text-sm text-gray-600 mb-4">Click on any section to edit</p>
+                            <button
+                                onClick={saveChanges}
+                                className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-2"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                onClick={cancelEdit}
+                                className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+
+            <div className={isEditMode ? 'edit-mode' : ''}>
+            {/* Hero Section */}
+            <section className="bg-green-600 py-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 
+                        className="text-5xl md:text-6xl font-bold text-white mb-6 fade-in editable"
+                        contentEditable={isEditMode}
+                        suppressContentEditableWarning
+                        onBlur={(e) => handleContentEdit('heroTitle', e.target.textContent)}
+                    >
+                        {getContent('heroTitle', 'Our Impact Story')}
+                    </h1>
+                    <p 
+                        className="text-xl text-white max-w-3xl mx-auto fade-in mb-8 editable"
+                        contentEditable={isEditMode}
+                        suppressContentEditableWarning
+                        onBlur={(e) => handleContentEdit('heroSubtitle', e.target.textContent)}
+                    >
+                        {getContent('heroSubtitle', 'Transforming food waste into community nourishment through AI-powered logistics and compassionate connections')}
+                    </p>
+                    <div className="flex justify-center gap-8 mt-8">
+                        <a href="#featured" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                            Featured
+                        </a>
+                        <a href="#news" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                            News
+                        </a>
+                        <a href="#stories" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                            Stories
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {/* Featured Section */}
+            <section id="featured" className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Food Distribution" className="rounded-2xl shadow-2xl w-full h-auto" />
+                        </div>
+                        <div>
+                            <h1 
+                                className="text-4xl font-bold text-gray-900 mb-6 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('featuredTitle', e.target.textContent)}
+                            >
+                                {getContent('featuredTitle', 'Bridging the Gap Between Surplus and Need')}
+                            </h1>
+                            <p 
+                                className="text-lg text-gray-600 leading-relaxed mb-6 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('featuredP1', e.target.textContent)}
+                            >
+                                {getContent('featuredP1', 'Every day, restaurants, grocery stores, and food producers have perfectly good food that goes to waste, while families in our communities struggle with food insecurity. DoGoods uses AI-powered logistics to bridge this gap in real-time.')}
+                            </p>
+                            <p 
+                                className="text-lg text-gray-600 leading-relaxed mb-6 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('featuredP2', e.target.textContent)}
+                            >
+                                {getContent('featuredP2', 'Our platform connects donors with recipients within minutes, ensuring fresh food reaches those who need it most. Through intelligent routing and automated coordination, we\'ve created a seamless network that turns potential waste into community nourishment.')} 
+                            </p>
+                            <button onClick={() => window.location.href='/share'} 
+                                className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors inline-flex items-center gap-2">
+                                Join Our Network →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Stories Section */}
+            <section id="stories" className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Community Impact" className="rounded-2xl shadow-2xl w-full h-auto mb-6" />
+                            <h1 
+                                className="text-3xl font-bold text-gray-900 mb-4 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('sarahTitle', e.target.textContent)}
+                            >
+                                {getContent('sarahTitle', 'Sarah\'s Story: From Volunteer to Champion')}
+                            </h1>
+                            <p 
+                                className="text-gray-600 leading-relaxed editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('sarahQuote', e.target.textContent)}
+                            >
+                                {getContent('sarahQuote', '"I started as a volunteer driver, picking up surplus food from local restaurants. Now I coordinate our entire network in the Bay Area. Seeing families receive fresh, nutritious meals—food that would have been wasted—gives me purpose every single day. We\'re not just feeding people; we\'re building a community that cares."')}
+                            </p>
+                            <p className="text-gray-600 leading-relaxed mt-4">
+                                <strong>— Sarah Martinez, Community Coordinator, Alameda</strong>
+                            </p>
+                        </div>
+
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Food Distribution" className="rounded-2xl shadow-2xl w-full h-auto mb-6" />
+                            <h1 
+                                className="text-3xl font-bold text-gray-900 mb-4 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('michaelTitle', e.target.textContent)}
+                            >
+                                {getContent('michaelTitle', 'Restaurant Partnership: A Win-Win Solution')}
+                            </h1>
+                            <p 
+                                className="text-gray-600 leading-relaxed editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('michaelQuote', e.target.textContent)}
+                            >
+                                {getContent('michaelQuote', '"As a restaurant owner, I used to feel terrible about food waste at the end of each day. DoGoods transformed that guilt into impact. Now, instead of throwing away perfectly good food, I know it\'s helping families in our neighborhood. The platform makes it effortless—I post what I have, and within an hour, it\'s picked up and distributed."')}
+                            </p>
+                            <p className="text-gray-600 leading-relaxed mt-4">
+                                <strong>— Michael Chen, Owner, Golden Wok Restaurant</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* News Section */}
+            <section id="news" className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="relative flex items-center">
+                        <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
+                            alt="Impact Story" className="w-full h-[400px] object-cover rounded-2xl" />
+                        
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-full md:w-1/2 bg-white bg-opacity-95 p-8 rounded-2xl shadow-2xl">
+                            <blockquote 
+                                className="text-xl font-bold text-gray-900 mb-6 italic editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('newsQuote', e.target.textContent)}
+                            >
+                                {getContent('newsQuote', '"DoGoods helped us feed over 500 families during the holidays. The AI routing meant we could distribute fresh food within 2 hours of donation—something that was impossible before."')}
+                            </blockquote>
+                            <p 
+                                className="text-gray-600 mb-4 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('newsAttribution', e.target.textContent)}
+                            >
+                                <strong>{getContent('newsAttribution', 'Director of Community Services')}</strong><br />
+                                Alameda County Food Bank
+                            </p>
+                            <p className="text-sm text-gray-500 mb-6">
+                                Thanks to our network of 150+ partners, we've prevented over 2 million pounds of food waste while providing 
+                                nutritious meals to families who need them most.
+                            </p>
+                            <a href="https://allgoodlivingfoundation.org/donate/" 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                                Support Our Mission
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Gallery Section */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop" 
+                                alt="Community" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <h3 
+                                className="text-xl font-bold text-gray-900 mb-2 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('gallery1Title', e.target.textContent)}
+                            >
+                                {getContent('gallery1Title', 'Community Centers')}
+                            </h3>
+                            <p 
+                                className="text-gray-600 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('gallery1Desc', e.target.textContent)}
+                            >
+                                {getContent('gallery1Desc', 'Partnering with 45+ community centers across the Bay Area to provide fresh meals and groceries to families in need, serving over 10,000 people monthly.')}
+                            </p>
+                        </div>
+
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop" 
+                                alt="Food Distribution" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <h3 
+                                className="text-xl font-bold text-gray-900 mb-2 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('gallery2Title', e.target.textContent)}
+                            >
+                                {getContent('gallery2Title', 'Restaurant Partners')}
+                            </h3>
+                            <p 
+                                className="text-gray-600 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('gallery2Desc', e.target.textContent)}
+                            >
+                                {getContent('gallery2Desc', 'Working with 200+ restaurants and grocers to rescue surplus food daily. Our AI routing ensures food reaches recipients within 60 minutes of donation.')}
+                            </p>
+                        </div>
+
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop" 
+                                alt="Impact" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <h3 
+                                className="text-xl font-bold text-gray-900 mb-2 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('gallery3Title', e.target.textContent)}
+                            >
+                                {getContent('gallery3Title', 'Environmental Impact')}
+                            </h3>
+                            <p 
+                                className="text-gray-600 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('gallery3Desc', e.target.textContent)}
+                            >
+                                {getContent('gallery3Desc', 'By preventing food waste, we\'ve reduced over 1,200 tons of CO2 emissions and conserved resources equivalent to 30 million gallons of water.')}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="text-center mt-12">
+                        <button onClick={() => navigate('/stories')} 
+                            className="bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                            View All Stories
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="bg-gradient-to-r from-green-600 to-green-700 py-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Be Part of Our Story</h2>
+                    <p className="text-xl text-white/90 mb-8">
+                        Every meal shared, every pound of food saved, every life touched—it all starts with you.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/share" 
+                            className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                            Join the Platform
+                        </a>
+                        <a href="https://allgoodlivingfoundation.org/donate/" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-700 transition-colors shadow-lg">
+                            Support Our Mission
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {/* Newsletter Section */}
+            <section className="bg-white py-20">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 md:p-12 shadow-xl border border-green-100">
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                                Stay Updated on Our Impact
+                            </h2>
+                            <p className="text-lg text-gray-600">
+                                Subscribe to our newsletter for inspiring stories, impact updates, and ways to get involved in fighting food waste.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                    <input type="text" name="firstName" required 
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                        placeholder="John" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                    <input type="text" name="lastName" required 
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                        placeholder="Doe" />
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" name="email" required 
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                    placeholder="john@example.com" />
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="flex items-start">
+                                    <input type="checkbox" name="consent" required 
+                                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1" />
+                                    <span className="ml-2 text-sm text-gray-600">
+                                        I agree to receive updates and newsletters from DoGoods. You can unsubscribe at any time.
+                                    </span>
+                                </label>
+                            </div>
+
+                            {newsletterSuccess && (
+                                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-4 text-center">
+                                    <svg className="inline-block w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    <strong>Success!</strong> You've been subscribed to our newsletter.
+                                </div>
+                            )}
+
+                            {newsletterError && (
+                                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4 text-center">
+                                    <strong>Error!</strong> {newsletterError}
+                                </div>
+                            )}
+
+                            <button type="submit" disabled={isSubmitting}
+                                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                {isSubmitting ? 'Subscribing...' : 'Subscribe to Newsletter'}
+                            </button>
+
+                            <p className="text-xs text-gray-500 text-center mt-4">
+                                We respect your privacy. Read our <a href="/privacy" className="text-green-600 hover:text-green-700 underline">Privacy Policy</a>.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            </div>
+        </div>
+    );
+}
+
+export default ImpactStory;

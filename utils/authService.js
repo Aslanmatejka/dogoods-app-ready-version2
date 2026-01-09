@@ -1,0 +1,467 @@
+// Inject is_admin claim into Supabase session for local admin testing
+import supabase from './supabaseClient.js';
+
+export async function injectAdminClaim(userId) {
+  const { data: profile, error } = await supabase
+    .from('users')
+    .select('is_admin')
+    .eq('id', userId)
+    .single();
+  if (error) {
+    console.error('Error fetching admin status:', error);
+    return;
+  }
+  if (profile?.is_admin) {
+    // This is a workaround for local testing only
+    // Supabase does not support direct mutation of JWT claims client-side in production
+    // For production, use Edge Functions or a custom JWT provider
+    supabase.auth.setSession({
+      ...supabase.auth.session(),
+      user: {
+        ...supabase.auth.user(),
+        is_admin: true
+      }
+    });
+    console.log('Admin claim injected into session');
+  }
+}
+import { reportError } from './helpers.js'
+
+class AuthService {
+  constructor() {
+    this.currentUser = null
+    this.isAuthenticated = false
+    this.isAdmin = false
+    this.listeners = []
+
+    // Restore from localStorage if available
+    const storedUser = localStorage.getItem('currentUser')
+    const storedAuth = localStorage.getItem('userAuthenticated')
+    if (storedUser && storedAuth === 'true') {
+      try {
+        this.currentUser = JSON.parse(storedUser)
+        this.isAuthenticated = true
+        this.isAdmin = this.currentUser.role === 'admin'
+      } catch (e) {
+        this.currentUser = null
+        this.isAuthenticated = false
+        this.isAdmin = false
+      }
+    }
+
+    // Initialize auth state from Supabase
+    this.init()
+  }
+
+  async init() {
+    try {
+      // Get initial session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        await this.setUser(session.user)
+      }
+
+      // Listen for auth changes
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          await this.setUser(session.user)
+        } else if (event === 'SIGNED_OUT') {
+          this.clearUser()
+        }
+      })
+    } catch (error) {
+      console.error('Auth initialization error:', error)
+      reportError(error)
+    }
+  }
+
+  async setUser(user) {
+    try {
+      // Get user profile from database
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned" - this is expected for new users
+        console.error('Error fetching user profile:', error)
+        return
+      }
+
+      // If no profile exists, create one manually (in case the trigger didn't fire)
+      if (!profile) {
+        console.log('No profile found, creating user profile...')
+        
+        try {
+          const { data: newProfile, error: createError } = await supabase
+            .from('users')
+            .insert({
+              id: user.id,
+              email: user.email,
+              name: user.user_metadata?.name || user.email,
+              account_type: user.user_metadata?.account_type || 'individual',
+              avatar_url: user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.user_metadata?.name || user.email)}&background=random`,
+              role: 'user',
+              status: 'active'
+            })
+            .select()
+            .single()
+
+          if (createError) {
+            console.error('Error creating user profile:', createError)
+            // Use auth data only if profile creation fails
+            this.currentUser = {
+              ...user,
+              name: user.user_metadata?.name || user.email,
+              account_type: user.user_metadata?.account_type || 'individual',
+              role: 'user',
+              status: 'active'
+            }
+          } else {
+            console.log('User profile created successfully')
+            this.currentUser = {
+              ...user,
+              ...newProfile
+            }
+
+            // Also create initial user stats
+            try {
+              await supabase
+                .from('user_stats')
+                .insert({
+                  user_id: user.id,
+                  total_donations: 0,
+                  total_trades: 0,
+                  total_food_saved: 0.0,
+                  total_impact_score: 0
+                })
+            } catch (statsError) {
+              console.warn('Error creating user stats:', statsError)
+            }
+          }
+        } catch (createError) {
+          console.error('Error creating user profile:', createError)
+          // Use auth data only if profile creation fails
+          this.currentUser = {
+            ...user,
+            name: user.user_metadata?.name || user.email,
+            account_type: user.user_metadata?.account_type || 'individual',
+            role: 'user',
+            status: 'active'
+          }
+        }
+      } else {
+        this.currentUser = {
+          ...user,
+          ...profile
+        }
+      }
+
+  this.isAuthenticated = true
+  this.isAdmin = this.currentUser.role === 'admin' || this.currentUser.is_admin === true
+      
+      // Store in localStorage for persistence
+      localStorage.setItem('userAuthenticated', 'true')
+      localStorage.setItem('currentUser', JSON.stringify(this.currentUser))
+      if (this.isAdmin) {
+        localStorage.setItem('adminAuthenticated', 'true')
+        localStorage.setItem('adminUser', JSON.stringify(this.currentUser))
+      }
+
+      this.notifyListeners()
+    } catch (error) {
+      console.error('Error setting user:', error)
+      reportError(error)
+    }
+  }
+
+  clearUser() {
+    this.currentUser = null
+    this.isAuthenticated = false
+    this.isAdmin = false
+    
+    localStorage.removeItem('userAuthenticated')
+    localStorage.removeItem('currentUser')
+    localStorage.removeItem('adminAuthenticated')
+    localStorage.removeItem('adminUser')
+    
+    this.notifyListeners()
+  }
+
+  async signUp(userData) {
+    try {
+      if (!userData.email || !userData.password) {
+        throw new Error('Email and password are required');
+      }
+
+      console.log('Attempting signup with:', {
+        email: userData.email,
+        metadata: userData.options?.data
+      });
+
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: userData.options?.data || {}
+        }
+      })
+
+      if (error) {
+        console.error('Supabase signup error:', error);
+        throw error;
+      }
+
+      if (!data?.user) {
+        throw new Error('No user data received from signup');
+      }
+
+      console.log('Signup successful:', data.user);
+      return { success: true, user: data.user }
+    } catch (error) {
+      console.error('Sign up error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async signIn(email, password) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (error) throw error
+
+      return { success: true, user: data.user }
+    } catch (error) {
+      console.error('Sign in error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async signOut() {
+    try {
+      // Clear user state immediately
+      this.clearUser()
+
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Supabase signOut error:', error)
+        // Don't throw - we've already cleared local state
+      }
+
+      // Give a moment for state to propagate
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      return { success: true }
+    } catch (error) {
+      console.error('Sign out error:', error)
+      // Ensure user is cleared even on error
+      this.clearUser()
+      reportError(error)
+      return { success: true } // Return success anyway since local state is cleared
+    }
+  }
+
+  async updateProfile(updates) {
+    try {
+      if (!this.currentUser) throw new Error('No user logged in')
+
+      const { error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', this.currentUser.id)
+
+      if (error) throw error
+
+      // Update local user data
+      this.currentUser = { ...this.currentUser, ...updates }
+      localStorage.setItem('currentUser', JSON.stringify(this.currentUser))
+      
+      this.notifyListeners()
+      return { success: true }
+    } catch (error) {
+      console.error('Profile update error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async uploadAvatar(file) {
+    try {
+      // 1. Validate user authentication
+      if (!this.currentUser) {
+        throw new Error('No user logged in')
+      }
+
+      // Debug log authentication state
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Current session:', session)
+      
+      // 2. Validate file
+      if (!file || !(file instanceof File)) {
+        throw new Error('Invalid file provided')
+      }
+      console.log('Uploading file:', { name: file.name, type: file.type, size: file.size })
+
+      // 3. Set up file path
+      const fileExt = file.name.split('.').pop()
+      const fileName = `avatar.${fileExt}`
+      const filePath = `${this.currentUser.id}/${fileName}` // Remove 'avatars/' prefix as it's the bucket name
+      console.log('Upload path:', filePath)
+
+      // 4. Test bucket access
+      const { data: bucketTest, error: bucketError } = await supabase.storage
+        .from('avatars')
+        .list(this.currentUser.id, { limit: 1 })
+      console.log('Bucket access test:', { data: bucketTest, error: bucketError })
+
+      // 5. Upload new file to bucket
+      console.log('Starting file upload...')
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type
+        })
+
+      if (uploadError) {
+        console.error('Upload error details:', uploadError)
+        throw new Error(`Failed to upload avatar: ${uploadError.message}`)
+      }
+      
+      console.log('Upload successful:', uploadData)
+
+      // 6. Get public URL
+      const { data: urlData, error: urlError } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      if (urlError) {
+        console.error('URL error details:', urlError)
+        throw new Error('Failed to get public URL for avatar')
+      }
+
+      if (!urlData?.publicUrl) {
+        throw new Error('No public URL returned from storage')
+      }
+
+      console.log('Got public URL:', urlData.publicUrl)
+
+      // 7. Update user profile
+      try {
+        await this.updateProfile({ 
+          avatar_url: urlData.publicUrl,
+          updated_at: new Date().toISOString()
+        })
+        console.log('Profile updated with new avatar')
+      } catch (error) {
+        console.error('Profile update error:', error)
+        throw new Error('Failed to update profile with new avatar URL')
+      }
+
+      return { 
+        success: true, 
+        avatarUrl: urlData.publicUrl 
+      }
+    } catch (error) {
+      // Log full error details
+      console.error('Avatar upload error:', {
+        message: error.message,
+        details: error,
+        user: this.currentUser?.id
+      })
+      reportError(error)
+      throw error
+    }
+  }
+
+  async refreshAuthState() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        await this.setUser(session.user)
+      } else {
+        this.clearUser()
+      }
+    } catch (error) {
+      console.error('Auth refresh error:', error)
+      reportError(error)
+    }
+  }
+
+  getCurrentUser() {
+    return this.currentUser
+  }
+
+  isUserAuthenticated() {
+    return this.isAuthenticated
+  }
+
+  isUserAdmin() {
+    return this.isAdmin
+  }
+
+  addListener(callback) {
+    this.listeners.push(callback)
+    return () => {
+      this.listeners = this.listeners.filter(listener => listener !== callback)
+    }
+  }
+
+  notifyListeners() {
+    this.listeners.forEach(callback => {
+      try {
+        callback({
+          user: this.currentUser,
+          isAuthenticated: this.isAuthenticated,
+          isAdmin: this.isAdmin
+        })
+      } catch (error) {
+        console.error('Auth listener error:', error)
+      }
+    })
+  }
+
+  // Password reset functionality
+  async resetPassword(email) {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      })
+
+      if (error) throw error
+      return { success: true }
+    } catch (error) {
+      console.error('Password reset error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+
+  async updatePassword(newPassword) {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+      return { success: true }
+    } catch (error) {
+      console.error('Password update error:', error)
+      reportError(error)
+      throw error
+    }
+  }
+}
+
+// Create singleton instance
+const authService = new AuthService()
+
+export default authService 
