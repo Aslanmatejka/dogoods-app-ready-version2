@@ -17,7 +17,7 @@ import { useTutorial } from "../utils/TutorialContext";
 
 function HomePage() {
     const navigate = useNavigate();
-    const { listings: featuredListings, loading: loadingListings, error: listingsError } = useFoodListings({ status: 'active' }, 6);
+    const { listings: featuredListings, loading: loadingListings, error: listingsError } = useFoodListings({ status: 'approved' }, 6);
     const { impact, loading: impactLoading } = useImpact();
     const [communities, setCommunities] = React.useState([]);
     const [loadingCommunities, setLoadingCommunities] = React.useState(true);
