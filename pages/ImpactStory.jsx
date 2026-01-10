@@ -384,7 +384,14 @@ function ImpactStory() {
                             </p>
                             <button onClick={() => window.location.href='/share'} 
                                 className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors inline-flex items-center gap-2">
-                                Join Our Network →
+                                <span 
+                                    className="editable"
+                                    contentEditable={isEditMode}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleContentEdit('featuredButtonText', e.target.textContent)}
+                                >
+                                    {getContent('featuredButtonText', 'Join Our Network →')}
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -415,7 +422,14 @@ function ImpactStory() {
                                 {getContent('sarahQuote', '"I started as a volunteer driver, picking up surplus food from local restaurants. Now I coordinate our entire network in the Bay Area. Seeing families receive fresh, nutritious meals—food that would have been wasted—gives me purpose every single day. We\'re not just feeding people; we\'re building a community that cares."')}
                             </p>
                             <p className="text-gray-600 leading-relaxed mt-4">
-                                <strong>— Sarah Martinez, Community Coordinator, Alameda</strong>
+                                <strong 
+                                    className="editable"
+                                    contentEditable={isEditMode}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleContentEdit('sarahAttribution', e.target.textContent)}
+                                >
+                                    {getContent('sarahAttribution', '— Sarah Martinez, Community Coordinator, Alameda')}
+                                </strong>
                             </p>
                         </div>
 
@@ -439,7 +453,14 @@ function ImpactStory() {
                                 {getContent('michaelQuote', '"As a restaurant owner, I used to feel terrible about food waste at the end of each day. DoGoods transformed that guilt into impact. Now, instead of throwing away perfectly good food, I know it\'s helping families in our neighborhood. The platform makes it effortless—I post what I have, and within an hour, it\'s picked up and distributed."')}
                             </p>
                             <p className="text-gray-600 leading-relaxed mt-4">
-                                <strong>— Michael Chen, Owner, Golden Wok Restaurant</strong>
+                                <strong 
+                                    className="editable"
+                                    contentEditable={isEditMode}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleContentEdit('michaelAttribution', e.target.textContent)}
+                                >
+                                    {getContent('michaelAttribution', '— Michael Chen, Owner, Golden Wok Restaurant')}
+                                </strong>
                             </p>
                         </div>
                     </div>
@@ -462,24 +483,44 @@ function ImpactStory() {
                             >
                                 {getContent('newsQuote', '"DoGoods helped us feed over 500 families during the holidays. The AI routing meant we could distribute fresh food within 2 hours of donation—something that was impossible before."')}
                             </blockquote>
+                            <p className="text-gray-600 mb-4">
+                                <strong 
+                                    className="editable"
+                                    contentEditable={isEditMode}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleContentEdit('newsAttribution', e.target.textContent)}
+                                >
+                                    {getContent('newsAttribution', 'Director of Community Services')}
+                                </strong><br />
+                                <span 
+                                    className="editable"
+                                    contentEditable={isEditMode}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleContentEdit('newsOrg', e.target.textContent)}
+                                >
+                                    {getContent('newsOrg', 'Alameda County Food Bank')}
+                                </span>
+                            </p>
                             <p 
-                                className="text-gray-600 mb-4 editable"
+                                className="text-sm text-gray-500 mb-6 editable"
                                 contentEditable={isEditMode}
                                 suppressContentEditableWarning
-                                onBlur={(e) => handleContentEdit('newsAttribution', e.target.textContent)}
+                                onBlur={(e) => handleContentEdit('newsStats', e.target.textContent)}
                             >
-                                <strong>{getContent('newsAttribution', 'Director of Community Services')}</strong><br />
-                                Alameda County Food Bank
-                            </p>
-                            <p className="text-sm text-gray-500 mb-6">
-                                Thanks to our network of 150+ partners, we've prevented over 2 million pounds of food waste while providing 
-                                nutritious meals to families who need them most.
+                                {getContent('newsStats', "Thanks to our network of 150+ partners, we've prevented over 2 million pounds of food waste while providing nutritious meals to families who need them most.")}
                             </p>
                             <a href="https://allgoodlivingfoundation.org/donate/" 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
-                                Support Our Mission
+                                <span 
+                                    className="editable"
+                                    contentEditable={isEditMode}
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleContentEdit('newsButtonText', e.target.textContent)}
+                                >
+                                    {getContent('newsButtonText', 'Support Our Mission')}
+                                </span>
                             </a>
                         </div>
                     </div>
@@ -557,7 +598,14 @@ function ImpactStory() {
                     <div className="text-center mt-12">
                         <button onClick={() => navigate('/stories')} 
                             className="bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
-                            View All Stories
+                            <span 
+                                className="editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('galleryButtonText', e.target.textContent)}
+                            >
+                                {getContent('galleryButtonText', 'View All Stories')}
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -566,20 +614,46 @@ function ImpactStory() {
             {/* CTA Section */}
             <section className="bg-gradient-to-r from-green-600 to-green-700 py-20">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Be Part of Our Story</h2>
-                    <p className="text-xl text-white/90 mb-8">
-                        Every meal shared, every pound of food saved, every life touched—it all starts with you.
+                    <h2 
+                        className="text-4xl md:text-5xl font-bold text-white mb-6 editable"
+                        contentEditable={isEditMode}
+                        suppressContentEditableWarning
+                        onBlur={(e) => handleContentEdit('ctaTitle', e.target.textContent)}
+                    >
+                        {getContent('ctaTitle', 'Be Part of Our Story')}
+                    </h2>
+                    <p 
+                        className="text-xl text-white/90 mb-8 editable"
+                        contentEditable={isEditMode}
+                        suppressContentEditableWarning
+                        onBlur={(e) => handleContentEdit('ctaSubtitle', e.target.textContent)}
+                    >
+                        {getContent('ctaSubtitle', 'Every meal shared, every pound of food saved, every life touched—it all starts with you.')}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a href="/share" 
                             className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
-                            Join the Platform
+                            <span 
+                                className="editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('ctaButton1Text', e.target.textContent)}
+                            >
+                                {getContent('ctaButton1Text', 'Join the Platform')}
+                            </span>
                         </a>
                         <a href="https://allgoodlivingfoundation.org/donate/" 
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-700 transition-colors shadow-lg">
-                            Support Our Mission
+                            <span 
+                                className="editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('ctaButton2Text', e.target.textContent)}
+                            >
+                                {getContent('ctaButton2Text', 'Support Our Mission')}
+                            </span>
                         </a>
                     </div>
                 </div>
@@ -590,24 +664,52 @@ function ImpactStory() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 md:p-12 shadow-xl border border-green-100">
                         <div className="text-center mb-8">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                                Stay Updated on Our Impact
+                            <h2 
+                                className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('newsletterTitle', e.target.textContent)}
+                            >
+                                {getContent('newsletterTitle', 'Stay Updated on Our Impact')}
                             </h2>
-                            <p className="text-lg text-gray-600">
-                                Subscribe to our newsletter for inspiring stories, impact updates, and ways to get involved in fighting food waste.
+                            <p 
+                                className="text-lg text-gray-600 editable"
+                                contentEditable={isEditMode}
+                                suppressContentEditableWarning
+                                onBlur={(e) => handleContentEdit('newsletterDesc', e.target.textContent)}
+                            >
+                                {getContent('newsletterDesc', 'Subscribe to our newsletter for inspiring stories, impact updates, and ways to get involved in fighting food waste.')}
                             </p>
                         </div>
 
                         <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <span 
+                                            className="editable"
+                                            contentEditable={isEditMode}
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => handleContentEdit('newsletterFirstNameLabel', e.target.textContent)}
+                                        >
+                                            {getContent('newsletterFirstNameLabel', 'First Name *')}
+                                        </span>
+                                    </label>
                                     <input type="text" name="firstName" required 
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
                                         placeholder="John" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <span 
+                                            className="editable"
+                                            contentEditable={isEditMode}
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => handleContentEdit('newsletterLastNameLabel', e.target.textContent)}
+                                        >
+                                            {getContent('newsletterLastNameLabel', 'Last Name *')}
+                                        </span>
+                                    </label>
                                     <input type="text" name="lastName" required 
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
                                         placeholder="Doe" />
@@ -615,7 +717,16 @@ function ImpactStory() {
                             </div>
 
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <span 
+                                        className="editable"
+                                        contentEditable={isEditMode}
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => handleContentEdit('newsletterEmailLabel', e.target.textContent)}
+                                    >
+                                        {getContent('newsletterEmailLabel', 'Email Address *')}
+                                    </span>
+                                </label>
                                 <input type="email" name="email" required 
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
                                     placeholder="john@example.com" />
@@ -625,8 +736,13 @@ function ImpactStory() {
                                 <label className="flex items-start">
                                     <input type="checkbox" name="consent" required 
                                         className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1" />
-                                    <span className="ml-2 text-sm text-gray-600">
-                                        I agree to receive updates and newsletters from DoGoods. You can unsubscribe at any time.
+                                    <span 
+                                        className="ml-2 text-sm text-gray-600 editable"
+                                        contentEditable={isEditMode}
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => handleContentEdit('newsletterConsent', e.target.textContent)}
+                                    >
+                                        {getContent('newsletterConsent', 'I agree to receive updates and newsletters from DoGoods. You can unsubscribe at any time.')}
                                     </span>
                                 </label>
                             </div>
@@ -648,7 +764,7 @@ function ImpactStory() {
 
                             <button type="submit" disabled={isSubmitting}
                                 className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                                {isSubmitting ? 'Subscribing...' : 'Subscribe to Newsletter'}
+                                {isSubmitting ? getContent('newsletterButtonSubmitting', 'Subscribing...') : getContent('newsletterButtonText', 'Subscribe to Newsletter')}
                             </button>
 
                             <p className="text-xs text-gray-500 text-center mt-4">
