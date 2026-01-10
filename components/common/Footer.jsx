@@ -101,9 +101,8 @@ function Footer({
                                 </li>
                                 <li>
                                     <a
-                                        href="/Do Good Store FAQs.docx"
+                                        href="/faqs"
                                         className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
-                                        download
                                     >
                                         <i className="fas fa-question-circle text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
                                         <span>FAQs</span>
