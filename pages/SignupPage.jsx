@@ -18,6 +18,11 @@ function SignupPageContent() {
 
     const [errors, setErrors] = React.useState({});
 
+    React.useEffect(() => {
+        // Scroll to top when page loads
+        window.scrollTo(0, 0);
+    }, []);
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({

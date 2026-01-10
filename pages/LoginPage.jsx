@@ -19,6 +19,11 @@ function LoginPage() {
     const [showPassword, setShowPassword] = React.useState(false);
 
     React.useEffect(() => {
+        // Scroll to top when page loads
+        window.scrollTo(0, 0);
+    }, []);
+
+    React.useEffect(() => {
         // Check for success message in URL
         const message = searchParams.get('message');
         if (message === 'password-reset-success') {
