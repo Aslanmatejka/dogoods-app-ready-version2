@@ -162,6 +162,18 @@ function ImpactStory() {
         }));
     };
 
+    const handleImageEdit = (key, currentUrl) => {
+        if (!isEditMode) return;
+        
+        const newUrl = prompt('Enter new image URL:', currentUrl);
+        if (newUrl && newUrl !== currentUrl) {
+            setEditableContent(prev => ({
+                ...prev,
+                [key]: newUrl
+            }));
+        }
+    };
+
     const saveChanges = async () => {
         try {
             // Save to Supabase
@@ -278,6 +290,41 @@ function ImpactStory() {
                 .edit-mode .edit-toolbar {
                     display: block;
                 }
+                
+                .editable-image {
+                    position: relative;
+                    cursor: pointer;
+                }
+                
+                .edit-mode .editable-image::after {
+                    content: '📷 Click to edit image URL';
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(59, 130, 246, 0.9);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    pointer-events: none;
+                }
+                
+                .edit-mode .editable-image:hover::after {
+                    opacity: 1;
+                }
+                
+                .edit-mode .editable-image img {
+                    outline: 2px dashed #3b82f6;
+                    outline-offset: 4px;
+                }
+                
+                .edit-mode .editable-image:hover img {
+                    outline-color: #1d4ed8;
+                    opacity: 0.8;
+                }
             `}</style>
 
             {/* Admin Edit Button */}
@@ -353,9 +400,15 @@ function ImpactStory() {
             <section id="featured" className="py-16 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                        <div>
-                            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop" 
-                                alt="Food Distribution" className="rounded-2xl shadow-2xl w-full h-auto" />
+                        <div 
+                            className="editable-image"
+                            onClick={() => handleImageEdit('featuredImage', getContent('featuredImage', 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop'))}
+                        >
+                            <img 
+                                src={getContent('featuredImage', 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop')}
+                                alt="Food Distribution" 
+                                className="rounded-2xl shadow-2xl w-full h-auto" 
+                            />
                         </div>
                         <div>
                             <h1 
@@ -403,8 +456,16 @@ function ImpactStory() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div>
-                            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
-                                alt="Community Impact" className="rounded-2xl shadow-2xl w-full h-auto mb-6" />
+                            <div 
+                                className="editable-image"
+                                onClick={() => handleImageEdit('sarahImage', getContent('sarahImage', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop'))}
+                            >
+                                <img 
+                                    src={getContent('sarahImage', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop')}
+                                    alt="Community Impact" 
+                                    className="rounded-2xl shadow-2xl w-full h-auto mb-6" 
+                                />
+                            </div>
                             <h1 
                                 className="text-3xl font-bold text-gray-900 mb-4 editable"
                                 contentEditable={isEditMode}
@@ -434,8 +495,16 @@ function ImpactStory() {
                         </div>
 
                         <div>
-                            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070&auto=format&fit=crop" 
-                                alt="Food Distribution" className="rounded-2xl shadow-2xl w-full h-auto mb-6" />
+                            <div 
+                                className="editable-image"
+                                onClick={() => handleImageEdit('michaelImage', getContent('michaelImage', 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070&auto=format&fit=crop'))}
+                            >
+                                <img 
+                                    src={getContent('michaelImage', 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070&auto=format&fit=crop')}
+                                    alt="Food Distribution" 
+                                    className="rounded-2xl shadow-2xl w-full h-auto mb-6" 
+                                />
+                            </div>
                             <h1 
                                 className="text-3xl font-bold text-gray-900 mb-4 editable"
                                 contentEditable={isEditMode}
@@ -471,8 +540,16 @@ function ImpactStory() {
             <section id="news" className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="relative flex items-center">
-                        <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop" 
-                            alt="Impact Story" className="w-full h-[400px] object-cover rounded-2xl" />
+                        <div 
+                            className="editable-image w-full"
+                            onClick={() => handleImageEdit('newsImage', getContent('newsImage', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop'))}
+                        >
+                            <img 
+                                src={getContent('newsImage', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop')}
+                                alt="Impact Story" 
+                                className="w-full h-[400px] object-cover rounded-2xl" 
+                            />
+                        </div>
                         
                         <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-full md:w-1/2 bg-white bg-opacity-95 p-8 rounded-2xl shadow-2xl">
                             <blockquote 
@@ -532,8 +609,16 @@ function ImpactStory() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
-                            <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop" 
-                                alt="Community" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <div 
+                                className="editable-image"
+                                onClick={() => handleImageEdit('gallery1Image', getContent('gallery1Image', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'))}
+                            >
+                                <img 
+                                    src={getContent('gallery1Image', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop')}
+                                    alt="Community" 
+                                    className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" 
+                                />
+                            </div>
                             <h3 
                                 className="text-xl font-bold text-gray-900 mb-2 editable"
                                 contentEditable={isEditMode}
@@ -553,8 +638,16 @@ function ImpactStory() {
                         </div>
 
                         <div>
-                            <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop" 
-                                alt="Food Distribution" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <div 
+                                className="editable-image"
+                                onClick={() => handleImageEdit('gallery2Image', getContent('gallery2Image', 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop'))}
+                            >
+                                <img 
+                                    src={getContent('gallery2Image', 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop')}
+                                    alt="Food Distribution" 
+                                    className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" 
+                                />
+                            </div>
                             <h3 
                                 className="text-xl font-bold text-gray-900 mb-2 editable"
                                 contentEditable={isEditMode}
@@ -574,8 +667,16 @@ function ImpactStory() {
                         </div>
 
                         <div>
-                            <img src="https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop" 
-                                alt="Impact" className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" />
+                            <div 
+                                className="editable-image"
+                                onClick={() => handleImageEdit('gallery3Image', getContent('gallery3Image', 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop'))}
+                            >
+                                <img 
+                                    src={getContent('gallery3Image', 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop')}
+                                    alt="Impact" 
+                                    className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" 
+                                />
+                            </div>
                             <h3 
                                 className="text-xl font-bold text-gray-900 mb-2 editable"
                                 contentEditable={isEditMode}
