@@ -15,19 +15,23 @@ function FAQs() {
 
     const faqs = [
         {
-            category: "Getting Started",
+            category: "About Do Good Store",
             questions: [
                 {
-                    question: "What is the Do Good Store?",
-                    answer: "The Do Good Store is a community food sharing platform operated by All Good Living Foundation. It connects food donors with families and individuals in need, reducing food waste while helping our community members access fresh, nutritious food."
+                    question: "What is Do Good Store?",
+                    answer: "Do Good Store is a free, community-powered platform created by All Good Living Foundation (AGLF) that connects surplus food with families who need it. Restaurants, organizations, schools, and neighbors share extra food—and families can easily see what's available at their local school Community Closets. Less waste. More meals. Everybody wins."
                 },
                 {
-                    question: "How do I create an account?",
-                    answer: "Click the 'Sign Up' button in the header or footer. Fill in your name, email, password, and select your account type (Individual, Business, or Nonprofit). You'll receive a confirmation email to activate your account."
+                    question: "Who is Do Good Store for?",
+                    answer: "Three main groups:\n\n• Sharers – Restaurants, organizations, schools, and community members with surplus food\n\n• Families – Those experiencing food insecurity who want to see what food is available nearby\n\n• Schools & Community Closets – Distribution points where donated food is made accessible to families"
                 },
                 {
-                    question: "Is there a cost to use the platform?",
-                    answer: "No! The Do Good Store is completely free for both donors and recipients. Our mission is to eliminate barriers to food access in our community."
+                    question: "Is Do Good Store free to use?",
+                    answer: "Yes. Completely free. No subscriptions. No hidden fees. No \"premium hunger\" tier."
+                },
+                {
+                    question: "Who runs Do Good Store?",
+                    answer: "Do Good Store is powered by All Good Living Foundation (AGLF), a nonprofit dedicated to ensuring no child or family goes without life's essentials."
                 }
             ]
         },
@@ -35,130 +39,64 @@ function FAQs() {
             category: "Sharing Food",
             questions: [
                 {
-                    question: "What types of food can I donate?",
-                    answer: "You can donate fresh produce, bakery items, dairy products, pantry staples, prepared meals, and more. All food must be safe for consumption, properly stored, and not past its expiration date."
+                    question: "What kind of food can be shared?",
+                    answer: "Sharers can list:\n\n• Fresh produce\n• Prepared foods (following food safety guidelines)\n• Packaged and nonperishable items\n• School-appropriate snacks and pantry staples\n\nIf it's safe, edible, and something you'd feed your own family—great. If not, it's a no."
                 },
                 {
-                    question: "How do I list food for donation?",
-                    answer: "Log in to your account, click 'Share Food' in the navigation menu, fill out the listing form with details about your food donation (title, description, quantity, category, expiration date), upload a photo, and submit. Your listing will be reviewed by our team before approval."
+                    question: "How does sharing food work?",
+                    answer: "Sharers:\n\n1. Post available food on the app\n2. Select a nearby school or Community Closet\n3. Drop off food according to the provided guidelines\n\nAGLF helps coordinate distribution so food gets to families quickly and safely."
                 },
                 {
-                    question: "How long does it take for my listing to be approved?",
-                    answer: "Most listings are reviewed and approved within 24 hours. You'll receive an email notification once your listing is approved and visible to the community."
-                },
-                {
-                    question: "Can businesses and restaurants donate?",
-                    answer: "Absolutely! We encourage businesses, restaurants, grocery stores, and food services to donate surplus food. Create a business account to get started."
+                    question: "Can restaurants and businesses participate regularly?",
+                    answer: "Absolutely—and we love our repeat sharers. Businesses can:\n\n• Reduce food waste\n• Support local families\n• Show real community impact\n\nWe'll help make it easy and consistent."
                 }
             ]
         },
         {
-            category: "Finding Food",
+            category: "For Families",
             questions: [
                 {
-                    question: "How do I claim available food?",
-                    answer: "Browse available listings on the 'Find Food' page, click on an item you're interested in, and click the 'Claim Food' button. Fill out the claim form with your contact information and pickup preferences."
+                    question: "How do families use Do Good Store?",
+                    answer: "Families can:\n\n• View real-time food availability at their school or Community Closet\n• See what items were donated and when they're available\n• Pick up food discreetly and with dignity\n\nNo guesswork. No awkward conversations. Just access."
                 },
                 {
-                    question: "What happens after I claim food?",
-                    answer: "The donor will be notified of your claim and will contact you to arrange pickup details. You'll receive confirmation and coordination messages through the platform."
+                    question: "Do families need to qualify or sign up?",
+                    answer: "Access is typically provided through:\n\n• Partner schools\n• Community Closets\n• Referrals from AGLF or trusted community organizations\n\nSome locations may require simple verification to ensure food reaches those who need it most."
                 },
                 {
-                    question: "Can I claim multiple items?",
-                    answer: "Yes! You can claim as many items as you need. We encourage taking only what you can use to ensure food reaches as many families as possible."
-                },
-                {
-                    question: "What if I can't pick up the food after claiming it?",
-                    answer: "Please cancel your claim as soon as possible so others can claim the food. Contact the donor through the platform to let them know."
+                    question: "Is this only for school families?",
+                    answer: "Schools are a major access point, but not the only one. Community organizations and partner locations may also participate. Availability depends on local partnerships."
                 }
             ]
         },
         {
-            category: "Food Safety",
+            category: "Safety & Quality",
             questions: [
                 {
-                    question: "How do you ensure food safety?",
-                    answer: "All listings are reviewed by our team. We provide guidelines for proper food storage, handling, and labeling. Donors must indicate if food requires refrigeration, freezing, or has specific allergen information."
-                },
-                {
-                    question: "What should I do if I receive food that seems unsafe?",
-                    answer: "Do not consume the food. Contact us immediately through the 'Report Issue' button or email info@allgoodlivingfoundation.org. Your safety is our top priority."
-                },
-                {
-                    question: "Are dietary restrictions and allergens labeled?",
-                    answer: "Yes! Donors can tag listings with dietary information (vegetarian, vegan, gluten-free, etc.) and list known allergens. Always verify with the donor if you have specific concerns."
+                    question: "Is the food safe?",
+                    answer: "Yes. AGLF follows food safety guidelines and works only with responsible sharers. Clear labeling, handling instructions, and drop-off standards are part of the process."
                 }
             ]
         },
         {
-            category: "Account & Profile",
+            category: "Community Impact",
             questions: [
                 {
-                    question: "How do I update my profile information?",
-                    answer: "Log in to your account, click on your profile icon or name in the header, select 'Profile Settings,' and update your information. Don't forget to save your changes."
+                    question: "Does Do Good Store replace food pantries?",
+                    answer: "No. It complements them. Do Good Store focuses on surplus food recovery and real-time sharing, helping fill gaps between traditional pantry schedules and increasing access to fresh food."
                 },
                 {
-                    question: "Can I change my account type?",
-                    answer: "Yes, you can update your account type in your profile settings. Contact us if you need assistance with the change."
-                },
-                {
-                    question: "I forgot my password. What should I do?",
-                    answer: "Click 'Forgot Password' on the login page, enter your email address, and you'll receive a password reset link. Follow the instructions in the email to create a new password."
-                },
-                {
-                    question: "How do I delete my account?",
-                    answer: "Contact us at info@allgoodlivingfoundation.org to request account deletion. We'll process your request within 7 business days."
+                    question: "How does this help the community long-term?",
+                    answer: "• Less food waste\n• More fresh food access\n• Stronger school-community connections\n• Families supported where they already are\n\nIt's local. It's efficient. And it works."
                 }
             ]
         },
         {
-            category: "Community & Impact",
+            category: "Get Involved",
             questions: [
                 {
-                    question: "Which communities do you serve?",
-                    answer: "We primarily serve Alameda, Oakland, and surrounding Bay Area communities. Check the 'Communities' section to see active community food programs in your area."
-                },
-                {
-                    question: "How can I track my impact?",
-                    answer: "Your user dashboard displays your donation history, pounds of food shared, families helped, and overall impact score. We also share community-wide impact metrics on the homepage."
-                },
-                {
-                    question: "Can I volunteer with All Good Living Foundation?",
-                    answer: "Yes! Visit our volunteer page or contact us at info@allgoodlivingfoundation.org to learn about volunteer opportunities including food distribution events, community closets, and more."
-                }
-            ]
-        },
-        {
-            category: "Technical Support",
-            questions: [
-                {
-                    question: "The website isn't working properly. What should I do?",
-                    answer: "Try refreshing your browser, clearing your cache, or using a different browser. If the issue persists, click the 'Feedback' button or contact us with details about the problem."
-                },
-                {
-                    question: "Can I use the platform on my mobile device?",
-                    answer: "Yes! The Do Good Store is fully responsive and works on smartphones, tablets, and desktop computers."
-                },
-                {
-                    question: "How do I report a bug or suggest a feature?",
-                    answer: "Click the 'Feedback' button at the bottom right of any page, select 'Bug Report' or 'Feature Request,' and describe the issue or suggestion. Our team reviews all feedback."
-                }
-            ]
-        },
-        {
-            category: "Contact & Support",
-            questions: [
-                {
-                    question: "How can I contact All Good Living Foundation?",
-                    answer: "Email: info@allgoodlivingfoundation.org\nPhone: 510-522-6288\nAddress: 1900 Thau Way, Alameda, CA 94501\nYou can also use the chat widget or contact form on the website."
-                },
-                {
-                    question: "What are your operating hours?",
-                    answer: "Our platform is available 24/7 for browsing and claiming food. Our support team responds to inquiries Monday-Friday, 9 AM - 5 PM PST. Emergency issues are addressed outside these hours."
-                },
-                {
-                    question: "Do you accept donations of other items besides food?",
-                    answer: "Currently, our platform focuses on food sharing. However, All Good Living Foundation operates Community Closets that accept clothing, school supplies, and other essentials. Contact us to learn more about those programs."
+                    question: "How can I get involved?",
+                    answer: "• Share surplus food\n• Encourage a restaurant or organization to join\n• Volunteer with AGLF\n• Spread the word\n\nDoing good is contagious—catch it."
                 }
             ]
         }
