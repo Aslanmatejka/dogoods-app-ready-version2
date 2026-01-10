@@ -4,6 +4,7 @@ import { FilterPanel } from '../components/food/FilterPanel';
 import { useGeoLocation } from '../utils/hooks/useLocation';
 import MainLayout from '../components/layout/MainLayout';
 import Button from '../components/common/Button';
+import dataService from '../utils/dataService';
 
 function NearMePage() {
     const [filters, setFilters] = useState({
@@ -32,25 +33,54 @@ function NearMePage() {
     const fetchNearbyListings = async () => {
         setLoading(true);
         try {
-            // TODO: Replace with actual API call
-            const listings = await fetch('/api/listings/nearby', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    radius: filters.radius,
-                    foodType: filters.foodType,
-                    dietaryPreferences: filters.dietaryPreferences,
-                    pickupTime: filters.pickupTime
-                })
-            }).then(res => res.json());
+            // Fetch all approved listings
+            const allListings = await dataService.getFoodListings({ status: 'approved' });
             
-            setNearbyListings(listings);
+            // Filter by distance if location is available
+            if (location && location.latitude && location.longitude) {
+                const filtered = allListings.filter(listing => {
+                    if (!listing.latitude || !listing.longitude) return false;
+                    
+                    // Calculate distance using Haversine formula
+                    const R = 6371; // Earth's radius in km
+                    const dLat = (listing.latitude - location.latitude) * Math.PI / 180;
+                    const dLon = (listing.longitude - location.longitude) * Math.PI / 180;
+                    const a = 
+                        Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.cos(location.latitude * Math.PI / 180) * 
+                        Math.cos(listing.latitude * Math.PI / 180) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    const distance = R * c;
+                    
+                    // Convert radius from miles to km (1 mile = 1.60934 km)
+                    const radiusKm = filters.radius * 1.60934;
+                    return distance <= radiusKm;
+                });
+                
+                // Apply additional filters
+                let result = filtered;
+                
+                if (filters.foodType) {
+                    result = result.filter(listing => listing.category === filters.foodType);
+                }
+                
+                if (filters.dietaryPreferences && filters.dietaryPreferences.length > 0) {
+                    result = result.filter(listing => {
+                        if (!listing.dietary_tags) return false;
+                        return filters.dietaryPreferences.some(pref => 
+                            listing.dietary_tags.includes(pref.toLowerCase())
+                        );
+                    });
+                }
+                
+                setNearbyListings(result);
+            } else {
+                setNearbyListings(allListings);
+            }
         } catch (error) {
             console.error('Error fetching nearby listings:', error);
+            setNearbyListings([]);
         } finally {
             setLoading(false);
         }
