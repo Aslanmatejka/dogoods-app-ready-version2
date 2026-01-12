@@ -96,13 +96,45 @@ export default function CommunityFoodPage() {
 
     return (
         <div className="max-w-6xl mx-auto py-10 px-4">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold">{community.name}</h1>
-                    <p className="text-sm text-gray-600">{community.location}</p>
+            <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 className="text-2xl font-bold">{community.name}</h1>
+                        <p className="text-sm text-gray-600 mt-1">
+                            <i className="fas fa-map-marker-alt mr-2"></i>
+                            {community.location}
+                        </p>
+                    </div>
+                    <div>
+                        <Button variant="secondary" onClick={() => navigate('/find')}>View All Listings</Button>
+                    </div>
                 </div>
-                <div>
-                    <Button variant="secondary" onClick={() => navigate('/find')}>View All Listings</Button>
+                
+                {/* Community Details */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="flex items-start">
+                        <i className="fas fa-user w-5 text-gray-500 mr-3 mt-1"></i>
+                        <div>
+                            <p className="text-xs font-semibold text-gray-700 uppercase">Contact</p>
+                            <p className="text-sm text-gray-900">{community.contact}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start">
+                        <i className="fas fa-phone w-5 text-gray-500 mr-3 mt-1"></i>
+                        <div>
+                            <p className="text-xs font-semibold text-gray-700 uppercase">Phone</p>
+                            <a href={`tel:${community.phone}`} className="text-sm text-blue-600 hover:underline">
+                                {community.phone}
+                            </a>
+                        </div>
+                    </div>
+                    <div className="flex items-start">
+                        <i className="fas fa-clock w-5 text-gray-500 mr-3 mt-1"></i>
+                        <div>
+                            <p className="text-xs font-semibold text-gray-700 uppercase">Hours</p>
+                            <p className="text-sm text-gray-900">{community.hours}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 

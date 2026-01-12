@@ -334,17 +334,9 @@ function HomePage() {
                                         />
                                         <div className="p-4">
                                             <h3 className="text-base font-semibold truncate mb-2">{community.name}</h3>
-                                            <div className="flex items-start text-xs text-gray-700 mb-1.5">
+                                            <div className="flex items-start text-xs text-gray-700 mb-3">
                                                 <i className="fas fa-map-marker-alt w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
                                                 <span>{community.location}</span>
-                                            </div>
-                                            <div className="flex items-start text-xs text-gray-700 mb-1.5">
-                                                <i className="fas fa-user w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
-                                                <span>Contact: {community.contact}</span>
-                                            </div>
-                                            <div className="flex items-start text-xs text-gray-700 mb-2">
-                                                <i className="fas fa-clock w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
-                                                <span>Hours: {community.hours}</span>
                                             </div>
 
                                             <div className="mt-3 pt-3 border-t space-y-2 bg-blue-50 p-2 rounded">
@@ -369,12 +361,6 @@ function HomePage() {
                                                     </span>
                                                     <span className="text-purple-700 font-bold">{schoolStaffHelpedValue.toLocaleString()}</span>
                                                 </div>
-                                            </div>
-
-                                            <div className="mt-3 pt-2 border-t">
-                                                <a href={`tel:${community.phone}`} className="text-sm text-blue-600 hover:underline">
-                                                    {community.phone}
-                                                </a>
                                             </div>
                                         </div>
                                     </Card>
