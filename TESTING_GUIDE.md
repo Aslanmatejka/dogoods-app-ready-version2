@@ -21,6 +21,7 @@ All major components are connected to Supabase:
 ### 1. Test Food Sharing Flow
 
 **Steps:**
+
 1. Log in as a regular user
 2. Navigate to "Share Food" page
 3. Fill out the form:
@@ -34,17 +35,19 @@ All major components are connected to Supabase:
 4. Submit the form
 
 **Expected Result:**
+
 - Form submits successfully
 - Listing is created with status `'pending'`
 - User is redirected to profile page
 - Listing appears in user's dashboard
 
 **Database Check:**
+
 ```sql
-SELECT id, title, status, created_at, user_id 
-FROM food_listings 
-WHERE title LIKE '%Test Fresh Apples%' 
-ORDER BY created_at DESC 
+SELECT id, title, status, created_at, user_id
+FROM food_listings
+WHERE title LIKE '%Test Fresh Apples%'
+ORDER BY created_at DESC
 LIMIT 1;
 ```
 
@@ -53,21 +56,24 @@ LIMIT 1;
 ### 2. Test Admin Approval Flow
 
 **Steps:**
+
 1. Log in as admin user (user with `is_admin = true`)
 2. Navigate to Admin → Content Moderation
 3. Look for "Test Fresh Apples" in pending listings
 4. Click "Approve" button
 
 **Expected Result:**
+
 - Listing status changes from `'pending'` to `'approved'`
 - Listing disappears from pending queue
 - Listing now appears on FindFood page
 - Listing appears on HomePage featured listings
 
 **Database Check:**
+
 ```sql
-SELECT id, title, status 
-FROM food_listings 
+SELECT id, title, status
+FROM food_listings
 WHERE title LIKE '%Test Fresh Apples%';
 ```
 
@@ -76,20 +82,23 @@ WHERE title LIKE '%Test Fresh Apples%';
 ### 3. Test Finding Food Flow
 
 **Steps:**
+
 1. Log in as a different user (not the donor)
 2. Navigate to "Find Food" page
 3. Verify "Test Fresh Apples" appears in the list
 4. Click on the listing to view details
 
 **Expected Result:**
+
 - Approved listing is visible
 - All details display correctly
 - "Claim Food" button is visible
 
 **Database Check:**
+
 ```sql
-SELECT COUNT(*) as approved_count 
-FROM food_listings 
+SELECT COUNT(*) as approved_count
+FROM food_listings
 WHERE status = 'approved';
 ```
 
@@ -98,6 +107,7 @@ WHERE status = 'approved';
 ### 4. Test Food Claiming Flow
 
 **Steps:**
+
 1. While viewing "Test Fresh Apples" listing
 2. Click "Claim Food" button
 3. Fill out the claim form:
@@ -110,17 +120,19 @@ WHERE status = 'approved';
 4. Submit the form
 
 **Expected Result:**
+
 - Claim is created with status `'pending'`
 - Success message is displayed
 - Claim appears in user's dashboard
 - Donor receives notification (if notifications are enabled)
 
 **Database Check:**
+
 ```sql
-SELECT id, requester_name, status, created_at, food_id 
-FROM food_claims 
-WHERE requester_name = 'Test User' 
-ORDER BY created_at DESC 
+SELECT id, requester_name, status, created_at, food_id
+FROM food_claims
+WHERE requester_name = 'Test User'
+ORDER BY created_at DESC
 LIMIT 1;
 ```
 
@@ -129,11 +141,13 @@ LIMIT 1;
 ### 5. Test Near Me Functionality
 
 **Steps:**
+
 1. Navigate to "Near Me" page
 2. Allow location access when prompted
 3. Verify listings are filtered by distance
 
 **Expected Result:**
+
 - Location permission is requested
 - Listings are filtered based on user's location
 - Distance radius can be adjusted
@@ -146,21 +160,24 @@ LIMIT 1;
 ### 6. Test HomePage Featured Listings
 
 **Steps:**
+
 1. Log out (or open incognito window)
 2. Go to homepage
 3. Scroll to "Featured Food Listings" section
 
 **Expected Result:**
+
 - Shows up to 6 approved listings
 - "Test Fresh Apples" appears if it's one of the latest
 - Clicking listing navigates to claim page (for logged-in users)
 
 **Database Check:**
+
 ```sql
-SELECT id, title, status, created_at 
-FROM food_listings 
-WHERE status = 'approved' 
-ORDER BY created_at DESC 
+SELECT id, title, status, created_at
+FROM food_listings
+WHERE status = 'approved'
+ORDER BY created_at DESC
 LIMIT 6;
 ```
 
@@ -169,12 +186,14 @@ LIMIT 6;
 ## Current Database State
 
 **Existing Data:**
+
 - 1 approved food listing: "mangoes"
 - 0 food claims
 - Database constraints: Date unique constraint removed from impact_data
 - All RLS policies active for food_listings and food_claims
 
 **Known Issues:**
+
 - ✅ Organization/Community dropdowns in Impact Data Entry - FIXED
 - ✅ Featured listings not showing - FIXED (changed from 'active' to 'approved')
 - ✅ NearMePage not connected - FIXED
@@ -188,13 +207,13 @@ To test admin features, ensure you have an admin user:
 
 ```sql
 -- Check current admin users
-SELECT id, email, name, is_admin, role 
-FROM users 
+SELECT id, email, name, is_admin, role
+FROM users
 WHERE is_admin = true OR role = 'admin';
 
 -- Make a user admin (replace with your email)
-UPDATE users 
-SET is_admin = true, role = 'admin' 
+UPDATE users
+SET is_admin = true, role = 'admin'
 WHERE email = 'your-email@example.com';
 ```
 
@@ -203,13 +222,15 @@ WHERE email = 'your-email@example.com';
 ## Quick Test Commands
 
 ### Check all food listings:
+
 ```sql
-SELECT id, title, status, created_at 
-FROM food_listings 
+SELECT id, title, status, created_at
+FROM food_listings
 ORDER BY created_at DESC;
 ```
 
 ### Check all claims:
+
 ```sql
 SELECT fc.id, fc.requester_name, fc.status, fl.title as food_title
 FROM food_claims fc
@@ -218,8 +239,9 @@ ORDER BY fc.created_at DESC;
 ```
 
 ### Check user stats:
+
 ```sql
-SELECT 
+SELECT
     u.email,
     COUNT(DISTINCT fl.id) as listings_count,
     COUNT(DISTINCT fc.id) as claims_count

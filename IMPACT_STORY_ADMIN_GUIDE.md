@@ -42,16 +42,19 @@ Once edit mode is active:
 ## Editable Content Sections
 
 ### Hero Section
+
 - **Title**: "Our Impact Story"
 - **Subtitle**: Main tagline about the platform
 
 ### Featured Section
+
 - **Title**: "Bridging the Gap Between Surplus and Need"
 - **Paragraph 1**: First featured description
 - **Paragraph 2**: Second featured description
 - **Button Text**: "Join Our Network →"
 
 ### Stories Section
+
 - **Sarah's Story**:
   - Title: "Sarah's Story: From Volunteer to Champion"
   - Quote: Full testimonial text
@@ -63,6 +66,7 @@ Once edit mode is active:
   - Attribution: "— Michael Chen, Owner, Golden Wok Restaurant"
 
 ### News Section
+
 - **Quote**: Food bank director testimonial
 - **Attribution**: "Director of Community Services"
 - **Organization**: "Alameda County Food Bank"
@@ -70,6 +74,7 @@ Once edit mode is active:
 - **Button Text**: "Support Our Mission"
 
 ### Gallery Section
+
 - **Community Centers**:
   - Title: "Community Centers"
   - Description: Stats about community partnerships
@@ -85,18 +90,20 @@ Once edit mode is active:
 - **Button Text**: "View All Stories"
 
 ### Call-to-Action (CTA) Section
+
 - **Title**: "Be Part of Our Story"
 - **Subtitle**: Motivational message
 - **Button 1 Text**: "Join the Platform"
 - **Button 2 Text**: "Support Our Mission"
 
 ### Newsletter Section
+
 - **Title**: "Stay Updated on Our Impact"
 - **Description**: Newsletter signup description
 - **Form Labels**:
-  - First Name Label: "First Name *"
-  - Last Name Label: "Last Name *"
-  - Email Label: "Email Address *"
+  - First Name Label: "First Name \*"
+  - Last Name Label: "Last Name \*"
+  - Email Label: "Email Address \*"
 - **Consent Text**: Privacy agreement text
 - **Button Text**: "Subscribe to Newsletter"
 - **Button Submitting Text**: "Subscribing..."
@@ -112,6 +119,7 @@ SELECT * FROM page_content WHERE page_name = 'impact-story';
 ```
 
 **Table Structure:**
+
 - `id` (UUID): Unique identifier
 - `page_name` (VARCHAR): Always "impact-story" for this page
 - `content` (JSONB): All editable content as key-value pairs
@@ -119,6 +127,7 @@ SELECT * FROM page_content WHERE page_name = 'impact-story';
 - `updated_at` (TIMESTAMP): Last edit time
 
 **Content Keys Examples:**
+
 - `heroTitle`: Hero section title
 - `heroSubtitle`: Hero section subtitle
 - `featuredTitle`: Featured section heading
@@ -136,6 +145,7 @@ The page has a **dual-storage system** for reliability:
 2. **Backup**: Also saves to browser `localStorage`
 
 If Supabase is unavailable:
+
 - Changes save to localStorage automatically
 - Content loads from localStorage on next visit
 - Admins will see a warning that changes may not persist
@@ -145,18 +155,21 @@ If Supabase is unavailable:
 ## Best Practices
 
 ### Content Guidelines
+
 1. **Keep it concise**: Shorter testimonials are more impactful
 2. **Update stats regularly**: Refresh numbers monthly/quarterly
 3. **Test links**: Ensure all buttons point to correct URLs
 4. **Check mobile**: View changes on mobile devices
 
 ### Technical Tips
+
 1. **Save frequently**: Click "Save Changes" after each major edit
 2. **Preview before saving**: Review all changes in edit mode
 3. **Use Cancel wisely**: If you make a mistake, click "Cancel" to revert
 4. **Check the database**: Verify changes persisted with SQL query above
 
 ### Common Issues
+
 - **Changes not saving**: Check browser console for errors
 - **Content not loading**: Verify you're logged in as admin
 - **Edit button not visible**: Confirm `is_admin = true` in `users` table
@@ -167,7 +180,9 @@ If Supabase is unavailable:
 ## Permissions
 
 ### Admin Access Required
+
 Only users with **`is_admin = true`** can:
+
 - See the floating edit button
 - Enter edit mode
 - Save content changes
@@ -177,8 +192,8 @@ Only users with **`is_admin = true`** can:
 To make a user an admin, run this SQL in Supabase:
 
 ```sql
-UPDATE users 
-SET is_admin = true, role = 'admin' 
+UPDATE users
+SET is_admin = true, role = 'admin'
 WHERE email = 'admin@example.com';
 ```
 
@@ -228,7 +243,7 @@ CREATE POLICY "Only admins can update page content"
 ✅ **Cancel Option**: Revert changes before saving  
 ✅ **Admin-Only**: Secured with role-based access control  
 ✅ **No Code Required**: Content team can edit without developers  
-✅ **Mobile Friendly**: Edit toolbar adapts to screen size  
+✅ **Mobile Friendly**: Edit toolbar adapts to screen size
 
 ---
 
