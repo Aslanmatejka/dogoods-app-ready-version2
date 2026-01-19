@@ -148,7 +148,7 @@ function HomePage() {
                             aria-labelledby="hero-heading"
                         >
                             <div className="container mx-auto px-4">
-                                <div className="max-w-3xl">
+                                <div className="max-w-3xl mx-auto text-center">
                                     <h1 
                                         id="hero-heading"
                                         className="text-4xl md:text-5xl font-bold mb-6 text-white drop-shadow-lg"
@@ -284,96 +284,50 @@ function HomePage() {
                         </div>
                     </section> */}
 
-                    {/* Communities Section */}
+                    {/* Categories Section */}
                     <section 
                         className="py-16 bg-white"
-                        aria-labelledby="communities-heading"
+                        aria-labelledby="categories-heading"
                     >
                         <div className="container mx-auto px-4">
                             <div className="text-center mb-12">
                                 <h2 
-                                    id="communities-heading"
+                                    id="categories-heading"
                                     className="text-3xl font-bold text-gray-900 mb-4"
                                 >
-                                    Active Communities
+                                    Browse by Category
                                 </h2>
                                 <p className="text-xl text-gray-600">
-                                    Join local food sharing groups in your area
+                                    Need food now? Browse available food by category
                                 </p>
                             </div>
 
-                            {loadingCommunities ? (
-                                <div className="col-span-full text-center py-8">
-                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-                                    <p className="mt-4 text-gray-600">Loading communities...</p>
-                                </div>
-                            ) : (
-                            <div 
-                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto"
+                            <div
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
                                 role="list"
-                                aria-label="Active communities"
+                                aria-label="Food categories"
                             >
-                                {communities.map((community) => {
-                                    // Extract metric values from database
-                                    const foodGivenValue = Math.round(parseFloat(community.food_given_lb) || 0);
-                                    const familiesHelpedValue = parseInt(community.families_helped) || 0;
-                                    const schoolStaffHelpedValue = parseInt(community.school_staff_helped) || 0;
-                                    
-                                    return (
-                                    <Card
-                                        key={community.id}
-                                        className="overflow-hidden"
-                                        role="listitem"
-                                        hoverable={true}
-                                        onClick={() => handleNavigation(`/community/${community.id}`)}
-                                    >
-                                        <img
-                                            src={community.image}
-                                            alt={`${community.name} community`}
-                                            className="w-full h-64 object-cover"
+                                {foodCategories.map((category, index) => (
+                                    <div key={index} role="listitem">
+                                        <CategoryCard
+                                            category={category}
+                                            onClick={() => handleNavigation(`/find?category=${category.id}`)}
                                         />
-                                        <div className="p-4">
-                                            <h3 className="text-base font-semibold truncate mb-2">{community.name}</h3>
-                                            <div className="flex items-start text-xs text-gray-700 mb-3">
-                                                <i className="fas fa-map-marker-alt w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
-                                                <span>{community.location}</span>
-                                            </div>
+                                    </div>
+                                ))}
+                            </div>
 
-                                            <div className="mt-3 pt-3 border-t space-y-2 bg-blue-50 p-2 rounded">
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-gray-700 font-medium">
-                                                        <i className="fas fa-apple-alt text-green-600 mr-1"></i>
-                                                        Food Given (lb)
-                                                    </span>
-                                                    <span className="text-green-700 font-bold">{foodGivenValue.toLocaleString()}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-gray-700 font-medium">
-                                                        <i className="fas fa-users text-blue-600 mr-1"></i>
-                                                        Families Helped
-                                                    </span>
-                                                    <span className="text-blue-700 font-bold">{familiesHelpedValue.toLocaleString()}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-gray-700 font-medium">
-                                                        <i className="fas fa-chalkboard-teacher text-purple-600 mr-1"></i>
-                                                        School Staff Helped
-                                                    </span>
-                                                    <span className="text-purple-700 font-bold">{schoolStaffHelpedValue.toLocaleString()}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                )})}
-                            </div>                            )}
-                            <div className="text-center">
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => handleNavigation('/community')}
-                                    aria-label="View all food sharing communities"
+                            {/* All Available Food Card */}
+                            <div className="mt-6 max-w-7xl mx-auto">
+                                <button
+                                    onClick={() => handleNavigation('/find')}
+                                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-8 flex items-center justify-center gap-3"
+                                    aria-label="View all available food"
                                 >
-                                    View all communities
-                                </Button>
+                                    <i className="fas fa-utensils text-2xl"></i>
+                                    <span className="text-2xl font-bold">All Available Food</span>
+                                    <i className="fas fa-arrow-right text-2xl"></i>
+                                </button>
                             </div>
                         </div>
                     </section>
@@ -439,50 +393,110 @@ function HomePage() {
                         </div>
                     </section>
 
-                    {/* Categories Section */}
+                    {/* Communities Section */}
                     <section 
-                        className="py-16 bg-white"
-                        aria-labelledby="categories-heading"
+                        className="py-16 bg-gray-50"
+                        aria-labelledby="communities-heading"
                     >
                         <div className="container mx-auto px-4">
                             <div className="text-center mb-12">
                                 <h2 
-                                    id="categories-heading"
+                                    id="communities-heading"
                                     className="text-3xl font-bold text-gray-900 mb-4"
                                 >
-                                    Browse by Category
+                                    Active Communities
                                 </h2>
                                 <p className="text-xl text-gray-600">
-                                    Need food now? Browse available food by category
+                                    Join local food sharing groups in your area
                                 </p>
                             </div>
 
-                            <div
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
+                            {loadingCommunities ? (
+                                <div className="col-span-full text-center py-8">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                                    <p className="mt-4 text-gray-600">Loading communities...</p>
+                                </div>
+                            ) : (
+                            <div 
+                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto"
                                 role="list"
-                                aria-label="Food categories"
+                                aria-label="Active communities"
                             >
-                                {foodCategories.map((category, index) => (
-                                    <div key={index} role="listitem">
-                                        <CategoryCard
-                                            category={category}
-                                            onClick={() => handleNavigation(`/find?category=${category.id}`)}
+                                {communities.map((community) => {
+                                    // Extract metric values from database
+                                    const foodGivenValue = Math.round(parseFloat(community.food_given_lb) || 0);
+                                    const familiesHelpedValue = parseInt(community.families_helped) || 0;
+                                    const schoolStaffHelpedValue = parseInt(community.school_staff_helped) || 0;
+                                    
+                                    return (
+                                    <Card
+                                        key={community.id}
+                                        className="overflow-hidden"
+                                        role="listitem"
+                                        hoverable={true}
+                                        onClick={() => handleNavigation(`/community/${community.id}`)}
+                                    >
+                                        <img
+                                            src={community.image}
+                                            alt={`${community.name} community`}
+                                            className="w-full h-64 object-cover"
                                         />
-                                    </div>
-                                ))}
-                            </div>
+                                        <div className="p-4">
+                                            <h3 className="text-base font-semibold truncate mb-2">{community.name}</h3>
+                                            <div className="flex items-start text-xs text-gray-700 mb-1.5">
+                                                <i className="fas fa-map-marker-alt w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
+                                                <span>{community.location}</span>
+                                            </div>
+                                            <div className="flex items-start text-xs text-gray-700 mb-1.5">
+                                                <i className="fas fa-user w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
+                                                <span>Contact: {community.contact}</span>
+                                            </div>
+                                            <div className="flex items-start text-xs text-gray-700 mb-2">
+                                                <i className="fas fa-clock w-4 text-center mr-2 mt-0.5 text-gray-500"></i>
+                                                <span>Hours: {community.hours}</span>
+                                            </div>
 
-                            {/* All Available Food Card */}
-                            <div className="mt-6 max-w-7xl mx-auto">
-                                <button
-                                    onClick={() => handleNavigation('/find')}
-                                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-8 flex items-center justify-center gap-3"
-                                    aria-label="View all available food"
+                                            <div className="mt-3 pt-3 border-t space-y-2 bg-blue-50 p-2 rounded">
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-gray-700 font-medium">
+                                                        <i className="fas fa-apple-alt text-green-600 mr-1"></i>
+                                                        Food Given (lb)
+                                                    </span>
+                                                    <span className="text-green-700 font-bold">{foodGivenValue.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-gray-700 font-medium">
+                                                        <i className="fas fa-users text-blue-600 mr-1"></i>
+                                                        Families Helped
+                                                    </span>
+                                                    <span className="text-blue-700 font-bold">{familiesHelpedValue.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-gray-700 font-medium">
+                                                        <i className="fas fa-chalkboard-teacher text-purple-600 mr-1"></i>
+                                                        School Staff Helped
+                                                    </span>
+                                                    <span className="text-purple-700 font-bold">{schoolStaffHelpedValue.toLocaleString()}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3 pt-2 border-t">
+                                                <a href={`tel:${community.phone}`} className="text-sm text-blue-600 hover:underline">
+                                                    {community.phone}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                )})}
+                            </div>                            )}
+                            <div className="text-center">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => handleNavigation('/community')}
+                                    aria-label="View all food sharing communities"
                                 >
-                                    <i className="fas fa-utensils text-2xl"></i>
-                                    <span className="text-2xl font-bold">All Available Food</span>
-                                    <i className="fas fa-arrow-right text-2xl"></i>
-                                </button>
+                                    View all communities
+                                </Button>
                             </div>
                         </div>
                     </section>
