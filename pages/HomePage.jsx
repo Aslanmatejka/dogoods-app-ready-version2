@@ -502,7 +502,7 @@ function HomePage() {
                     </section>
 
                     {/* Support the Community Section */}
-                    <section className="mt-10">
+                    <section className="mt-16 mb-16">
                         <div className="container mx-auto px-4">
                             <h2 className="text-2xl font-bold mb-4">Support the Community</h2>
                             <DonateVolunteerButtons />
