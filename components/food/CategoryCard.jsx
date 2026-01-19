@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
 import { reportError } from '../../utils/helpers';
 
 function CategoryCard({
@@ -9,14 +8,13 @@ function CategoryCard({
 }) {
     const [imageError, setImageError] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
-    const navigate = useNavigate();
 
     const handleClick = () => {
         if (onClick) {
             onClick(category);
         } else {
             // Navigate to find page with category filter
-            navigate(`/find?category=${category.id}`);
+            window.location.href = `/find?category=${category.id}`;
         }
     };
 
