@@ -11,7 +11,7 @@ function Header({
         { label: 'Find Food', path: '/find' },
         { label: 'Community', path: '/community' },
         { 
-            label: 'Support', 
+            label: 'Support Us', 
             dropdown: [
                 { label: 'Donate', path: 'https://allgoodlivingfoundation.org/donate', external: true },
                 { label: 'Volunteer', path: 'https://allgoodlivingfoundation.org/volunteer-form', external: true }
