@@ -49,21 +49,29 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 function AppContent() {
     const location = useLocation();
     
-    // Scroll to top on route change, except for hash navigation
+    // Scroll to top on route change (handles forward navigation, back button, and all route changes)
     React.useEffect(() => {
-        if (!location.hash) {
-            // Scroll to top for regular navigation
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        } else {
-            // For hash navigation, let browser handle scrolling to anchor
-            setTimeout(() => {
-                const element = document.querySelector(location.hash);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 0);
+        // Don't scroll if there's a hash (user wants to go to a specific section)
+        if (location.hash) {
+            // Let the browser handle hash navigation
+            const element = document.getElementById(location.hash.slice(1));
+            if (element) {
+                setTimeout(() => element.scrollIntoView({ behavior: 'smooth' }), 0);
+            }
+            return;
         }
-    }, [location.pathname, location.hash]);
+        
+        // Use setTimeout to ensure the scroll happens after React finishes rendering
+        const scrollTimeout = setTimeout(() => {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'instant' // Use 'instant' to avoid smooth scroll conflicts
+            });
+        }, 0);
+        
+        return () => clearTimeout(scrollTimeout);
+    }, [location.pathname, location.search, location.hash]);
 
     const ProtectedRoute = ({ children }) => {
         const { isAuthenticated, loading } = useAuthContext();
