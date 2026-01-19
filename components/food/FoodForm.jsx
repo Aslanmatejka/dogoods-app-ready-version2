@@ -422,7 +422,7 @@ function FoodForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
                 <Input
-                    label="Title"
+                    label="What are you donating?"
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
