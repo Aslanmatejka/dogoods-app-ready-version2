@@ -13,6 +13,8 @@ function ImpactDataEntry() {
     const [activeTab, setActiveTab] = React.useState('organizations');
     const [communities, setCommunities] = React.useState([]);
     const [organizations, setOrganizations] = React.useState([]);
+    const [showArchived, setShowArchived] = React.useState(false);
+    const [dateFilter, setDateFilter] = React.useState('recent'); // 'recent', 'current-month', 'last-3-months', 'all'
 
     // Refs for organization impact entries
     const orgRowRefs = React.useRef({
@@ -179,12 +181,43 @@ function ImpactDataEntry() {
     };
 
     const filteredData = React.useMemo(() => {
+        let filtered = data;
+        
+        // Filter by tab (organizations or communities)
         if (activeTab === 'organizations') {
-            return data.filter(row => row.organization && row.organization.trim() !== '');
+            filtered = filtered.filter(row => row.organization && row.organization.trim() !== '');
         } else {
-            return data.filter(row => row.communities_served && row.communities_served.trim() !== '');
+            filtered = filtered.filter(row => row.communities_served && row.communities_served.trim() !== '');
         }
-    }, [data, activeTab]);
+        
+        // Filter by date range
+        if (dateFilter !== 'all') {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            
+            filtered = filtered.filter(row => {
+                const rowDate = new Date(row.date);
+                
+                switch (dateFilter) {
+                    case 'current-month':
+                        return rowDate.getFullYear() === currentYear && rowDate.getMonth() === currentMonth;
+                    case 'last-3-months':
+                        const threeMonthsAgo = new Date(now);
+                        threeMonthsAgo.setMonth(currentMonth - 3);
+                        return rowDate >= threeMonthsAgo;
+                    case 'recent':
+                    default:
+                        // Show last 2 months by default
+                        const twoMonthsAgo = new Date(now);
+                        twoMonthsAgo.setMonth(currentMonth - 2);
+                        return rowDate >= twoMonthsAgo;
+                }
+            });
+        }
+        
+        return filtered;
+    }, [data, activeTab, dateFilter]);
 
     const handleAddOrgRow = async () => {
         try {
@@ -450,6 +483,62 @@ function ImpactDataEntry() {
                             <i className="fas fa-download mr-2"></i>
                             Export CSV
                         </Button>
+                    </div>
+                </div>
+
+                {/* Date Filter Controls */}
+                <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div className="flex items-center gap-2">
+                            <i className="fas fa-filter text-blue-600"></i>
+                            <span className="font-medium text-gray-700">Show entries from:</span>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                            <button
+                                onClick={() => setDateFilter('current-month')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilter === 'current-month'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-blue-100'
+                                }`}
+                            >
+                                Current Month
+                            </button>
+                            <button
+                                onClick={() => setDateFilter('recent')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilter === 'recent'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-blue-100'
+                                }`}
+                            >
+                                Last 2 Months
+                            </button>
+                            <button
+                                onClick={() => setDateFilter('last-3-months')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilter === 'last-3-months'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-blue-100'
+                                }`}
+                            >
+                                Last 3 Months
+                            </button>
+                            <button
+                                onClick={() => setDateFilter('all')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilter === 'all'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-blue-100'
+                                }`}
+                            >
+                                <i className="fas fa-archive mr-1"></i>
+                                All (Archived)
+                            </button>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                            Showing <span className="font-semibold text-blue-700">{filteredData.length}</span> of <span className="font-semibold">{data.length}</span> total entries
+                        </div>
                     </div>
                 </div>
 
