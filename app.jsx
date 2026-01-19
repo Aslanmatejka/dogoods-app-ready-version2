@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import ClaimFoodForm from './pages/ClaimFoodForm.jsx';
 import HomePage from './pages/HomePage';
 import HowItWorks from './pages/HowItWorks';
@@ -47,6 +47,13 @@ import AdminRoute from './components/admin/AdminRoute.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 function AppContent() {
+    const location = useLocation();
+    
+    // Scroll to top on route change
+    React.useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
+
     const ProtectedRoute = ({ children }) => {
         const { isAuthenticated, loading } = useAuthContext();
         const navigate = useNavigate();

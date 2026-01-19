@@ -15,6 +15,7 @@ function AdminLayout({ children, active }) {
 
     const handleNavigation = (path) => {
         navigate(path);
+        window.scrollTo(0, 0);
         setIsMobileSidebarOpen(false);
     };
 
