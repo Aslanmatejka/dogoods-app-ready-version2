@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import { formatDate, getExpirationStatus, reportError } from "../../utils/helpers";
 import Card from "../common/Card";
 import Avatar from "../common/Avatar";
@@ -71,8 +72,10 @@ function FoodCard({
         }
     };
 
+    const navigate = useNavigate();
+    
     const handleReturn = () => {
-        window.location.href = '/';
+        navigate('/');
     };
 
     const handleAIRecipes = async () => {

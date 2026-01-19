@@ -1,19 +1,21 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import Card from "../components/common/Card";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { reportError } from "../utils/helpers";
 import { useAuth, useNotifications } from "../utils/hooks/useSupabase";
 
 function Notifications() {
+    const navigate = useNavigate();
     const { user: authUser, isAuthenticated } = useAuth();
     const { notifications, loading, error, markAsRead, unreadCount } = useNotifications(authUser?.id);
 
     React.useEffect(() => {
         if (!isAuthenticated) {
-            window.location.href = '/login';
+            navigate('/login');
             return;
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, navigate]);
 
     const handleMarkAsRead = async (notificationId) => {
         try {

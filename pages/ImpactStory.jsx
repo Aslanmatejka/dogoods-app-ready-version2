@@ -435,7 +435,7 @@ function ImpactStory() {
                             >
                                 {getContent('featuredP2', 'Our platform connects donors with recipients within minutes, ensuring fresh food reaches those who need it most. Through intelligent routing and automated coordination, we\'ve created a seamless network that turns potential waste into community nourishment.')} 
                             </p>
-                            <button onClick={() => window.location.href='/share'} 
+                            <button onClick={() => navigate('/share')} 
                                 className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors inline-flex items-center gap-2">
                                 <span 
                                     className="editable"

@@ -49,10 +49,21 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 function AppContent() {
     const location = useLocation();
     
-    // Scroll to top on route change
+    // Scroll to top on route change, except for hash navigation
     React.useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [location.pathname]);
+        if (!location.hash) {
+            // Scroll to top for regular navigation
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        } else {
+            // For hash navigation, let browser handle scrolling to anchor
+            setTimeout(() => {
+                const element = document.querySelector(location.hash);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 0);
+        }
+    }, [location.pathname, location.hash]);
 
     const ProtectedRoute = ({ children }) => {
         const { isAuthenticated, loading } = useAuthContext();

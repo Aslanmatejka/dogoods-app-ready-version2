@@ -14,6 +14,7 @@ const formatDate = (date) => {
 };
 
 function UserListings() {
+    const navigate = useNavigate();
     const { user: authUser, isAuthenticated } = useAuth();
     const { listings, loading, error, createListing, updateListing, deleteListing } = useFoodListings({ user_id: authUser?.id });
     
@@ -25,7 +26,7 @@ function UserListings() {
 
     React.useEffect(() => {
         if (!isAuthenticated) {
-            window.location.href = '/login';
+            navigate('/login');
             return;
         }
     }, [isAuthenticated]);
