@@ -134,6 +134,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             // Create custom marker element
             const el = document.createElement('div');
             el.className = 'custom-marker';
+            el.style.pointerEvents = 'auto';
             el.innerHTML = `
                 <div style="
                     width: 40px;
@@ -143,6 +144,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                     justify-content: center;
                     cursor: pointer;
                     transition: transform 0.2s;
+                    pointer-events: auto;
                 ">
                     <div style="position: relative;">
                         <div style="
@@ -201,9 +203,6 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 .addTo(map.current);
 
             markersRef.current.push(marker);
-
-            // Show popup directly on the map
-            showPopup(listing);
         });
     };
 
