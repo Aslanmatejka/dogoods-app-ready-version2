@@ -15,7 +15,7 @@ const API_CONFIG = {
         }
     },
     MAPBOX: {
-        ACCESS_TOKEN: ENV.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiZG9nb29kc2FwcCIsImEiOiJjbHd5ejN4eGYwMDJ5MmpwaDloZzB6dGJ3In0.placeholder'
+        ACCESS_TOKEN: ENV.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q'
     },
     RATE_LIMITS: {
         DEFAULT: {

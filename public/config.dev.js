@@ -6,6 +6,9 @@ window.__ENV__ = {
     DEEPSEEK_API_ENDPOINT: 'https://api.deepseek.com/v1',
     DEEPSEEK_MODEL_VERSION: '1.0.0',
     
+    // Mapbox Configuration
+    VITE_MAPBOX_TOKEN: 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q',
+    
     // API Settings
     API_TIMEOUT: '30000',
     API_MAX_RETRIES: '3',
