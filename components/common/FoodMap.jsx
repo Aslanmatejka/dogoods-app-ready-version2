@@ -40,7 +40,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
         try {
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/light-v11', // Lighter, faster style
+                style: 'mapbox://styles/mapbox/streets-v12', // Modern colorful style
                 center: [-122.27, 37.82], // East Bay - covers San Francisco, Oakland, and Berkeley
                 zoom: 11,
                 attributionControl: true,
