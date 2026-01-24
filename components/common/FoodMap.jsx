@@ -41,8 +41,8 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
                 style: 'mapbox://styles/mapbox/light-v11', // Lighter, faster style
-                center: [-122.4194, 37.7749], // San Francisco, California
-                zoom: 12,
+                center: [-122.27, 37.82], // East Bay - covers San Francisco, Oakland, and Berkeley
+                zoom: 11,
                 attributionControl: true,
                 accessToken: MAPBOX_TOKEN,
                 renderWorldCopies: false,
