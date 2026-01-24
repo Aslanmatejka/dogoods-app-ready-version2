@@ -190,7 +190,10 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 showPopup(listing);
             });
 
-            const marker = new mapboxgl.Marker(el)
+            const marker = new mapboxgl.Marker({
+                element: el,
+                anchor: 'bottom'
+            })
                 .setLngLat([listing.longitude, listing.latitude])
                 .addTo(map.current);
 
