@@ -57,7 +57,7 @@ function ShareFoodPageContent() {
             const listingData = {
                 ...formData,
                 user_id: authUser.id,
-                status: 'pending',
+                status: 'approved',
                 image_url: imageUrl,
                 listing_type: 'donation',
             };
