@@ -186,17 +186,6 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 </div>
             `;
 
-            // Store the inner div reference for transformations
-            const innerDiv = el.querySelector('div');
-
-            el.addEventListener('mouseenter', () => {
-                if (innerDiv) innerDiv.style.transform = 'scale(1.1)';
-            });
-
-            el.addEventListener('mouseleave', () => {
-                if (innerDiv) innerDiv.style.transform = 'scale(1)';
-            });
-
             el.addEventListener('click', () => {
                 showPopup(listing);
             });
