@@ -137,9 +137,9 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             el.innerHTML = `
                 <div style="
                     width: 40px;
-                    height: 40px;
+                    height: 50px;
                     display: flex;
-                    align-items: center;
+                    align-items: flex-end;
                     justify-content: center;
                     cursor: pointer;
                     transition: transform 0.2s;
@@ -148,19 +148,36 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                         <div style="
                             position: absolute;
                             inset: -4px;
-                            background: rgba(34, 197, 94, 0.4);
-                            border-radius: 50%;
+                            background: rgba(239, 68, 68, 0.4);
+                            border-radius: 50% 50% 50% 0;
+                            transform: rotate(-45deg);
                             filter: blur(4px);
                         "></div>
                         <div style="
                             position: relative;
-                            background: rgb(22, 163, 74);
-                            border-radius: 50%;
-                            padding: 8px;
+                            background: rgb(220, 38, 38);
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 50% 50% 50% 0;
+                            transform: rotate(-45deg);
                             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
                         ">
-                            <i class="fas fa-utensils" style="color: white; font-size: 16px;"></i>
+                            <i class="fas fa-apple-alt" style="color: white; font-size: 14px; transform: rotate(45deg);"></i>
                         </div>
+                        <div style="
+                            position: absolute;
+                            bottom: -8px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            width: 0;
+                            height: 0;
+                            border-left: 4px solid transparent;
+                            border-right: 4px solid transparent;
+                            border-top: 8px solid rgb(220, 38, 38);
+                        "></div>
                     </div>
                 </div>
             `;
