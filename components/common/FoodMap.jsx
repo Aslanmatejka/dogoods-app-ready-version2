@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import supabase from '../../utils/supabaseClient';
 import { getApiConfig } from '../../utils/config';
 
-const MAPBOX_TOKEN = getApiConfig().MAPBOX.ACCESS_TOKEN;
+const MAPBOX_TOKEN = getApiConfig().MAPBOX?.ACCESS_TOKEN || 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
 
 function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const navigate = useNavigate();
@@ -102,10 +102,6 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                         longitude={listing.longitude}
                         latitude={listing.latitude}
                         anchor="bottom"
-                        onClick={(e) => {
-                            e.originalEvent.stopPropagation();
-                            handleMarkerClick(listing);
-                        }}
                     >
                         <div 
                             className="cursor-pointer transform hover:scale-110 transition-transform"
@@ -116,6 +112,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}
+                            onClick={() => handleMarkerClick(listing)}
                         >
                             <div className="relative">
                                 <div className="absolute -inset-1 bg-green-400 rounded-full opacity-75 blur-sm"></div>
@@ -134,7 +131,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                         anchor="top"
                         onClose={() => setSelectedListing(null)}
                         closeOnClick={false}
-                        className="food-popup"
+                        maxWidth="320px"
                     >
                         <div className="p-3 max-w-xs">
                             {selectedListing.image_url && (
