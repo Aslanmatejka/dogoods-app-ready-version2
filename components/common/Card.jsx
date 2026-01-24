@@ -81,12 +81,12 @@ function Card({
                 )}
 
                 {subtitle && (
-                    <p 
+                    <div 
                         className="text-sm text-gray-500 mb-4"
                         id="card-subtitle"
                     >
                         {subtitle}
-                    </p>
+                    </div>
                 )}
 
                 {children}
@@ -107,7 +107,7 @@ function Card({
 Card.propTypes = {
     children: PropTypes.node,
     title: PropTypes.string,
-    subtitle: PropTypes.string,
+    subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     image: PropTypes.string,
     imageAlt: PropTypes.string,
     footer: PropTypes.node,

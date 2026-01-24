@@ -229,23 +229,23 @@ FoodCard.propTypes = {
     food: PropTypes.shape({
         id: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
-        image_url: PropTypes.string.isRequired,
-        quantity: PropTypes.number.isRequired,
-        unit: PropTypes.string.isRequired,
-        expiryDate: PropTypes.string.isRequired,
-        location: PropTypes.string.isRequired,
+        description: PropTypes.string,
+        image_url: PropTypes.string,
+        quantity: PropTypes.number,
+        unit: PropTypes.string,
+        expiry_date: PropTypes.string,
+        location: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
         type: PropTypes.oneOf(['donation', 'trade']),
-        donor: PropTypes.shape({
-            id: PropTypes.string.isRequired,
-            name: PropTypes.string.isRequired,
-            avatar: PropTypes.string.isRequired
-        }).isRequired
+        donor_name: PropTypes.string,
+        donor_city: PropTypes.string,
+        donor_state: PropTypes.string,
+        users: PropTypes.oneOfType([PropTypes.object, PropTypes.array])
     }).isRequired,
     onClaim: PropTypes.func,
     onTrade: PropTypes.func,
     className: PropTypes.string,
-    showReturnButton: PropTypes.bool
+    showReturnButton: PropTypes.bool,
+    distance: PropTypes.number
 };
 
 export default FoodCard;

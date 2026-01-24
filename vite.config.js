@@ -29,6 +29,12 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env': env
+    },
+    worker: {
+      format: 'es'
+    },
+    optimizeDeps: {
+      exclude: ['mapbox-gl']
     }
   };
 }); 

@@ -20,7 +20,7 @@ function CategoryCard({
 
     const handleImageError = () => {
         setImageError(true);
-        reportError(new Error(`Failed to load image for category: ${category.id}`));
+        // Image load failures are expected and handled gracefully with fallback UI
     };
 
     const handleImageLoad = () => {

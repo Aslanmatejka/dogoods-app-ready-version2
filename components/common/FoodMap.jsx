@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../utils/supabaseClient';
-import { getApiConfig } from '../../utils/config';
 
-const MAPBOX_TOKEN = getApiConfig().MAPBOX?.ACCESS_TOKEN || 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
+// Mapbox is loaded via CDN in index.html
+// Access it from window.mapboxgl
+const getMapboxgl = () => window.mapboxgl;
 
-mapboxgl.accessToken = MAPBOX_TOKEN;
+// Set Mapbox access token directly
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
+
+console.log('🔑 Mapbox token set:', MAPBOX_TOKEN.substring(0, 20) + '...');
 
 function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const navigate = useNavigate();
@@ -18,23 +20,80 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const [foodListings, setFoodListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [mapboxReady, setMapboxReady] = useState(false);
+
+    // Wait for Mapbox to load from CDN
+    useEffect(() => {
+        const checkMapbox = () => {
+            if (window.mapboxgl) {
+                console.log('✅ Mapbox GL JS loaded from CDN');
+                setMapboxReady(true);
+            } else {
+                console.log('⏳ Waiting for Mapbox GL JS to load...');
+                setTimeout(checkMapbox, 100);
+            }
+        };
+        checkMapbox();
+    }, []);
 
     useEffect(() => {
-        if (map.current) return; // Initialize map only once
+        if (!mapboxReady || map.current) return; // Wait for Mapbox and initialize map only once
 
-        map.current = new mapboxgl.Map({
-            container: mapContainer.current,
-            style: 'mapbox://styles/mapbox/streets-v12',
-            center: [-98.5795, 39.8283], // Center of USA
-            zoom: 4
-        });
+        console.log('🗺️ Starting Mapbox initialization...');
+        console.log('🗺️ Container element:', mapContainer.current);
+        console.log('🗺️ Container dimensions:', mapContainer.current?.offsetWidth, 'x', mapContainer.current?.offsetHeight);
 
-        map.current.on('load', () => {
-            setMapLoaded(true);
-        });
+        if (!mapContainer.current) {
+            console.error('❌ Map container ref is null');
+            return;
+        }
+
+        if (!MAPBOX_TOKEN) {
+            console.error('❌ Mapbox token is missing');
+            return;
+        }
+
+        const mapboxgl = getMapboxgl();
+        if (!mapboxgl) {
+            console.error('❌ Mapbox GL JS not loaded from CDN');
+            return;
+        }
+
+        try {
+            console.log('🗺️ Creating Mapbox map instance...');
+            
+            map.current = new mapboxgl.Map({
+                container: mapContainer.current,
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [-98.5795, 39.8283], // Center of USA
+                zoom: 4,
+                attributionControl: true,
+                accessToken: MAPBOX_TOKEN
+            });
+
+            console.log('✅ Mapbox map instance created:', map.current);
+
+            map.current.on('load', () => {
+                console.log('✅ Mapbox map fully loaded and rendered');
+                setMapLoaded(true);
+            });
+
+            map.current.on('error', (e) => {
+                console.error('❌ Mapbox error event:', e.error);
+            });
+
+            map.current.on('style.load', () => {
+                console.log('✅ Mapbox style loaded');
+            });
+        } catch (error) {
+            console.error('❌ Exception during Mapbox map creation:', error);
+            console.error('❌ Error stack:', error.stack);
+        }
 
         // Add navigation controls
-        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        if (map.current && mapboxgl) {
+            map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        }
 
         // Try to get user's location
         if (navigator.geolocation) {
@@ -75,7 +134,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             const { data, error } = await supabase
                 .from('food_listings')
                 .select('*')
-                .in('status', ['available', 'approved', 'pending'])
+                .in('status', ['approved', 'active'])
                 .not('latitude', 'is', null)
                 .not('longitude', 'is', null)
                 .limit(100);
@@ -98,6 +157,12 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
     const addMarkers = () => {
         console.log('Adding markers for', foodListings.length, 'listings');
+        
+        const mapboxgl = getMapboxgl();
+        if (!mapboxgl || !map.current) {
+            console.warn('⚠️ Mapbox not ready for markers');
+            return;
+        }
         
         // Remove existing markers
         markersRef.current.forEach(marker => marker.remove());
@@ -162,6 +227,12 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     };
 
     const showPopup = (listing) => {
+        const mapboxgl = getMapboxgl();
+        if (!mapboxgl || !map.current) {
+            console.warn('⚠️ Mapbox not ready for popup');
+            return;
+        }
+        
         // Remove existing popup
         if (popupRef.current) {
             popupRef.current.remove();
@@ -271,8 +342,8 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     };
 
     return (
-        <div className="relative w-full h-full">
-            <div ref={mapContainer} className="w-full h-full" />
+        <div className="relative w-full" style={{ height: '600px' }}>
+            <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
 
             {loading && (
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-2 z-10">
