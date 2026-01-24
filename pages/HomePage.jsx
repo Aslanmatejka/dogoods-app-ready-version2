@@ -14,6 +14,7 @@ import { useImpact } from "../utils/hooks/useImpact";
 import supabase from "../utils/supabaseClient";
 import Tutorial from "../components/common/Tutorial";
 import { useTutorial } from "../utils/TutorialContext";
+import FoodMap from "../components/common/FoodMap";
 
 function HomePage() {
     const navigate = useNavigate();
@@ -181,6 +182,61 @@ function HomePage() {
                             </div>
                         </section>
                     </HeroSlideshow>
+
+                    {/* Food Map Section - Before Signup */}
+                    <section 
+                        className="py-16 bg-gradient-to-br from-green-50 via-blue-50 to-green-50"
+                        aria-labelledby="food-map-heading"
+                    >
+                        <div className="container mx-auto px-4">
+                            <div className="text-center mb-8">
+                                <h2 
+                                    id="food-map-heading"
+                                    className="text-3xl font-bold text-gray-900 mb-4"
+                                >
+                                    <i className="fas fa-map-marked-alt text-green-600 mr-3"></i>
+                                    Discover Available Food Near You
+                                </h2>
+                                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                    Explore food locations in your area. Sign up for free to claim items and connect with local donors!
+                                </p>
+                            </div>
+                            
+                            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ height: '600px' }}>
+                                <FoodMap showSignupPrompt={true} />
+                            </div>
+                            
+                            <div className="mt-8 text-center">
+                                <div className="bg-blue-100 border-2 border-blue-300 rounded-xl p-6 max-w-2xl mx-auto">
+                                    <div className="flex items-center justify-center gap-3 mb-3">
+                                        <i className="fas fa-info-circle text-blue-600 text-2xl"></i>
+                                        <h3 className="text-lg font-bold text-blue-900">Ready to Get Started?</h3>
+                                    </div>
+                                    <p className="text-blue-800 mb-4">
+                                        Create a free account to claim food, connect with donors, and help reduce food waste in your community.
+                                    </p>
+                                    <div className="flex gap-4 justify-center">
+                                        <Button 
+                                            variant="primary" 
+                                            size="lg"
+                                            onClick={() => handleNavigation('/signup')}
+                                        >
+                                            <i className="fas fa-user-plus mr-2"></i>
+                                            Sign Up Free
+                                        </Button>
+                                        <Button 
+                                            variant="secondary" 
+                                            size="lg"
+                                            onClick={() => handleNavigation('/login')}
+                                        >
+                                            <i className="fas fa-sign-in-alt mr-2"></i>
+                                            Log In
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     {/* How It Works Schematic */}
                     {/* <section

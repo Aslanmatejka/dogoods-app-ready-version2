@@ -14,6 +14,9 @@ const API_CONFIG = {
             COMPLETION: 'deepseek-completion'
         }
     },
+    MAPBOX: {
+        ACCESS_TOKEN: ENV.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiZG9nb29kc2FwcCIsImEiOiJjbHd5ejN4eGYwMDJ5MmpwaDloZzB6dGJ3In0.placeholder'
+    },
     RATE_LIMITS: {
         DEFAULT: {
             maxRequests: parseInt(ENV.RATE_LIMIT_MAX_REQUESTS) || 50,
