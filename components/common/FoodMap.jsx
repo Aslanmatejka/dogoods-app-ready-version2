@@ -134,19 +134,18 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             // Create custom marker element
             const el = document.createElement('div');
             el.className = 'custom-marker';
-            el.style.pointerEvents = 'auto';
+            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 50px; position: relative; z-index: 100;';
             el.innerHTML = `
                 <div style="
-                    width: 40px;
-                    height: 50px;
+                    width: 100%;
+                    height: 100%;
                     display: flex;
                     align-items: flex-end;
                     justify-content: center;
-                    cursor: pointer;
                     transition: transform 0.2s;
-                    pointer-events: auto;
+                    pointer-events: none;
                 ">
-                    <div style="position: relative;">
+                    <div style="position: relative; pointer-events: none;">
                         <div style="
                             position: absolute;
                             inset: -4px;
@@ -154,6 +153,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                             border-radius: 50% 50% 50% 0;
                             transform: rotate(-45deg);
                             filter: blur(4px);
+                            pointer-events: none;
                         "></div>
                         <div style="
                             position: relative;
@@ -166,8 +166,9 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                             display: flex;
                             align-items: center;
                             justify-content: center;
+                            pointer-events: none;
                         ">
-                            <i class="fas fa-apple-alt" style="color: white; font-size: 14px; transform: rotate(45deg);"></i>
+                            <i class="fas fa-apple-alt" style="color: white; font-size: 14px; transform: rotate(45deg); pointer-events: none;"></i>
                         </div>
                         <div style="
                             position: absolute;
@@ -179,19 +180,21 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                             border-left: 4px solid transparent;
                             border-right: 4px solid transparent;
                             border-top: 8px solid rgb(220, 38, 38);
+                            pointer-events: none;
                         "></div>
                     </div>
                 </div>
             `;
 
+            // Store the inner div reference for transformations
+            const innerDiv = el.querySelector('div');
+
             el.addEventListener('mouseenter', () => {
-                el.style.transform = 'scale(1.1)';
-                el.style.zIndex = '1000';
+                if (innerDiv) innerDiv.style.transform = 'scale(1.1)';
             });
 
             el.addEventListener('mouseleave', () => {
-                el.style.transform = 'scale(1)';
-                el.style.zIndex = 'auto';
+                if (innerDiv) innerDiv.style.transform = 'scale(1)';
             });
 
             el.addEventListener('click', () => {
