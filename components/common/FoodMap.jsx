@@ -20,28 +20,12 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const [foodListings, setFoodListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mapLoaded, setMapLoaded] = useState(false);
-    const [mapboxReady, setMapboxReady] = useState(false);
-
-    // Wait for Mapbox to load from CDN
-    useEffect(() => {
-        const checkMapbox = () => {
-            if (window.mapboxgl) {
-                console.log('✅ Mapbox GL JS loaded from CDN');
-                setMapboxReady(true);
-            } else {
-                console.log('⏳ Waiting for Mapbox GL JS to load...');
-                setTimeout(checkMapbox, 100);
-            }
-        };
-        checkMapbox();
-    }, []);
 
     useEffect(() => {
-        if (!mapboxReady || map.current) return; // Wait for Mapbox and initialize map only once
+        if (map.current) return;
 
-        console.log('🗺️ Starting Mapbox initialization...');
-        console.log('🗺️ Container element:', mapContainer.current);
-        console.log('🗺️ Container dimensions:', mapContainer.current?.offsetWidth, 'x', mapContainer.current?.offsetHeight);
+        const mapboxgl = getMapboxgl();
+        if (!mapboxgl || !mapContainer.current) return;
 
         if (!mapContainer.current) {
             console.error('❌ Map container ref is null');
@@ -53,62 +37,35 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             return;
         }
 
-        const mapboxgl = getMapboxgl();
-        if (!mapboxgl) {
-            console.error('❌ Mapbox GL JS not loaded from CDN');
-            return;
-        }
-
         try {
-            console.log('🗺️ Creating Mapbox map instance...');
-            
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/streets-v12',
-                center: [-98.5795, 39.8283], // Center of USA
-                zoom: 4,
+                style: 'mapbox://styles/mapbox/light-v11', // Lighter, faster style
+                center: [-122.4194, 37.7749], // San Francisco, California
+                zoom: 12,
                 attributionControl: true,
-                accessToken: MAPBOX_TOKEN
+                accessToken: MAPBOX_TOKEN,
+                renderWorldCopies: false,
+                preserveDrawingBuffer: false,
+                fadeDuration: 0, // No fade animation - instant rendering
+                refreshExpiredTiles: false // Don't refresh tiles
             });
 
-            console.log('✅ Mapbox map instance created:', map.current);
-
             map.current.on('load', () => {
-                console.log('✅ Mapbox map fully loaded and rendered');
                 setMapLoaded(true);
             });
 
             map.current.on('error', (e) => {
-                console.error('❌ Mapbox error event:', e.error);
+                console.error('❌ Map error:', e.error);
             });
 
-            map.current.on('style.load', () => {
-                console.log('✅ Mapbox style loaded');
-            });
         } catch (error) {
-            console.error('❌ Exception during Mapbox map creation:', error);
-            console.error('❌ Error stack:', error.stack);
+            console.error('❌ Map creation failed:', error);
         }
 
         // Add navigation controls
         if (map.current && mapboxgl) {
             map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-        }
-
-        // Try to get user's location
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    map.current.flyTo({
-                        center: [position.coords.longitude, position.coords.latitude],
-                        zoom: 11,
-                        essential: true
-                    });
-                },
-                (error) => {
-                    console.log('Location access denied or unavailable');
-                }
-            );
         }
 
         return () => {
@@ -119,10 +76,12 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     }, []);
 
     useEffect(() => {
+        // Fetch listings immediately
         fetchFoodListings();
     }, []);
 
     useEffect(() => {
+        // Add markers as soon as both map and data are ready
         if (mapLoaded && foodListings.length > 0) {
             addMarkers();
         }
@@ -342,8 +301,39 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     };
 
     return (
-        <div className="relative w-full" style={{ height: '600px' }}>
-            <div ref={mapContainer} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+        <div className="relative w-full" style={{ height: '600px', backgroundColor: '#f0f0f0' }}>
+            {/* Static map-like background - shows instantly */}
+            <div 
+                className="absolute inset-0" 
+                style={{
+                    backgroundImage: `
+                        linear-gradient(rgba(220, 220, 220, 0.5) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(220, 220, 220, 0.5) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '50px 50px',
+                    backgroundColor: '#e8e8e8',
+                    opacity: mapLoaded ? 0 : 1,
+                    transition: 'opacity 0.3s ease-out'
+                }}
+            >
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-gray-500">
+                        <i className="fas fa-map-marked-alt text-5xl mb-3"></i>
+                        <p className="font-medium">Loading San Francisco Map...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div 
+                ref={mapContainer} 
+                className="absolute inset-0" 
+                style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    opacity: mapLoaded ? 1 : 0,
+                    transition: 'opacity 0.3s ease-in'
+                }} 
+            />
 
             {loading && (
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-2 z-10">
