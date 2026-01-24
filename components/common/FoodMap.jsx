@@ -182,6 +182,9 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 .addTo(map.current);
 
             markersRef.current.push(marker);
+
+            // Show popup directly on the map
+            showPopup(listing);
         });
     };
 
@@ -192,17 +195,10 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             return;
         }
         
-        // Remove existing popup
+        // Remove existing popup if clicking on a different listing
         if (popupRef.current) {
             popupRef.current.remove();
         }
-
-        // Center map on marker
-        map.current.flyTo({
-            center: [listing.longitude, listing.latitude],
-            zoom: 13,
-            essential: true
-        });
 
         const popupContent = document.createElement('div');
         popupContent.className = 'p-3 max-w-xs';
@@ -219,8 +215,8 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             <h3 style="font-weight: bold; font-size: 18px; color: #111827; margin-bottom: 8px;">
                 ${listing.title}
             </h3>
-            <p style="font-size: 14px; color: #4B5563; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                ${listing.description || ''}
+            <p style="font-size: 14px; color: #4B5563; margin-bottom: 12px; line-height: 1.5;">
+                ${listing.description || 'No description available'}
             </p>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; color: #374151;">
                 <i class="fas fa-weight" style="color: #16A34A;"></i>
@@ -273,8 +269,9 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
         popupRef.current = new mapboxgl.Popup({
             closeButton: true,
-            closeOnClick: true,
-            maxWidth: '320px'
+            closeOnClick: false,
+            maxWidth: '320px',
+            offset: 25
         })
             .setLngLat([listing.longitude, listing.latitude])
             .setDOMContent(popupContent)
