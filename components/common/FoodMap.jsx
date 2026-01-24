@@ -184,10 +184,12 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
             el.addEventListener('mouseenter', () => {
                 el.style.transform = 'scale(1.1)';
+                el.style.zIndex = '1000';
             });
 
             el.addEventListener('mouseleave', () => {
                 el.style.transform = 'scale(1)';
+                el.style.zIndex = 'auto';
             });
 
             el.addEventListener('click', () => {
