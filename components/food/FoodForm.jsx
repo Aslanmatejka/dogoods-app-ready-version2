@@ -28,6 +28,7 @@ function FoodForm({
         school_district: '',
         donor_email: '',
         donor_phone: '',
+        full_address: '',
         latitude: null,
         longitude: null,
         image: null,
@@ -37,6 +38,8 @@ function FoodForm({
         ingredients: '',
         ...initialData
     });
+
+    const [geocoding, setGeocoding] = useState(false);
 
     // Pre-fill donor information from user profile
     useEffect(() => {
@@ -165,6 +168,58 @@ function FoodForm({
                 ...prev,
                 image: null
             }));
+        }
+    };
+
+    const geocodeAddress = async (address) => {
+        setGeocoding(true);
+        try {
+            const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
+            const encodedAddress = encodeURIComponent(address);
+            const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${MAPBOX_TOKEN}&limit=1`
+            );
+            
+            if (!response.ok) {
+                throw new Error('Geocoding failed');
+            }
+            
+            const data = await response.json();
+            
+            if (data.features && data.features.length > 0) {
+                const [longitude, latitude] = data.features[0].center;
+                setFormData(prev => ({
+                    ...prev,
+                    latitude,
+                    longitude
+                }));
+                setErrors(prev => ({
+                    ...prev,
+                    full_address: null
+                }));
+                return { success: true, latitude, longitude };
+            } else {
+                setErrors(prev => ({
+                    ...prev,
+                    full_address: 'Address not found. Please check and try again.'
+                }));
+                return { success: false };
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error);
+            setErrors(prev => ({
+                ...prev,
+                full_address: 'Failed to locate address. Please try again.'
+            }));
+            return { success: false };
+        } finally {
+            setGeocoding(false);
+        }
+    };
+
+    const handleAddressBlur = async () => {
+        if (formData.full_address && formData.full_address.trim()) {
+            await geocodeAddress(formData.full_address);
         }
     };
 
@@ -390,6 +445,33 @@ function FoodForm({
                         maxLength={20}
                         helperText="Enter your phone number."
                     />
+                </div>
+                <div className="mt-6">
+                    <div className="relative">
+                        <Input
+                            label="Full Address (for map location)"
+                            name="full_address"
+                            value={formData.full_address}
+                            onChange={handleChange}
+                            onBlur={handleAddressBlur}
+                            error={errors.full_address}
+                            placeholder="e.g., 123 Main St, San Francisco, CA 94102"
+                            helperText="Enter the complete pickup address. We'll automatically locate it on the map."
+                        />
+                        {geocoding && (
+                            <div className="absolute right-3 top-9">
+                                <i className="fas fa-spinner fa-spin text-green-500"></i>
+                            </div>
+                        )}
+                        {formData.latitude && formData.longitude && (
+                            <div className="mt-2 text-sm text-green-600 flex items-center">
+                                <i className="fas fa-map-marker-alt mr-2"></i>
+                                Location found: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <Input
                         label="Occupation / Role"
                         name="donor_occupation"
