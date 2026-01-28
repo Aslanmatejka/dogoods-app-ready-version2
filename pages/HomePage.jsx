@@ -107,7 +107,7 @@ function HomePage() {
                 id: 'pantry',
                 title: 'Pantry Items',
                 description: 'Non-perishable food items',
-                image: 'https://images.unsplash.com/photo-1584473457406-6240486418e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60',
                 itemCount: 34
             },
             {

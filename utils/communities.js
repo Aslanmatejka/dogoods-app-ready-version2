@@ -79,11 +79,11 @@ const communities = [
     },
     // {
     //     id: 7,
-    //     name: 'Oakland Unified School District',
-    //     location: '1011 Union Street Oakland, CA94607',
+    //     name: 'Madison Park Academy Primary',
+    //     location: '470 El Paseo Drive Oakland, CA 94603',
     //     contact: 'Khánh Hữu Nguyên',
     //     hours: 'Monday - Friday 8:00 am - 4:00 pm',
-    //     phone: '510-879-1525',
+    //     phone: '(510) 879-8164',
     //     lastActive: new Date().toISOString(),
     //     image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/OUSD.png?raw=true'
     // },
