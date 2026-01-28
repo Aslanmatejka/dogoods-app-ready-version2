@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { reportError } from '../../utils/helpers';
 
 const VARIANTS = {
-    primary: 'bg-green-600 text-white hover:bg-green-700 disabled:bg-green-300',
+    primary: 'text-white hover:opacity-90 disabled:opacity-50',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100',
-    outline: 'border-2 border-green-600 text-green-600 hover:bg-green-50 disabled:border-green-300 disabled:text-green-300',
+    outline: 'border-2 text-white hover:opacity-90 disabled:opacity-50',
     danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300'
 };
 
@@ -42,16 +42,19 @@ function Button({
     const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
     
     const focusRingColors = {
-        primary: 'focus:ring-green-500',
+        primary: 'focus:ring-[#2CABE3]',
         secondary: 'focus:ring-gray-400',
-        outline: 'focus:ring-green-500',
+        outline: 'focus:ring-[#2CABE3]',
         danger: 'focus:ring-red-500'
     };
 
     const isDisabled = disabled || loading;
 
+    const bgColor = (variant === 'primary' || variant === 'outline') ? 'bg-[#2CABE3]' : '';
+
     const classes = `
         ${baseStyles}
+        ${bgColor}
         ${VARIANTS[variant]}
         ${SIZES[size]}
         ${focusRingColors[variant]}

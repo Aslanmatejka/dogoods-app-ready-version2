@@ -275,7 +275,7 @@ function FindFoodPage({ initialCategory }) {
         >
             <div className="py-10">
                 <div className="mb-8 text-center">
-                    <h1 className="text-4xl font-extrabold text-green-700 drop-shadow-sm mb-2">Find Food Assistance</h1>
+                    <h1 className="text-4xl font-extrabold drop-shadow-sm mb-2" style={{ color: '#2CABE3' }}>Find Food Assistance</h1>
                     <p className="mt-2 text-lg text-gray-600">
                         Browse available food listings and claim what you need for your school, family, or organization. All requests are confidential and reviewed promptly.
                     </p>

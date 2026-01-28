@@ -364,10 +364,10 @@ function ImpactStory() {
 
             <div className={isEditMode ? 'edit-mode' : ''}>
             {/* Hero Section */}
-            <section className="bg-green-600 py-20">
+            <section className="bg-[#D9E1F1] py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h1 
-                        className="text-5xl md:text-6xl font-bold text-white mb-6 fade-in editable"
+                        className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 fade-in editable"
                         contentEditable={isEditMode}
                         suppressContentEditableWarning
                         onBlur={(e) => handleContentEdit('heroTitle', e.target.textContent)}
@@ -375,7 +375,7 @@ function ImpactStory() {
                         {getContent('heroTitle', 'Our Impact Story')}
                     </h1>
                     <p 
-                        className="text-xl text-white max-w-3xl mx-auto fade-in mb-8 editable"
+                        className="text-xl text-gray-700 max-w-3xl mx-auto fade-in mb-8 editable"
                         contentEditable={isEditMode}
                         suppressContentEditableWarning
                         onBlur={(e) => handleContentEdit('heroSubtitle', e.target.textContent)}
@@ -383,13 +383,13 @@ function ImpactStory() {
                         {getContent('heroSubtitle', 'Transforming food waste into community nourishment through AI-powered logistics and compassionate connections')}
                     </p>
                     <div className="flex justify-center gap-8 mt-8">
-                        <a href="#featured" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                        <a href="#featured" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Featured
                         </a>
-                        <a href="#news" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                        <a href="#news" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             News
                         </a>
-                        <a href="#stories" className="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                        <a href="#stories" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Stories
                         </a>
                     </div>
@@ -436,7 +436,7 @@ function ImpactStory() {
                                 {getContent('featuredP2', 'Our platform connects donors with recipients within minutes, ensuring fresh food reaches those who need it most. Through intelligent routing and automated coordination, we\'ve created a seamless network that turns potential waste into community nourishment.')} 
                             </p>
                             <button onClick={() => window.location.href='/share'} 
-                                className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors inline-flex items-center gap-2">
+                                className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all inline-flex items-center gap-2">
                                 <span 
                                     className="editable"
                                     contentEditable={isEditMode}
@@ -589,7 +589,7 @@ function ImpactStory() {
                             <a href="https://allgoodlivingfoundation.org/donate/" 
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                                className="inline-block bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                                 <span 
                                     className="editable"
                                     contentEditable={isEditMode}
@@ -698,7 +698,7 @@ function ImpactStory() {
 
                     <div className="text-center mt-12">
                         <button onClick={() => navigate('/stories')} 
-                            className="bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors">
+                            className="bg-[#2CABE3] text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             <span 
                                 className="editable"
                                 contentEditable={isEditMode}
@@ -713,7 +713,7 @@ function ImpactStory() {
             </section>
 
             {/* CTA Section */}
-            <section className="bg-gradient-to-r from-green-600 to-green-700 py-20">
+            <section className="bg-[#171366] py-20">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 
                         className="text-4xl md:text-5xl font-bold text-white mb-6 editable"
@@ -733,7 +733,7 @@ function ImpactStory() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a href="/share" 
-                            className="bg-white text-green-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
+                            className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             <span 
                                 className="editable"
                                 contentEditable={isEditMode}
@@ -746,7 +746,7 @@ function ImpactStory() {
                         <a href="https://allgoodlivingfoundation.org/donate/" 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-700 transition-colors shadow-lg">
+                            className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             <span 
                                 className="editable"
                                 contentEditable={isEditMode}
@@ -864,7 +864,7 @@ function ImpactStory() {
                             )}
 
                             <button type="submit" disabled={isSubmitting}
-                                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                className="w-full bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                                 {isSubmitting ? getContent('newsletterButtonSubmitting', 'Subscribing...') : getContent('newsletterButtonText', 'Subscribe to Newsletter')}
                             </button>
 

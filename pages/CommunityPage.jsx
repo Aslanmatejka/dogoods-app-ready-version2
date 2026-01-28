@@ -12,7 +12,7 @@ export const DonateVolunteerButtons = ({ className = "" }) => (
             href="https://allgoodlivingfoundation.org/donate"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-6 py-2 bg-green-600 text-white rounded-lg font-semibold shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="inline-block px-6 py-2 bg-[#2CABE3] text-white rounded-lg font-semibold shadow hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#2CABE3]"
             aria-label="Donate to All Good Living Foundation"
         >
             Donate

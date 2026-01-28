@@ -8,7 +8,7 @@ function Footer({
     return (
         <footer
             data-name="footer"
-            className={`bg-[#1a2332] text-white ${className}`}
+            className={`bg-[#D9E1F1] text-gray-900 ${className}`}
             role="contentinfo"
             aria-label="Site footer"
         >
@@ -27,7 +27,7 @@ function Footer({
                                 className="h-16 w-auto"
                             />
                         </a>
-                        <p className="text-gray-300 text-sm leading-relaxed mb-8">
+                        <p className="text-gray-700 text-sm leading-relaxed mb-8">
                             All Good Living Foundation is the community's safety net and spirit lifter, rolling up its sleeves to support students and families who are facing the most challenging moments of their lives. From school-based Community Closets to food access programs and youth-centered initiatives, the foundation brings practical help, dignity, and genuine connection to Alameda, Oakland, and other surrounding areas. It's simple: when our neighbors struggle, AGLF shows up — and keeps showing up — to make sure no one is left behind.
                         </p>
 
@@ -37,7 +37,7 @@ function Footer({
                                 href="https://instagram.com/allgoodlivingfoundation"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-teal-700 hover:bg-teal-600 flex items-center justify-center transition-colors duration-200"
+                                className="w-10 h-10 rounded-full bg-[#2CABE3] hover:opacity-90 flex items-center justify-center transition-all duration-200"
                                 aria-label="Follow us on Instagram"
                             >
                                 <i className="fab fa-instagram text-white text-lg" aria-hidden="true"></i>
@@ -46,7 +46,7 @@ function Footer({
                                 href="https://facebook.com/allgoodlivingfoundation"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded-full bg-teal-700 hover:bg-teal-600 flex items-center justify-center transition-colors duration-200"
+                                className="w-10 h-10 rounded-full bg-[#2CABE3] hover:opacity-90 flex items-center justify-center transition-all duration-200"
                                 aria-label="Follow us on Facebook"
                             >
                                 <i className="fab fa-facebook-f text-white text-lg" aria-hidden="true"></i>
@@ -56,24 +56,24 @@ function Footer({
 
                     {/* Platform Section - Middle Column */}
                     <div data-name="footer-platform" className="md:col-span-1">
-                        <h3 className="text-xl font-semibold mb-6">Platform</h3>
+                        <h3 className="text-xl font-semibold mb-6 text-gray-900">Platform</h3>
                         <nav aria-label="Platform links">
                             <ul className="space-y-4">
                                 <li>
                                     <a
                                         href="/find"
-                                        className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                        className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                     >
-                                        <i className="fas fa-search text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                        <i className="fas fa-search text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                         <span>Find Food</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a
                                         href="/share"
-                                        className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                        className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                     >
-                                        <i className="fas fa-heart text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                        <i className="fas fa-heart text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                         <span>Share Food</span>
                                     </a>
                                 </li>
@@ -82,9 +82,9 @@ function Footer({
                                         href="https://allgoodlivingfoundation.org/volunteer-form"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                        className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                     >
-                                        <i className="fas fa-users text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                        <i className="fas fa-users text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                         <span>Volunteer</span>
                                     </a>
                                 </li>
@@ -93,18 +93,18 @@ function Footer({
                                         href="https://allgoodlivingfoundation.org/donate/"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                        className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                     >
-                                        <i className="fas fa-hand-holding-heart text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                        <i className="fas fa-hand-holding-heart text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                         <span>Donate</span>
                                     </a>
                                 </li>
                                 <li>
                                     <a
                                         href="/faqs"
-                                        className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                        className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                     >
-                                        <i className="fas fa-question-circle text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                        <i className="fas fa-question-circle text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                         <span>FAQs</span>
                                     </a>
                                 </li>
@@ -114,33 +114,33 @@ function Footer({
 
                     {/* Contact Section - Right Column */}
                     <div data-name="footer-contact" className="md:col-span-1">
-                        <h3 className="text-xl font-semibold mb-6">Contact</h3>
+                        <h3 className="text-xl font-semibold mb-6 text-gray-900">Contact</h3>
                         <ul className="space-y-4">
                             <li>
                                 <a
                                     href="mailto:info@allgoodlivingfoundation.org"
-                                    className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                    className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                 >
-                                    <i className="fas fa-envelope text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                    <i className="fas fa-envelope text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                     <span className="break-all">info@allgoodlivingfoundation.org</span>
                                 </a>
                             </li>
                             <li>
                                 <a
                                     href="tel:510-522-6288"
-                                    className="text-gray-300 hover:text-white transition-colors duration-200 flex items-center group"
+                                    className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                 >
-                                    <i className="fas fa-phone text-gray-400 group-hover:text-white mr-3" aria-hidden="true"></i>
+                                    <i className="fas fa-phone text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                     <span>510-522-6288</span>
                                 </a>
                             </li>
                             <li className="flex items-start group">
-                                <i className="fas fa-map-marker-alt text-gray-400 group-hover:text-white mr-3 mt-1" aria-hidden="true"></i>
+                                <i className="fas fa-map-marker-alt text-gray-600 group-hover:text-gray-900 mr-3 mt-1" aria-hidden="true"></i>
                                 <a
                                     href="https://maps.google.com/?q=1900+Thau+Way,+Alameda,+CA+94501"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    className="text-gray-700 hover:text-gray-900 transition-colors duration-200"
                                 >
                                     1900 Thau Way, Alameda, CA 94501
                                 </a>
@@ -150,13 +150,13 @@ function Footer({
                 </div>
 
                 {/* Bottom Section */}
-                <div className="border-t border-gray-700 mt-12 pt-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+                <div className="border-t border-gray-400 mt-12 pt-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
                         <p>© {new Date().getFullYear()} All Good Living Foundation. All rights reserved.</p>
                         <div className="flex gap-6 mt-4 md:mt-0">
-                            <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
-                            <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
-                            <a href="/cookies" className="hover:text-white transition-colors">Cookie Policy</a>
+                            <a href="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
+                            <a href="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</a>
+                            <a href="/cookies" className="hover:text-gray-900 transition-colors">Cookie Policy</a>
                         </div>
                     </div>
                 </div>

@@ -164,7 +164,7 @@ function HomePage() {
                                         <button 
                                             onClick={() => handleNavigation('/find')}
                                             aria-label="Find food in your area"
-                                            className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-green-600 text-white rounded-2xl shadow-2xl hover:bg-green-700 hover:scale-105 transition-all duration-300 transform hover:shadow-green-500/50"
+                                            className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-[#2CABE3] text-white rounded-2xl shadow-2xl hover:opacity-90 hover:scale-105 transition-all duration-300 transform"
                                         >
                                             <i className="fas fa-search mr-3"></i>
                                             Find Food
@@ -172,7 +172,7 @@ function HomePage() {
                                         <button 
                                             onClick={() => handleNavigation('/share')}
                                             aria-label="Share food with the community"
-                                            className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-orange-600 text-white rounded-2xl shadow-2xl hover:bg-orange-700 hover:scale-105 transition-all duration-300 transform hover:shadow-orange-500/50"
+                                            className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-[#171366] text-white rounded-2xl shadow-2xl hover:opacity-90 hover:scale-105 transition-all duration-300 transform"
                                         >
                                             <i className="fas fa-share-alt mr-3"></i>
                                             Share Food
@@ -378,7 +378,7 @@ function HomePage() {
                             <div className="mt-6 max-w-7xl mx-auto">
                                 <button
                                     onClick={() => handleNavigation('/find')}
-                                    className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 p-8 flex items-center justify-center gap-3"
+                                    className="w-full bg-[#2CABE3] text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] hover:opacity-90 transition-all duration-300 p-8 flex items-center justify-center gap-3"
                                     aria-label="View all available food"
                                 >
                                     <i className="fas fa-utensils text-2xl"></i>
@@ -568,7 +568,7 @@ function HomePage() {
 
                     {/* Call to Action */}
                     <section
-                        className="py-16 bg-green-600 text-white"
+                        className="py-16 bg-[#171366] text-white"
                         aria-labelledby="cta-heading"
                     >
                         <div className="container mx-auto px-4 text-center">

@@ -141,7 +141,7 @@ function SponsorsPage() {
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading sponsors...</p>
           </div>
         ) : (
@@ -171,20 +171,20 @@ function SponsorsPage() {
                   {sponsor.description}
                 </p>
 
-                <div className="mb-4 space-y-2 bg-green-50 p-3 rounded-lg">
+                <div className="mb-4 space-y-2 bg-[#2CABE3]/10 p-3 rounded-lg">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-700 font-medium">
-                      <i className="fas fa-leaf text-green-600 mr-2"></i>
+                      <i className="fas fa-leaf text-[#2CABE3] mr-2"></i>
                       Food Saved from Waste (lb)
                     </span>
-                    <span className="text-green-700 font-bold">{foodSavedValue.toLocaleString()}</span>
+                    <span className="text-[#2CABE3] font-bold">{foodSavedValue.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-700 font-medium">
-                      <i className="fas fa-hands-helping text-green-600 mr-2"></i>
+                      <i className="fas fa-hands-helping text-[#2CABE3] mr-2"></i>
                       Food Donated (lb)
                     </span>
-                    <span className="text-green-700 font-bold">{foodDonatedValue.toLocaleString()}</span>
+                    <span className="text-[#2CABE3] font-bold">{foodDonatedValue.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -193,7 +193,7 @@ function SponsorsPage() {
                     href={sponsor.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm"
+                    className="inline-flex items-center text-[#2CABE3] hover:opacity-80 font-medium text-sm"
                   >
                     Visit Website
                     <i className="fas fa-external-link-alt ml-2 text-xs"></i>
@@ -220,7 +220,7 @@ function SponsorsPage() {
           </p>
           <a
             href="mailto:sponsors@dogoods.org"
-            className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+            className="inline-block bg-[#2CABE3] text-white px-8 py-3 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
           >
             Contact Us About Sponsorship
           </a>
