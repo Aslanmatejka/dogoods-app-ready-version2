@@ -124,21 +124,21 @@ function HomePage() {
                 id: 'pantry',
                 title: 'Pantry Items',
                 description: 'Non-perishable food items',
-                image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60',
+                image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/aaron-doucett-liOAS02GnfY-unsplash.jpg?raw=true',
                 itemCount: 34
             },
             {
                 id: 'canned',
                 title: 'Canned Goods',
                 description: 'Canned vegetables, fruits, and more',
-                image: 'https://images.unsplash.com/photo-1593759608892-b0033064e78c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/gabre-cameron--v04zNpvKoU-unsplash.jpg?raw=true',
                 itemCount: 28
             },
             {
                 id: 'frozen',
                 title: 'Frozen Foods',
                 description: 'Frozen meals and ingredients',
-                image: 'https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60',
+                image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/istockphoto-1268433754-612x612.webp?raw=true',
                 itemCount: 21
             },
             {
