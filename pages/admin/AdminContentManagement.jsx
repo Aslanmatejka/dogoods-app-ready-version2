@@ -260,7 +260,7 @@ function AdminContentManagement() {
             <div className="space-y-4">
                 {loading ? (
                     <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
                         <p className="mt-4 text-gray-600">Loading posts...</p>
                     </div>
                 ) : posts.length === 0 ? (
@@ -279,7 +279,7 @@ function AdminContentManagement() {
                                             post.post_type === 'testimony' ? 'bg-purple-100 text-purple-800' :
                                             post.post_type === 'blog' ? 'bg-blue-100 text-blue-800' :
                                             post.post_type === 'announcement' ? 'bg-red-100 text-red-800' :
-                                            'bg-green-100 text-green-800'
+                                            'bg-[#2CABE3]/20 text-[#2CABE3]'
                                         }`}>
                                             {post.post_type}
                                         </span>

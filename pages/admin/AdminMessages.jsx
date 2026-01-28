@@ -381,7 +381,7 @@ function AdminMessages() {
                                                     }`}>
                                                         <p className="text-sm break-words whitespace-pre-wrap">{msg.message}</p>
                                                         <div className="flex items-center justify-between mt-2 text-xs">
-                                                            <span className={msg.is_from_admin ? 'text-green-100' : 'text-gray-400'}>
+                                                            <span className={msg.is_from_admin ? 'text-white/80' : 'text-gray-400'}>
                                                                 {new Date(msg.created_at).toLocaleString()}
                                                             </span>
                                                             {msg.is_from_admin && (
@@ -390,7 +390,7 @@ function AdminMessages() {
                                                         </div>
                                                     </div>
                                                     {msg.is_from_admin && (
-                                                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                                        <div className="w-8 h-8 bg-[#2CABE3] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                                             <i className="fas fa-user-shield text-white text-xs"></i>
                                                         </div>
                                                     )}
