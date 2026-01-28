@@ -441,7 +441,7 @@ function ImpactDataEntry() {
                     const value = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
                     onBlur(value);
                 }}
-                className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
             />
         );
     };
@@ -548,7 +548,7 @@ function ImpactDataEntry() {
                             onClick={() => setActiveTab('organizations')}
                             className={`${
                                 activeTab === 'organizations'
-                                    ? 'border-green-500 text-green-600'
+                                    ? 'border-green-500 text-[#2CABE3]'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
                         >
@@ -571,7 +571,7 @@ function ImpactDataEntry() {
 
                 {loading ? (
                     <div className="p-8 text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
                         <p className="mt-4 text-gray-600">Loading data...</p>
                     </div>
                 ) : (
@@ -586,10 +586,10 @@ function ImpactDataEntry() {
                                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[280px]">
                                             Organization
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-[#2CABE3] uppercase tracking-wider min-w-[220px]">
                                             Food Saved from Waste (lb)
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-green-600 uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-[#2CABE3] uppercase tracking-wider min-w-[220px]">
                                             Food Donated
                                         </th>
                                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">
@@ -601,7 +601,7 @@ function ImpactDataEntry() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    <tr className="bg-green-50">
+                                    <tr className="bg-[#2CABE3]/10">
                                         <td className="px-3 py-2">
                                             <UncontrolledCell
                                                 type="date"
@@ -613,7 +613,7 @@ function ImpactDataEntry() {
                                         <td className="px-3 py-2">
                                             <select
                                                 ref={el => orgRowRefs.current.organization = el}
-                                                className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             >
                                                 <option value="">Select Organization</option>
                                                 {organizations.map((org) => (
@@ -670,7 +670,7 @@ function ImpactDataEntry() {
                                                 <select
                                                     value={row.organization || ''}
                                                     onChange={(e) => handleUpdateRow(row.id, 'organization', e.target.value)}
-                                                    className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                    className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                                 >
                                                     <option value="">Select Organization</option>
                                                     {organizations.map((org) => (

@@ -238,7 +238,7 @@ function AdminMessages() {
                                         onClick={() => setFilter(tab.value)}
                                         className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                                             filter === tab.value
-                                                ? 'bg-green-600 text-white'
+                                                ? 'bg-[#2CABE3] text-white'
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                     >
@@ -267,7 +267,7 @@ function AdminMessages() {
                                         key={conv.id}
                                         onClick={() => setSelectedConversation(conv)}
                                         className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left ${
-                                            selectedConversation?.id === conv.id ? 'bg-green-50' : ''
+                                            selectedConversation?.id === conv.id ? 'bg-[#2CABE3]/10' : ''
                                         }`}
                                     >
                                         <div className="flex items-start space-x-3">
@@ -282,7 +282,7 @@ function AdminMessages() {
                                                         {conv.users?.name || conv.users?.email || 'Unknown User'}
                                                     </h3>
                                                     {getUnreadCount(conv) > 0 && (
-                                                        <span className="ml-2 bg-green-600 text-white text-xs rounded-full px-2 py-0.5">
+                                                        <span className="ml-2 bg-[#2CABE3] text-white text-xs rounded-full px-2 py-0.5">
                                                             {getUnreadCount(conv)}
                                                         </span>
                                                     )}
@@ -293,7 +293,7 @@ function AdminMessages() {
                                                 <div className="flex items-center space-x-2 text-xs">
                                                     <span className={`px-2 py-0.5 rounded ${
                                                         conv.status === 'open'
-                                                            ? 'bg-green-100 text-green-700'
+                                                            ? 'bg-[#2CABE3]/20 text-[#2CABE3]'
                                                             : 'bg-gray-100 text-gray-600'
                                                     }`}>
                                                         {conv.status}
@@ -376,7 +376,7 @@ function AdminMessages() {
                                                     )}
                                                     <div className={`rounded-lg px-4 py-3 ${
                                                         msg.is_from_admin
-                                                            ? 'bg-green-600 text-white'
+                                                            ? 'bg-[#2CABE3] text-white'
                                                             : 'bg-white border border-gray-200'
                                                     }`}>
                                                         <p className="text-sm break-words whitespace-pre-wrap">{msg.message}</p>

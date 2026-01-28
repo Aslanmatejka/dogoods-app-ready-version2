@@ -50,7 +50,7 @@ function VerificationManagement() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading verification data...</p>
         </div>
       </div>
@@ -60,7 +60,7 @@ function VerificationManagement() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">
-        <i className="fas fa-check-double text-green-600 mr-3"></i>
+        <i className="fas fa-check-double text-[#2CABE3] mr-3"></i>
         Verification Management
       </h1>
 
@@ -173,13 +173,13 @@ function VerificationManagement() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-sm">
                       {listing.verified_before_pickup && (
-                        <span className="text-green-600">
+                        <span className="text-[#2CABE3]">
                           <i className="fas fa-check-circle mr-1"></i>
                           Before
                         </span>
                       )}
                       {listing.verified_after_pickup && (
-                        <span className="text-green-600">
+                        <span className="text-[#2CABE3]">
                           <i className="fas fa-check-circle mr-1"></i>
                           After
                         </span>
@@ -221,7 +221,7 @@ function StatCard({ label, value, icon, color }) {
   const colorClasses = {
     blue: 'bg-blue-500',
     yellow: 'bg-yellow-500',
-    green: 'bg-green-500',
+    green: 'bg-[#2CABE3]',
     red: 'bg-red-500'
   };
 
@@ -246,7 +246,7 @@ function FilterTab({ active, onClick, label, count }) {
       onClick={onClick}
       className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
         active
-          ? 'border-green-500 text-green-600'
+          ? 'border-[#2CABE3] text-[#2CABE3]'
           : 'border-transparent text-gray-500 hover:text-gray-700'
       }`}
     >
@@ -259,9 +259,9 @@ function ListingDetailsModal({ listing, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="bg-green-600 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
+        <div className="bg-[#2CABE3] text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
           <h2 className="text-2xl font-bold">Verification Details</h2>
-          <button onClick={onClose} className="text-white hover:text-green-100">
+          <button onClick={onClose} className="text-white hover:opacity-90">
             <i className="fas fa-times text-2xl"></i>
           </button>
         </div>

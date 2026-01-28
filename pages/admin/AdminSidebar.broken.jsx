@@ -18,7 +18,7 @@ function AdminSidebar({ active }) {
             {/* Logo */}
             <div className="p-4 border-b border-gray-700">
                 <Link to="/admin" className="flex items-center space-x-2 text-white">
-                    <div className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center">
+                    <div className="h-8 w-8 bg-[#2CABE3] rounded-full flex items-center justify-center">
                         <i className="fas fa-seedling"></i>
                     </div>
                     <span className="text-lg font-semibold">DoGoods Admin</span>

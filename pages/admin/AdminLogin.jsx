@@ -72,7 +72,7 @@ function AdminLogin() {
                 <div className="max-w-md w-full mx-auto">
                     <div className="text-center mb-8">
                         <div className="flex justify-center mb-4">
-                            <div className="h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+                            <div className="h-12 w-12 bg-[#2CABE3] rounded-full flex items-center justify-center">
                                 <i className="fas fa-seedling text-white text-2xl"></i>
                             </div>
                         </div>
@@ -114,7 +114,7 @@ function AdminLogin() {
                                         type={showPassword ? 'text' : 'password'}
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2CABE3] focus:border-[#2CABE3]"
                                         required
                                     />
                                     <button
@@ -135,7 +135,7 @@ function AdminLogin() {
                                         type="checkbox"
                                         checked={formData.rememberMe}
                                         onChange={handleChange}
-                                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                        className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                     />
                                     <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
                                         Remember me
@@ -147,7 +147,7 @@ function AdminLogin() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center"
+                                    className="w-full py-3 px-4 bg-[#2CABE3] hover:opacity-90 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center"
                                 >
                                     {loading ? (
                                         <div className="flex items-center">
@@ -184,7 +184,7 @@ function AdminLogin() {
                     </div>
 
                     <div className="text-center">
-                        <Link to="/" className="text-sm font-medium text-green-600 hover:text-green-500">
+                        <Link to="/" className="text-sm font-medium text-[#2CABE3] hover:opacity-90">
                             <i className="fas fa-arrow-left mr-1"></i>
                             Return to main site
                         </Link>

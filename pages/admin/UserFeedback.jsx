@@ -105,7 +105,7 @@ function UserFeedback() {
         const colors = {
             'new': 'bg-blue-100 text-blue-800',
             'in-progress': 'bg-yellow-100 text-yellow-800',
-            'resolved': 'bg-green-100 text-green-800',
+            'resolved': 'bg-[#2CABE3]/20 text-[#2CABE3]',
             'closed': 'bg-gray-100 text-gray-800'
         };
         return colors[status] || 'bg-gray-100 text-gray-800';
@@ -116,7 +116,7 @@ function UserFeedback() {
             'urgent': 'bg-red-100 text-red-800',
             'high': 'bg-orange-100 text-orange-800',
             'medium': 'bg-yellow-100 text-yellow-800',
-            'low': 'bg-green-100 text-green-800'
+            'low': 'bg-[#2CABE3]/20 text-[#2CABE3]'
         };
         return colors[priority] || 'bg-gray-100 text-gray-800';
     };
@@ -162,7 +162,7 @@ function UserFeedback() {
                     </div>
                     <div className="bg-white p-4 rounded-lg shadow">
                         <h3 className="text-sm font-medium text-gray-600">Resolved</h3>
-                        <p className="text-2xl font-bold text-green-600">{stats.byStatus.resolved || 0}</p>
+                        <p className="text-2xl font-bold text-[#2CABE3]">{stats.byStatus.resolved || 0}</p>
                     </div>
                 </div>
             )}
@@ -177,7 +177,7 @@ function UserFeedback() {
                             <select
                                 value={filters.status}
                                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#2CABE3]"
                             >
                                 <option value="">All Statuses</option>
                                 <option value="new">New</option>
@@ -191,7 +191,7 @@ function UserFeedback() {
                             <select
                                 value={filters.type}
                                 onChange={(e) => handleFilterChange('type', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#2CABE3]"
                             >
                                 <option value="">All Types</option>
                                 <option value="error">Error</option>
@@ -206,7 +206,7 @@ function UserFeedback() {
                             <select
                                 value={filters.priority}
                                 onChange={(e) => handleFilterChange('priority', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#2CABE3]"
                             >
                                 <option value="">All Priorities</option>
                                 <option value="urgent">Urgent</option>
@@ -222,7 +222,7 @@ function UserFeedback() {
             {/* Loading State */}
             {loading && (
                 <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2CABE3] mx-auto"></div>
                     <p className="text-gray-600 mt-4">Loading feedback...</p>
                 </div>
             )}
@@ -285,7 +285,7 @@ function UserFeedback() {
                                         <div className="ml-4 flex flex-col space-y-2">
                                             <button
                                                 onClick={() => setSelectedFeedback(item)}
-                                                className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                className="px-3 py-1 text-sm bg-[#2CABE3] text-white rounded hover:opacity-90"
                                             >
                                                 Manage
                                             </button>

@@ -9,7 +9,7 @@ function FeedbackButton() {
             {/* Floating Feedback Button */}
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="fixed bottom-24 right-6 z-40 bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-green-300 group"
+                className="fixed bottom-24 right-6 z-40 bg-[#2CABE3] hover:opacity-90 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-[#2CABE3]/50 group"
                 title="Send Feedback"
                 aria-label="Send Feedback"
             >

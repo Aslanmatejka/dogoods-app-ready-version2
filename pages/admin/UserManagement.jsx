@@ -129,7 +129,7 @@ const UserManagement = () => {
 
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading users...</p>
           </div>
         ) : users.length === 0 ? (
@@ -171,8 +171,8 @@ const UserManagement = () => {
                             alt={user.name}
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <i className="fas fa-user text-green-600"></i>
+                          <div className="h-10 w-10 rounded-full bg-[#2CABE3]/20 flex items-center justify-center">
+                            <i className="fas fa-user text-[#2CABE3]"></i>
                           </div>
                         )}
                         <div className="ml-4">
@@ -185,7 +185,7 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.user_type === 'donor' ? 'bg-green-100 text-green-800' :
+                        user.user_type === 'donor' ? 'bg-[#2CABE3]/20 text-[#2CABE3]' :
                         user.user_type === 'recipient' ? 'bg-blue-100 text-blue-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
@@ -194,7 +194,7 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.is_admin ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                        user.is_admin ? 'bg-red-100 text-red-800' : 'bg-[#2CABE3]/20 text-[#2CABE3]'
                       }`}>
                         {user.is_admin ? 'Admin' : 'User'}
                       </span>

@@ -175,7 +175,7 @@ function AdminReports() {
 
         const colors = [
             'bg-blue-500',
-            'bg-green-500',
+            'bg-[#2CABE3]',
             'bg-yellow-500',
             'bg-purple-500',
             'bg-red-500'
@@ -209,7 +209,7 @@ function AdminReports() {
                         <select
                             value={timeRange}
                             onChange={(e) => setTimeRange(e.target.value)}
-                            className="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
+                            className="form-select block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#2CABE3] focus:border-[#2CABE3] sm:text-sm rounded-md"
                         >
                             <option value="month">Last Month</option>
                             <option value="quarter">Last Quarter</option>
@@ -247,8 +247,8 @@ function AdminReports() {
 
                     <Card className="p-6">
                         <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-green-100 rounded-full p-3">
-                                <i className="fas fa-users text-green-600 text-xl"></i>
+                            <div className="flex-shrink-0 bg-[#2CABE3]/20 rounded-full p-3">
+                                <i className="fas fa-users text-[#2CABE3] text-xl"></i>
                             </div>
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-500">Total Users</p>
@@ -306,7 +306,7 @@ function AdminReports() {
                             <Card>
                                 <div className="p-6">
                                     <h2 className="text-lg font-semibold mb-6">Food Listings Over Time</h2>
-                                    {renderBarChart(reportsData.foodSaved, 'month', 'amount', 'bg-green-500')}
+                                    {renderBarChart(reportsData.foodSaved, 'month', 'amount', 'bg-[#2CABE3]')}
                                     <div className="mt-4 text-center text-sm text-gray-500">Month</div>
                                 </div>
                             </Card>

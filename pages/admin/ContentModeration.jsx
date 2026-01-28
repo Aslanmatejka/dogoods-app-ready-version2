@@ -163,12 +163,12 @@ const ContentModeration = () => {
 
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading content...</p>
           </div>
         ) : content.length === 0 ? (
           <div className="p-8 text-center">
-            <i className="fas fa-check-circle text-green-500 text-4xl mb-4"></i>
+            <i className="fas fa-check-circle text-[#2CABE3] text-4xl mb-4"></i>
             <p className="text-gray-600">No pending content to moderate</p>
           </div>
         ) : (

@@ -119,8 +119,8 @@ const DistributionAttendees = () => {
 
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
-            <div className="flex-shrink-0 bg-green-100 rounded-full p-3">
-              <i className="fas fa-users text-green-600 text-xl"></i>
+            <div className="flex-shrink-0 bg-[#2CABE3]/20 rounded-full p-3">
+              <i className="fas fa-users text-[#2CABE3] text-xl"></i>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total People</p>
@@ -161,7 +161,7 @@ const DistributionAttendees = () => {
 
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading attendees...</p>
           </div>
         ) : attendees.length === 0 ? (
@@ -209,8 +209,8 @@ const DistributionAttendees = () => {
                             alt={claim.claimer.name}
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                            <i className="fas fa-user text-green-600"></i>
+                          <div className="h-10 w-10 rounded-full bg-[#2CABE3]/20 flex items-center justify-center">
+                            <i className="fas fa-user text-[#2CABE3]"></i>
                           </div>
                         )}
                         <div className="ml-4">
@@ -239,7 +239,7 @@ const DistributionAttendees = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         claim.status === 'completed'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-[#2CABE3]/20 text-[#2CABE3]'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
                         {claim.status || 'pending'}

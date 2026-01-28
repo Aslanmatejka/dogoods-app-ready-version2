@@ -229,7 +229,7 @@ function AdminSettings() {
                     )}
 
                     {success && (
-                        <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative">
+                        <div className="mb-6 bg-[#2CABE3]/10 border border-[#2CABE3]/30 text-[#2CABE3] px-4 py-3 rounded relative">
                             <span className="block sm:inline">{success}</span>
                         </div>
                     )}
@@ -252,7 +252,7 @@ function AdminSettings() {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.general.siteName}
                                             onChange={(e) => handleInputChange('general', 'siteName', e.target.value)}
                                         />
@@ -263,7 +263,7 @@ function AdminSettings() {
                                         </label>
                                         <input
                                             type="email"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.general.contactEmail}
                                             onChange={(e) => handleInputChange('general', 'contactEmail', e.target.value)}
                                         />
@@ -274,7 +274,7 @@ function AdminSettings() {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.general.supportPhone}
                                             onChange={(e) => handleInputChange('general', 'supportPhone', e.target.value)}
                                         />
@@ -284,7 +284,7 @@ function AdminSettings() {
                                             Site Description
                                         </label>
                                         <textarea
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             rows="3"
                                             value={settings.general.siteDescription}
                                             onChange={(e) => handleInputChange('general', 'siteDescription', e.target.value)}
@@ -313,7 +313,7 @@ function AdminSettings() {
                                             <input
                                                 id="enableEmailNotifications"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.notifications.enableEmailNotifications}
                                                 onChange={() => handleCheckboxChange('notifications', 'enableEmailNotifications')}
                                             />
@@ -328,7 +328,7 @@ function AdminSettings() {
                                             <input
                                                 id="enablePushNotifications"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.notifications.enablePushNotifications}
                                                 onChange={() => handleCheckboxChange('notifications', 'enablePushNotifications')}
                                             />
@@ -344,7 +344,7 @@ function AdminSettings() {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.notifications.adminAlertEmails}
                                             onChange={(e) => handleInputChange('notifications', 'adminAlertEmails', e.target.value)}
                                         />
@@ -354,7 +354,7 @@ function AdminSettings() {
                                             <input
                                                 id="dailyDigest"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.notifications.dailyDigest}
                                                 onChange={() => handleCheckboxChange('notifications', 'dailyDigest')}
                                             />
@@ -387,7 +387,7 @@ function AdminSettings() {
                                             <input
                                                 id="requireApproval"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.listings.requireApproval}
                                                 onChange={() => handleCheckboxChange('listings', 'requireApproval')}
                                             />
@@ -405,7 +405,7 @@ function AdminSettings() {
                                             type="number"
                                             min="1"
                                             max="10"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.listings.maxImagesPerListing}
                                             onChange={(e) => handleInputChange('listings', 'maxImagesPerListing', parseInt(e.target.value))}
                                         />
@@ -418,7 +418,7 @@ function AdminSettings() {
                                             type="number"
                                             min="1"
                                             max="30"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.listings.maxActiveDaysDefault}
                                             onChange={(e) => handleInputChange('listings', 'maxActiveDaysDefault', parseInt(e.target.value))}
                                         />
@@ -429,7 +429,7 @@ function AdminSettings() {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.listings.allowedCategories}
                                             onChange={(e) => handleInputChange('listings', 'allowedCategories', e.target.value)}
                                         />
@@ -457,7 +457,7 @@ function AdminSettings() {
                                             <input
                                                 id="requireEmailVerification"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.users.requireEmailVerification}
                                                 onChange={() => handleCheckboxChange('users', 'requireEmailVerification')}
                                             />
@@ -472,7 +472,7 @@ function AdminSettings() {
                                             <input
                                                 id="allowGuestBrowsing"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.users.allowGuestBrowsing}
                                                 onChange={() => handleCheckboxChange('users', 'allowGuestBrowsing')}
                                             />
@@ -487,7 +487,7 @@ function AdminSettings() {
                                             Default User Role
                                         </label>
                                         <select
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.users.defaultUserRole}
                                             onChange={(e) => handleInputChange('users', 'defaultUserRole', e.target.value)}
                                         >
@@ -501,7 +501,7 @@ function AdminSettings() {
                                             Account Deletion Policy
                                         </label>
                                         <select
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.users.accountDeletionPolicy}
                                             onChange={(e) => handleInputChange('users', 'accountDeletionPolicy', e.target.value)}
                                         >
@@ -535,7 +535,7 @@ function AdminSettings() {
                                         <input
                                             type="number"
                                             min="30"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             value={settings.privacy.dataRetentionDays}
                                             onChange={(e) => handleInputChange('privacy', 'dataRetentionDays', parseInt(e.target.value))}
                                         />
@@ -545,7 +545,7 @@ function AdminSettings() {
                                             <input
                                                 id="showUserProfiles"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.privacy.showUserProfiles}
                                                 onChange={() => handleCheckboxChange('privacy', 'showUserProfiles')}
                                             />
@@ -560,7 +560,7 @@ function AdminSettings() {
                                             <input
                                                 id="maskUserContact"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.privacy.maskUserContact}
                                                 onChange={() => handleCheckboxChange('privacy', 'maskUserContact')}
                                             />
@@ -575,7 +575,7 @@ function AdminSettings() {
                                             <input
                                                 id="allowLocationSharing"
                                                 type="checkbox"
-                                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
                                                 checked={settings.privacy.allowLocationSharing}
                                                 onChange={() => handleCheckboxChange('privacy', 'allowLocationSharing')}
                                             />

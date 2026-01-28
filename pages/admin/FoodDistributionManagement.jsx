@@ -98,10 +98,10 @@ function FoodDistributionManagement() {
 
     const getStatusBadge = (status) => {
         const statusStyles = {
-            available: 'bg-green-100 text-green-800',
+            available: 'bg-[#2CABE3]/20 text-[#2CABE3]',
             pending: 'bg-yellow-100 text-yellow-800',
             claimed: 'bg-blue-100 text-blue-800',
-            approved: 'bg-green-100 text-green-800',
+            approved: 'bg-[#2CABE3]/20 text-[#2CABE3]',
             declined: 'bg-red-100 text-red-800'
         };
 
@@ -135,8 +135,8 @@ function FoodDistributionManagement() {
 
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-green-100 rounded-full p-3">
-                                <i className="fas fa-check-circle text-green-600 text-xl"></i>
+                            <div className="flex-shrink-0 bg-[#2CABE3]/20 rounded-full p-3">
+                                <i className="fas fa-check-circle text-[#2CABE3] text-xl"></i>
                             </div>
                             <div className="ml-4">
                                 <p className="text-sm font-medium text-gray-500">Available</p>
@@ -177,7 +177,7 @@ function FoodDistributionManagement() {
 
                     {loading ? (
                         <div className="p-8 text-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
                             <p className="mt-4 text-gray-600">Loading listings...</p>
                         </div>
                     ) : listings.length === 0 ? (

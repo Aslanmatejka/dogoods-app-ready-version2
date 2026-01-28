@@ -35,7 +35,7 @@ function AdminSidebar({ active, onNavigate }) {
                         className="flex items-center space-x-2 text-white"
                         aria-label="Go to admin dashboard"
                     >
-                        <div className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center">
+                        <div className="h-8 w-8 bg-[#2CABE3] rounded-full flex items-center justify-center">
                             <i className="fas fa-seedling" aria-hidden="true"></i>
                         </div>
                         <span className="text-lg font-semibold">DoGoods Admin</span>
