@@ -107,7 +107,7 @@ function UserDashboard() {
             description: `You listed "${listing.title}" for sharing`,
             time: formatDate(listing.created_at),
             icon: 'fa-plus-circle',
-            iconColor: 'text-green-500'
+            iconColor: 'text-[#2CABE3]'
         })).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
         return activities;
@@ -120,7 +120,7 @@ function UserDashboard() {
             description: 'Share your surplus food',
             icon: 'fa-plus',
             path: '/share',
-            color: 'bg-green-500'
+            color: 'bg-[#2CABE3]'
         },
         {
             title: 'Find Food',
@@ -227,7 +227,7 @@ function UserDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" role="region" aria-label="Activity Statistics">
                 {[
                     { label: 'Active Listings', value: stats.listings, icon: 'fa-list', color: 'bg-blue-100', iconColor: 'text-blue-600' },
-                    { label: 'Completed Donations', value: stats.donations, icon: 'fa-check-circle', color: 'bg-green-100', iconColor: 'text-green-600' },
+                    { label: 'Completed Donations', value: stats.donations, icon: 'fa-check-circle', color: 'bg-[#2CABE3]/20', iconColor: 'text-[#2CABE3]' },
                     { label: 'Food Donated', value: `${stats.foodSaved} lbs`, icon: 'fa-apple-whole', color: 'bg-orange-100', iconColor: 'text-orange-600' },
                     { label: 'People Helped', value: stats.peopleHelped, icon: 'fa-users', color: 'bg-purple-100', iconColor: 'text-purple-600' }
                 ].map((stat, index) => (

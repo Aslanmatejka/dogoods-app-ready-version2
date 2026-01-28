@@ -78,7 +78,7 @@ function AdminDashboard() {
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
       <div className="mb-6 flex gap-4">
         <button
-          className={`px-4 py-2 rounded ${activeTab === 'pending' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          className={`px-4 py-2 rounded ${activeTab === 'pending' ? 'bg-[#2CABE3] text-white' : 'bg-gray-200 text-gray-700'}`}
           onClick={() => setActiveTab('pending')}
         >Pending Foods</button>
         <button
@@ -107,7 +107,7 @@ function AdminDashboard() {
                 <p className="mb-4">Status: <span className="font-bold text-yellow-600">{food.status}</span></p>
                 <div className="flex gap-2">
                   <button
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    className="bg-[#2CABE3] text-white px-4 py-2 rounded hover:opacity-90"
                     onClick={() => handleAction(food.id, 'approved')}
                     disabled={food.status !== 'pending' || actionStatus[food.id] === 'loading'}
                   >Approve</button>
@@ -116,7 +116,7 @@ function AdminDashboard() {
                     onClick={() => handleAction(food.id, 'declined')}
                     disabled={food.status !== 'pending' || actionStatus[food.id] === 'loading'}
                   >Decline</button>
-                  {actionStatus[food.id] === 'approved' && <span className="text-green-600 ml-2">Approved</span>}
+                  {actionStatus[food.id] === 'approved' && <span className="text-[#2CABE3] ml-2">Approved</span>}
                   {actionStatus[food.id] === 'declined' && <span className="text-red-600 ml-2">Declined</span>}
                   {actionStatus[food.id] === 'error' && <span className="text-red-600 ml-2">Error</span>}
                 </div>
