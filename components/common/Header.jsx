@@ -95,7 +95,7 @@ function Header({
 
                     <div data-name="logo" className="flex items-center">
                         <a href="/" className="flex items-center">
-                            <div className="h-10 w-10 bg-green-600 rounded-full flex items-center justify-center text-white">
+                            <div className="h-10 w-10 bg-[#2CABE3] rounded-full flex items-center justify-center text-white">
                                 <i className="fas fa-seedling text-xl"></i>
                             </div>
                             <span className="ml-2 text-xl font-semibold text-gray-900">DoGoods</span>
