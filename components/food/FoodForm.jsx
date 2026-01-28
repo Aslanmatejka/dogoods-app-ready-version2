@@ -428,6 +428,7 @@ function FoodForm({
                             { value: 'Markham Elementary', label: 'Markham Elementary' },
                             { value: 'Madison Park Academy', label: 'Madison Park Academy' },
                             { value: 'McClymonds', label: 'McClymonds' },
+                            { value: 'Garfield Elementary', label: 'Garfield Elementary' },
                             { value: 'Hillside Elementary School', label: 'Hillside Elementary School' },
                             { value: 'Edendale Middle School', label: 'Edendale Middle School' },
                             { value: 'San Lorenzo High School', label: 'San Lorenzo High School' }
