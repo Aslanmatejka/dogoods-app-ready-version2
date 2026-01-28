@@ -166,7 +166,7 @@ function UserSettings() {
     if (!isAuthenticated) {
         return (
             <div className="text-center py-12" role="status" aria-busy="true">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2CABE3] mx-auto"></div>
                 <div className="sr-only">Loading user settings...</div>
                 <p className="mt-4 text-gray-600" aria-live="polite">Loading user settings...</p>
             </div>
@@ -304,7 +304,7 @@ function UserSettings() {
                                     <select
                                         value={formData.default_reminder_hours}
                                         onChange={(e) => handleInputChange('default_reminder_hours', parseInt(e.target.value))}
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
+                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-[#2CABE3] sm:text-sm rounded-md"
                                         aria-label="Select reminder time"
                                     >
                                         <option value={1}>1 hour before</option>

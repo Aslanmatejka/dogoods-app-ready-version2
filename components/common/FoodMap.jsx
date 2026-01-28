@@ -348,7 +348,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             {loading && (
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-2 z-10">
                     <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2CABE3]"></div>
                         <span className="text-sm text-gray-600">Loading food locations...</span>
                     </div>
                 </div>

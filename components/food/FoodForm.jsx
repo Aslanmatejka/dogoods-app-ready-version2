@@ -470,7 +470,7 @@ function FoodForm({
                         />
                         {geocoding && (
                             <div className="absolute right-3 top-9">
-                                <i className="fas fa-spinner fa-spin text-green-500"></i>
+                                <i className="fas fa-spinner fa-spin text-[#2CABE3]"></i>
                             </div>
                         )}
                         {formData.latitude && formData.longitude && (
