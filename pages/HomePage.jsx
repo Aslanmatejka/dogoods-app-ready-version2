@@ -22,6 +22,7 @@ function HomePage() {
     const { impact, loading: impactLoading } = useImpact();
     const [communities, setCommunities] = React.useState([]);
     const [loadingCommunities, setLoadingCommunities] = React.useState(true);
+    const [selectedLocation, setSelectedLocation] = React.useState('all');
     const { isTutorialOpen, closeTutorial, completeTutorial, startTutorial, hasSeenTutorial } = useTutorial();
     
     // Auto-start tutorial for new users on HomePage
@@ -72,6 +73,22 @@ function HomePage() {
         
         fetchCommunities();
     }, []);
+    
+    // Filter communities by location
+    const filteredCommunities = React.useMemo(() => {
+        if (selectedLocation === 'all') {
+            return communities;
+        }
+        
+        const locationMap = {
+            'alameda': ['Do Good Warehouse', 'Encinal Jr Sr High School', 'Island HS CC', 'NEA/ACLC CC', 'Academy of Alameda CC', 'Ruby Bridges Elementary CC'],
+            'oakland': ['McClymonds', 'Markham Elementary', 'Madison Park Academy', 'Madison Park Academy Primary'],
+            'san-lorenzo': ['Hillside Elementary School', 'Edendale Middle School', 'San Lorenzo High School']
+        };
+        
+        const communityNames = locationMap[selectedLocation] || [];
+        return communities.filter(c => communityNames.includes(c.name));
+    }, [communities, selectedLocation]);
     
     try {
         const foodCategories = [
@@ -463,9 +480,53 @@ function HomePage() {
                                 >
                                     Active Communities
                                 </h2>
-                                <p className="text-xl text-gray-600">
+                                <p className="text-xl text-gray-600 mb-6">
                                     Join local food sharing groups in your area
                                 </p>
+                                
+                                {/* Location Filter */}
+                                <div className="flex justify-center gap-4 flex-wrap">
+                                    <button
+                                        onClick={() => setSelectedLocation('all')}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                                            selectedLocation === 'all'
+                                                ? 'bg-[#2CABE3] text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        All Locations
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedLocation('alameda')}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                                            selectedLocation === 'alameda'
+                                                ? 'bg-[#2CABE3] text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        Alameda
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedLocation('oakland')}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                                            selectedLocation === 'oakland'
+                                                ? 'bg-[#2CABE3] text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        Oakland
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedLocation('san-lorenzo')}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                                            selectedLocation === 'san-lorenzo'
+                                                ? 'bg-[#2CABE3] text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        San Lorenzo
+                                    </button>
+                                </div>
                             </div>
 
                             {loadingCommunities ? (
@@ -479,7 +540,7 @@ function HomePage() {
                                 role="list"
                                 aria-label="Active communities"
                             >
-                                {communities.map((community) => {
+                                {filteredCommunities.map((community) => {
                                     // Extract metric values from database
                                     const foodGivenValue = Math.round(parseFloat(community.food_given_lb) || 0);
                                     const familiesHelpedValue = parseInt(community.families_helped) || 0;
