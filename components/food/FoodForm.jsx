@@ -48,13 +48,18 @@ function FoodForm({
     useEffect(() => {
         const fetchCommunities = async () => {
             try {
+                console.log('Fetching communities from database...');
                 const { data, error } = await supabase
                     .from('communities')
                     .select('id, name')
                     .eq('is_active', true)
                     .order('name', { ascending: true });
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Error fetching communities:', error);
+                    throw error;
+                }
+                console.log('Fetched communities:', data);
                 setCommunities(data || []);
             } catch (error) {
                 console.error('Error fetching communities:', error);
