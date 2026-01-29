@@ -204,21 +204,28 @@ function FoodForm({
 
     const geocodeAddress = async (address) => {
         setGeocoding(true);
+        console.log('Geocoding address:', address);
         try {
             const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
             const encodedAddress = encodeURIComponent(address);
-            const response = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${MAPBOX_TOKEN}&limit=1`
-            );
+            const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${MAPBOX_TOKEN}&limit=1`;
+            console.log('Geocoding URL:', url);
+            
+            const response = await fetch(url);
+            console.log('Geocoding response status:', response.status);
             
             if (!response.ok) {
-                throw new Error('Geocoding failed');
+                const errorText = await response.text();
+                console.error('Geocoding API error:', response.status, errorText);
+                throw new Error(`Geocoding failed: ${response.status}`);
             }
             
             const data = await response.json();
+            console.log('Geocoding data:', data);
             
             if (data.features && data.features.length > 0) {
                 const [longitude, latitude] = data.features[0].center;
+                console.log('Found coordinates:', { latitude, longitude });
                 setFormData(prev => ({
                     ...prev,
                     latitude,
@@ -230,6 +237,7 @@ function FoodForm({
                 }));
                 return { success: true, latitude, longitude };
             } else {
+                console.warn('No geocoding results found for address:', address);
                 setErrors(prev => ({
                     ...prev,
                     full_address: 'Address not found. Please check and try again.'
