@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import { useAuthContext } from '../../utils/AuthContext';
+import supabase from '../../utils/supabaseClient';
 
 function FoodForm({
     initialData = null,
@@ -10,6 +11,8 @@ function FoodForm({
     loading = false
 }) {
     const { user } = useAuthContext();
+    const [communities, setCommunities] = useState([]);
+    const [loadingCommunities, setLoadingCommunities] = useState(true);
     
     const [formData, setFormData] = useState({
         title: '',
@@ -40,6 +43,29 @@ function FoodForm({
     });
 
     const [geocoding, setGeocoding] = useState(false);
+
+    // Fetch active communities from database
+    useEffect(() => {
+        const fetchCommunities = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('communities')
+                    .select('id, name')
+                    .eq('is_active', true)
+                    .order('name', { ascending: true });
+
+                if (error) throw error;
+                setCommunities(data || []);
+            } catch (error) {
+                console.error('Error fetching communities:', error);
+                setCommunities([]);
+            } finally {
+                setLoadingCommunities(false);
+            }
+        };
+
+        fetchCommunities();
+    }, []);
 
     // Pre-fill donor information from user profile
     useEffect(() => {
@@ -416,24 +442,13 @@ function FoodForm({
                         value={formData.school_district}
                         onChange={handleChange}
                         error={errors.school_district}
+                        disabled={loadingCommunities}
                         options={[
-                            { value: '', label: 'Select Community' },
-                            { value: 'Do Good Warehouse', label: 'Do Good Warehouse' },
-                            { value: 'Ruby Bridges Elementary CC', label: 'Ruby Bridges Elementary CC' },
-                            { value: 'NEA/ACLC CC', label: 'NEA/ACLC CC' },
-                            { value: 'Academy of Alameda CC', label: 'Academy of Alameda CC' },
-                            { value: 'Island HS CC', label: 'Island HS CC' },
-                            { value: 'Encinal Jr Sr High School', label: 'Encinal Jr Sr High School' },
-                            { value: 'Madison Park Academy Primary', label: 'Madison Park Academy Primary' },
-                            { value: 'Markham Elementary', label: 'Markham Elementary' },
-                            { value: 'Madison Park Academy', label: 'Madison Park Academy' },
-                            { value: 'McClymonds High School', label: 'McClymonds High School' },
-                            { value: 'Garfield Elementary', label: 'Garfield Elementary' },
-                            { value: 'Lodestar Charter School', label: 'Lodestar Charter School' },
-                            { value: 'Horace Mann Elementary', label: 'Horace Mann Elementary' },
-                            { value: 'Hillside Elementary School', label: 'Hillside Elementary School' },
-                            { value: 'Edendale Middle School', label: 'Edendale Middle School' },
-                            { value: 'San Lorenzo High School', label: 'San Lorenzo High School' }
+                            { value: '', label: loadingCommunities ? 'Loading communities...' : 'Select Community' },
+                            ...communities.map(community => ({
+                                value: community.name,
+                                label: community.name
+                            }))
                         ]}
                         helperText="choose a community"
                     />
