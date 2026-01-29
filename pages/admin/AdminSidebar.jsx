@@ -7,6 +7,7 @@ function AdminSidebar({ active, onNavigate }) {
         const menuItems = [
             { id: 'dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt', path: '/admin' },
             { id: 'users', label: 'User Management', icon: 'fa-users', path: '/admin/users' },
+            { id: 'communities', label: 'Communities', icon: 'fa-building', path: '/admin/communities' },
             { id: 'content', label: 'Content Moderation', icon: 'fa-shield-alt', path: '/admin/content' },
             { id: 'posts', label: 'Posts & Blog', icon: 'fa-newspaper', path: '/admin/posts' },
             { id: 'messages', label: 'Messages', icon: 'fa-comments', path: '/admin/messages' },

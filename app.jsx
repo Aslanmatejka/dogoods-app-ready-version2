@@ -34,6 +34,7 @@ import { TutorialProvider } from './utils/TutorialContext.jsx';
 import DistributionAttendees from './pages/admin/DistributionAttendees.jsx';
 import FoodDistributionManagement from './pages/admin/FoodDistributionManagement.jsx';
 import UserManagement from './pages/admin/UserManagement.jsx';
+import CommunityManagement from './pages/admin/CommunityManagement.jsx';
 import AdminContentManagement from './pages/admin/AdminContentManagement.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
@@ -119,6 +120,7 @@ function AppContent() {
                 <Route path="/admin/posts" element={<AdminRoute><AdminContentManagement /></AdminRoute>} />
                 <Route path="/admin/content" element={<AdminRoute><ContentModeration /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+                <Route path="/admin/communities" element={<AdminRoute><CommunityManagement /></AdminRoute>} />
                 <Route path="/admin/distribution" element={<AdminRoute><FoodDistributionManagement /></AdminRoute>} />
                 <Route path="/admin/attendees" element={<AdminRoute><DistributionAttendees /></AdminRoute>} />
                 <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
