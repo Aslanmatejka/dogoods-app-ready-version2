@@ -124,7 +124,7 @@ function Header({
                                                     subItem.external ? (
                                                         <button
                                                             key={subIndex}
-                                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#2CABE3]"
+                                                            className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3]"
                                                             role="menuitem"
                                                             onClick={() => {
                                                                 window.open(subItem.path, '_blank', 'noopener,noreferrer');
@@ -138,7 +138,7 @@ function Header({
                                                         <a
                                                             key={subIndex}
                                                             href={subItem.path}
-                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#2CABE3]"
+                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3]"
                                                             role="menuitem"
                                                             onClick={() => setSupportDropdownOpen(false)}
                                                         >
@@ -291,7 +291,7 @@ function Header({
                                                         <li key={subIndex}>
                                                             {subItem.external ? (
                                                                 <button
-                                                                    className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                                    className="w-full text-left block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                                     onClick={() => {
                                                                         window.open(subItem.path, '_blank', 'noopener,noreferrer');
                                                                         setIsMenuOpen(false);
@@ -303,7 +303,7 @@ function Header({
                                                             ) : (
                                                                 <a
                                                                     href={subItem.path}
-                                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                                     onClick={() => setIsMenuOpen(false)}
                                                                 >
                                                                     {subItem.label}
@@ -317,7 +317,7 @@ function Header({
                                             <li key={index}>
                                                 <a
                                                     href={item.path}
-                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                     onClick={() => setIsMenuOpen(false)}
                                                 >
                                                     {item.label}
@@ -330,7 +330,7 @@ function Header({
                                             <li className="border-t border-gray-200 mt-2 pt-2">
                                                 <a
                                                     href="/dashboard"
-                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                     onClick={() => setIsMenuOpen(false)}
                                                 >
                                                     Dashboard
@@ -339,7 +339,7 @@ function Header({
                                             <li>
                                                 <a
                                                     href="/profile"
-                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                     onClick={() => setIsMenuOpen(false)}
                                                 >
                                                     Your Profile
@@ -348,7 +348,7 @@ function Header({
                                             <li>
                                                 <a
                                                     href="/listings"
-                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                     onClick={() => setIsMenuOpen(false)}
                                                 >
                                                     My Listings
@@ -358,7 +358,7 @@ function Header({
                                                 <li>
                                                     <a
                                                         href="/admin"
-                                                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                        className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                         onClick={() => setIsMenuOpen(false)}
                                                     >
                                                         Admin Panel
@@ -368,7 +368,7 @@ function Header({
                                             <li>
                                                 <a
                                                     href="/settings"
-                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                     onClick={() => setIsMenuOpen(false)}
                                                 >
                                                     Settings
@@ -392,7 +392,7 @@ function Header({
                                             <li className="border-t border-gray-200 mt-2 pt-2">
                                                 <a
                                                     href="/login"
-                                                    className="block px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-[#2CABE3] rounded-lg"
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-[#2CABE3]/10 hover:text-[#2CABE3] rounded-lg"
                                                     onClick={() => setIsMenuOpen(false)}
                                                 >
                                                     Sign In
