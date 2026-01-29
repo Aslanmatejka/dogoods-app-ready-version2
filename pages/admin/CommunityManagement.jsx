@@ -8,6 +8,7 @@ const CommunityManagement = () => {
   const [loading, setLoading] = React.useState(true);
   const [showModal, setShowModal] = React.useState(false);
   const [editingCommunity, setEditingCommunity] = React.useState(null);
+  const [submitting, setSubmitting] = React.useState(false);
   const [formData, setFormData] = React.useState({
     name: '',
     location: '',
@@ -70,9 +71,23 @@ const CommunityManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (submitting) {
+      console.log('Already submitting, ignoring duplicate submission');
+      return;
+    }
+    
+    setSubmitting(true);
     console.log('Submitting community data:', formData);
     
     try {
+      // Check authentication first
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session ? 'Authenticated' : 'Not authenticated');
+      
+      if (!session) {
+        throw new Error('You must be logged in to add/edit communities. Please log in to the admin panel.');
+      }
+      
       if (editingCommunity) {
         // Update existing community
         console.log('Updating community ID:', editingCommunity.id);
@@ -123,7 +138,9 @@ const CommunityManagement = () => {
         hint: error.hint,
         code: error.code
       });
-      alert('Failed to save community: ' + error.message + '\nCheck console for details.');
+      alert('Failed to save community: ' + error.message + '\n\nCheck console for details.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -381,11 +398,19 @@ const CommunityManagement = () => {
 
                 <div className="flex items-center">
                   <input
-                    type="checkbox"
-                    name="is_active"
-                    checked={formData.is_active}
-                    onChange={handleInputChange}
-                    className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        Saving...
+                      </>
+                    ) : (
+                      editingCommunity ? 'Update Community' : 'Add Community'
+                    )order-gray-300 rounded"
                   />
                   <label className="ml-2 block text-sm text-gray-700">
                     Active (visible to users)
