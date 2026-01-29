@@ -399,6 +399,22 @@ const CommunityManagement = () => {
 
                 <div className="flex items-center">
                   <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={formData.is_active}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
+                  />
+                  <label className="ml-2 block text-sm text-gray-700">
+                    Active (visible to users)
+                  </label>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowModal(false)}
                     disabled={submitting}
                   >
                     Cancel
@@ -411,23 +427,7 @@ const CommunityManagement = () => {
                       </>
                     ) : (
                       editingCommunity ? 'Update Community' : 'Add Community'
-                    )order-gray-300 rounded"
-                  />
-                  <label className="ml-2 block text-sm text-gray-700">
-                    Active (visible to users)
-                  </label>
-                </div>
-
-                <div className="flex justify-end space-x-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingCommunity ? 'Update Community' : 'Add Community'}
+                    )}
                   </Button>
                 </div>
               </form>
