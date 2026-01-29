@@ -430,6 +430,7 @@ function FoodForm({
                             { value: 'McClymonds', label: 'McClymonds' },
                             { value: 'Garfield Elementary', label: 'Garfield Elementary' },
                             { value: 'Lodestar Charter School', label: 'Lodestar Charter School' },
+                            { value: 'Horace Mann Elementary', label: 'Horace Mann Elementary' },
                             { value: 'Hillside Elementary School', label: 'Hillside Elementary School' },
                             { value: 'Edendale Middle School', label: 'Edendale Middle School' },
                             { value: 'San Lorenzo High School', label: 'San Lorenzo High School' }

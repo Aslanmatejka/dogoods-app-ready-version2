@@ -82,7 +82,7 @@ function HomePage() {
         
         const locationMap = {
             'alameda': ['Do Good Warehouse', 'Encinal Jr Sr High School', 'Island HS CC', 'NEA/ACLC CC', 'Academy of Alameda CC', 'Ruby Bridges Elementary CC'],
-            'oakland': ['McClymonds', 'Markham Elementary', 'Madison Park Academy', 'Madison Park Academy Primary', 'Garfield Elementary', 'Lodestar Charter School'],
+            'oakland': ['McClymonds', 'Markham Elementary', 'Madison Park Academy', 'Madison Park Academy Primary', 'Garfield Elementary', 'Lodestar Charter School', 'Horace Mann Elementary'],
             'san-lorenzo': ['Hillside Elementary School', 'Edendale Middle School', 'San Lorenzo High School']
         };
         
