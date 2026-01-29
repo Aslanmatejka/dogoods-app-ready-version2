@@ -157,8 +157,8 @@ export default function ClaimFoodForm() {
                         <Input label="Contact" name="dropoff_contact" value={formData.dropoff_contact || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter contact." />
                     </div>
                 ) : (
-                    <div className="mt-8 p-6 bg-green-50 rounded-xl border border-green-200">
-                        <h3 className="text-lg font-bold text-green-700 mb-4">Pickup Details</h3>
+                    <div className="mt-8 p-6 bg-[#2CABE3]/10 rounded-xl border border-[#2CABE3]/30">
+                        <h3 className="text-lg font-bold text-[#2CABE3] mb-4">Pickup Details</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
                                 label="Pickup Date"
@@ -183,16 +183,16 @@ export default function ClaimFoodForm() {
                         <Input label="Pickup Place" name="pickup_place" value={formData.pickup_place || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter pickup location." />
                         <Input label="Pickup Contact" name="pickup_contact" value={formData.pickup_contact || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter contact for pickup." />
 
-                        <div className="mt-4 pt-4 border-t border-green-200">
+                        <div className="mt-4 pt-4 border-t border-[#2CABE3]/30">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <i className="fas fa-bell mr-2 text-green-600"></i>
+                                <i className="fas fa-bell mr-2 text-[#2CABE3]"></i>
                                 Remind me before pickup
                             </label>
                             <select
                                 name="reminder_hours_before"
                                 value={formData.reminder_hours_before}
                                 onChange={handleFormChange}
-                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md"
+                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#2CABE3] focus:border-[#2CABE3] sm:text-sm rounded-md"
                             >
                                 <option value={1}>1 hour before</option>
                                 <option value={2}>2 hours before</option>
@@ -208,7 +208,7 @@ export default function ClaimFoodForm() {
                     </div>
                 )}
                 <div className="flex justify-end mt-8">
-                    <Button type="submit" variant="primary" className="px-8 py-3 text-lg font-semibold rounded-lg shadow-md bg-green-600 hover:bg-green-700 transition" disabled={loading}>
+                    <Button type="submit" variant="primary" className="px-8 py-3 text-lg font-semibold rounded-lg shadow-md bg-[#2CABE3] hover:opacity-90 transition" disabled={loading}>
                         {loading ? (
                             <span><i className="fas fa-spinner fa-spin mr-2"></i>Submitting...</span>
                         ) : (
