@@ -269,8 +269,9 @@ function FoodForm({
         if (!formData.donor_email && !formData.donor_phone) newErrors.donor_email = 'Email or phone is required';
         if (!formData.donor_occupation) newErrors.donor_occupation = 'Occupation is required';
         if (!formData.full_address) newErrors.full_address = 'Full address is required for map location';
-        if (formData.full_address && (!formData.latitude || !formData.longitude)) {
-            newErrors.full_address = 'Please wait for address verification or enter a valid address';
+        // Only require geocoding if address is provided and geocoding is not in progress
+        if (formData.full_address && (!formData.latitude || !formData.longitude) && !geocoding) {
+            newErrors.full_address = 'Address geocoding failed. Please verify the address is correct.';
         }
         if (!formData.image && !initialData?.image_url) {
             newErrors.image = 'Photo is required';
@@ -497,9 +498,19 @@ function FoodForm({
                         )}
                         {formData.latitude && formData.longitude && (
                             <div className="mt-2 text-sm text-green-600 flex items-center">
-                                <i className="fas fa-map-marker-alt mr-2"></i>
-                                Location found: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                                <i className="fas fa-check-circle mr-2"></i>
+                                Location verified: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
                             </div>
+                        )}
+                        {errors.full_address && formData.full_address && !geocoding && (
+                            <button
+                                type="button"
+                                onClick={() => geocodeAddress(formData.full_address)}
+                                className="mt-2 text-sm text-[#2CABE3] hover:underline flex items-center"
+                            >
+                                <i className="fas fa-redo mr-1"></i>
+                                Retry address verification
+                            </button>
                         )}
                     </div>
                 </div>
