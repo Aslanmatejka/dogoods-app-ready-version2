@@ -427,7 +427,7 @@ function FoodForm({
                             { value: 'Madison Park Academy Primary', label: 'Madison Park Academy Primary' },
                             { value: 'Markham Elementary', label: 'Markham Elementary' },
                             { value: 'Madison Park Academy', label: 'Madison Park Academy' },
-                            { value: 'McClymonds', label: 'McClymonds' },
+                            { value: 'McClymonds High School', label: 'McClymonds High School' },
                             { value: 'Garfield Elementary', label: 'Garfield Elementary' },
                             { value: 'Lodestar Charter School', label: 'Lodestar Charter School' },
                             { value: 'Horace Mann Elementary', label: 'Horace Mann Elementary' },
