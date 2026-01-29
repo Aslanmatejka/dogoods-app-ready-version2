@@ -69,23 +69,38 @@ const CommunityManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    console.log('Submitting community data:', formData);
+    
     try {
       if (editingCommunity) {
         // Update existing community
-        const { error } = await supabase
+        console.log('Updating community ID:', editingCommunity.id);
+        const { data, error } = await supabase
           .from('communities')
           .update(formData)
-          .eq('id', editingCommunity.id);
+          .eq('id', editingCommunity.id)
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
+        console.log('Update successful:', data);
         alert('Community updated successfully!');
       } else {
         // Add new community
-        const { error } = await supabase
+        console.log('Inserting new community...');
+        const { data, error } = await supabase
           .from('communities')
-          .insert([formData]);
+          .insert([formData])
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
+        console.log('Insert successful:', data);
         alert('Community added successfully!');
       }
 
@@ -102,7 +117,13 @@ const CommunityManagement = () => {
       fetchCommunities();
     } catch (error) {
       console.error('Error saving community:', error);
-      alert('Failed to save community: ' + error.message);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      alert('Failed to save community: ' + error.message + '\nCheck console for details.');
     }
   };
 
