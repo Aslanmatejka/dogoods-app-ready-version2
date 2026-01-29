@@ -113,7 +113,8 @@ const CommunityManagement = () => {
 
         if (error) {
           console.error('Insert error:', error);
-          throw error;
+          console.error('Full error object:', JSON.stringify(error, null, 2));
+          throw new Error(`Database Error: ${error.message || 'Unknown error'}\nCode: ${error.code || 'N/A'}\nDetails: ${error.details || 'N/A'}\nHint: ${error.hint || 'N/A'}`);
         }
         console.log('Insert successful:', data);
         alert('Community added successfully!');
