@@ -106,12 +106,39 @@ function FoodForm({
     const [errors, setErrors] = useState({});
     const [imagePreview, setImagePreview] = useState(null);
     const [submitError, setSubmitError] = useState(null);
+    const [geocodeTimeout, setGeocodeTimeout] = useState(null);
 
     useEffect(() => {
         if (initialData?.image_url) {
             setImagePreview(initialData.image_url);
         }
     }, [initialData]);
+
+    // Auto-geocode when address changes (with debounce)
+    useEffect(() => {
+        // Clear previous timeout
+        if (geocodeTimeout) {
+            clearTimeout(geocodeTimeout);
+        }
+
+        // Only geocode if address exists and coordinates are not already set
+        if (formData.full_address && formData.full_address.trim().length > 10 && !formData.latitude && !formData.longitude) {
+            console.log('Setting geocode timeout for address:', formData.full_address);
+            const timeout = setTimeout(() => {
+                console.log('Auto-geocoding address after delay');
+                geocodeAddress(formData.full_address);
+            }, 1500); // 1.5 second delay after user stops typing
+
+            setGeocodeTimeout(timeout);
+        }
+
+        // Cleanup timeout on unmount
+        return () => {
+            if (geocodeTimeout) {
+                clearTimeout(geocodeTimeout);
+            }
+        };
+    }, [formData.full_address]);
 
     // Cleanup function for image preview URL
     useEffect(() => {
