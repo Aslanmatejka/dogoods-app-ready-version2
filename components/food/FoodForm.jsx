@@ -257,7 +257,8 @@ function FoodForm({
     };
 
     const handleAddressBlur = async () => {
-        if (formData.full_address && formData.full_address.trim()) {
+        if (formData.full_address && formData.full_address.trim() && !formData.latitude && !formData.longitude) {
+            console.log('Address blur - triggering geocoding');
             await geocodeAddress(formData.full_address);
         }
     };

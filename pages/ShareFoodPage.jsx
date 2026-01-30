@@ -6,6 +6,7 @@ import { reportError } from "../utils/helpers";
 import FoodForm from "../components/food/FoodForm";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import dataService from '../utils/dataService';
+import supabase from '../utils/supabaseClient';
 
 function ShareFoodPageContent() {
     const navigate = useNavigate();
@@ -54,10 +55,24 @@ function ShareFoodPageContent() {
                 imageUrl = url;
             }
 
+            // Look up community_id from community name
+            let communityId = null;
+            if (formData.school_district) {
+                const { data: community } = await supabase
+                    .from('communities')
+                    .select('id')
+                    .eq('name', formData.school_district)
+                    .single();
+                if (community) {
+                    communityId = community.id;
+                }
+            }
+
             const listingData = {
                 ...formData,
                 user_id: authUser.id,
-                status: 'approved',
+                status: 'pending',
+                community_id: communityId,
                 image_url: imageUrl,
                 listing_type: 'donation',
             };
