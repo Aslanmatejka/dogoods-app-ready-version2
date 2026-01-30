@@ -196,7 +196,7 @@ function Tutorial({ isOpen, onClose, onComplete }) {
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-green-600 transition-all duration-300"
+                            className="h-full bg-[#2CABE3] transition-all duration-300"
                             style={{ width: `${((currentStep + 1) / TUTORIAL_STEPS.length) * 100}%` }}
                         />
                     </div>
@@ -221,7 +221,7 @@ function Tutorial({ isOpen, onClose, onComplete }) {
                         )}
                         <button
                             onClick={handleNext}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                            className="px-4 py-2 bg-[#2CABE3] text-white rounded-lg hover:opacity-90 font-medium"
                         >
                             {isLastStep ? 'Get Started' : 'Next'}
                         </button>
