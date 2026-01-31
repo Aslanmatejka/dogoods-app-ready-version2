@@ -18,11 +18,12 @@ import FoodMap from "../components/common/FoodMap";
 
 function HomePage() {
     const navigate = useNavigate();
-    const { listings: featuredListings, loading: loadingListings, error: listingsError } = useFoodListings({ status: 'approved' }, 6);
+    const { listings: featuredListings, loading: loadingListings, error: listingsError } = useFoodListings({ status: 'approved' }, 12);
     const { impact, loading: impactLoading } = useImpact();
     const [communities, setCommunities] = React.useState([]);
     const [loadingCommunities, setLoadingCommunities] = React.useState(true);
     const [selectedLocation, setSelectedLocation] = React.useState('all');
+    const [showAllListings, setShowAllListings] = React.useState(false);
     const { isTutorialOpen, closeTutorial, completeTutorial, startTutorial, hasSeenTutorial } = useTutorial();
     
     // Auto-start tutorial for new users on HomePage
@@ -435,17 +436,40 @@ function HomePage() {
                                     <p className="text-gray-500">Unable to load featured listings</p>
                                 </div>
                             ) : featuredListings && featuredListings.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                    {featuredListings.map((listing) => (
-                                        <FoodCard
-                                            key={listing.id}
-                                            food={listing}
-                                            onClaim={(food) => {
-                                                navigate('/claim', { state: { food } });
-                                            }}
-                                        />
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                        {(showAllListings ? featuredListings : featuredListings.slice(0, 3)).map((listing) => (
+                                            <FoodCard
+                                                key={listing.id}
+                                                food={listing}
+                                                onClaim={(food) => {
+                                                    navigate('/claim', { state: { food } });
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                    
+                                    {featuredListings.length > 3 && (
+                                        <div className="text-center mb-8">
+                                            <button
+                                                onClick={() => setShowAllListings(!showAllListings)}
+                                                className="px-6 py-2 text-white bg-[#2CABE3] hover:bg-[#2398c7] rounded-lg font-semibold transition-colors duration-200"
+                                            >
+                                                {showAllListings ? (
+                                                    <>
+                                                        Show Less
+                                                        <i className="fas fa-chevron-up ml-2" aria-hidden="true"></i>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        View More Featured Listings
+                                                        <i className="fas fa-chevron-down ml-2" aria-hidden="true"></i>
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="text-center py-8 bg-white rounded-lg shadow-sm">
                                     <i className="fas fa-box-open text-gray-400 text-4xl mb-3"></i>
