@@ -24,6 +24,7 @@ function HomePage() {
     const [loadingCommunities, setLoadingCommunities] = React.useState(true);
     const [selectedLocation, setSelectedLocation] = React.useState('all');
     const [showAllListings, setShowAllListings] = React.useState(false);
+    const [showAllCommunities, setShowAllCommunities] = React.useState(false);
     const { isTutorialOpen, closeTutorial, completeTutorial, startTutorial, hasSeenTutorial } = useTutorial();
     
     // Auto-start tutorial for new users on HomePage
@@ -559,12 +560,13 @@ function HomePage() {
                                     <p className="mt-4 text-gray-600">Loading communities...</p>
                                 </div>
                             ) : (
+                            <>
                             <div 
                                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 max-w-6xl mx-auto"
                                 role="list"
                                 aria-label="Active communities"
                             >
-                                {filteredCommunities.map((community) => {
+                                {(showAllCommunities ? filteredCommunities : filteredCommunities.slice(0, 3)).map((community) => {
                                     // Extract metric values from database
                                     const foodGivenValue = Math.round(parseFloat(community.food_given_lb) || 0);
                                     const familiesHelpedValue = parseInt(community.families_helped) || 0;
@@ -630,7 +632,30 @@ function HomePage() {
                                         </div>
                                     </Card>
                                 )})}
-                            </div>                            )}
+                            </div>
+                            
+                            {filteredCommunities.length > 3 && (
+                                <div className="text-center mb-8">
+                                    <button
+                                        onClick={() => setShowAllCommunities(!showAllCommunities)}
+                                        className="px-6 py-2 text-white bg-[#2CABE3] hover:bg-[#2398c7] rounded-lg font-semibold transition-colors duration-200"
+                                    >
+                                        {showAllCommunities ? (
+                                            <>
+                                                Show Less
+                                                <i className="fas fa-chevron-up ml-2" aria-hidden="true"></i>
+                                            </>
+                                        ) : (
+                                            <>
+                                                View More Communities
+                                                <i className="fas fa-chevron-down ml-2" aria-hidden="true"></i>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                            </>
+                            )}
                             <div className="text-center">
                                 <Button
                                     variant="secondary"
