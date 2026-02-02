@@ -10,7 +10,9 @@ const communities = [
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/allgoodliving.jpg?raw=true',
         food_given_lb: 0,
         families_helped: 0,
-        school_staff_helped: 0
+        school_staff_helped: 0,
+        latitude: 37.7609,
+        longitude: -122.2553
     },
     {
         id: 2,
@@ -23,7 +25,9 @@ const communities = [
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/Ruby.jpg?raw=true',
         food_given_lb: 0,
         families_helped: 0,
-        school_staff_helped: 0
+        school_staff_helped: 0,
+        latitude: 37.7720,
+        longitude: -122.2647
     },
     {
         id: 3,
@@ -36,7 +40,9 @@ const communities = [
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/ACLC.jpg?raw=true',
         food_given_lb: 0,
         families_helped: 0,
-        school_staff_helped: 0
+        school_staff_helped: 0,
+        latitude: 37.7683,
+        longitude: -122.2545
     },
     {
         id: 4,
@@ -49,7 +55,9 @@ const communities = [
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/the%20academy.jpg?raw=true',
         food_given_lb: 0,
         families_helped: 0,
-        school_staff_helped: 0
+        school_staff_helped: 0,
+        latitude: 37.7703,
+        longitude: -122.2609
     },
     {
         id: 5,
@@ -62,7 +70,9 @@ const communities = [
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/island.jpg?raw=true',
         food_given_lb: 0,
         families_helped: 0,
-        school_staff_helped: 0
+        school_staff_helped: 0,
+        latitude: 37.7696,
+        longitude: -122.2615
     },
     {
         id: 6,
@@ -75,7 +85,9 @@ const communities = [
         image: 'https://github.com/Aslanmatejka/my-public-assets/blob/main/jets.jpg?raw=true',
         food_given_lb: 0,
         families_helped: 0,
-        school_staff_helped: 0
+        school_staff_helped: 0,
+        latitude: 37.7679,
+        longitude: -122.2702
     },
     // {
     //     id: 7,

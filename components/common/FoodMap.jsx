@@ -18,6 +18,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const markersRef = useRef([]);
     const popupRef = useRef(null);
     const [foodListings, setFoodListings] = useState([]);
+    const [communities, setCommunities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -76,16 +77,17 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     }, []);
 
     useEffect(() => {
-        // Fetch listings immediately
+        // Fetch listings and communities immediately
         fetchFoodListings();
+        fetchCommunities();
     }, []);
 
     useEffect(() => {
         // Add markers as soon as both map and data are ready
-        if (mapLoaded && foodListings.length > 0) {
+        if (mapLoaded && (foodListings.length > 0 || communities.length > 0)) {
             addMarkers();
         }
-    }, [mapLoaded, foodListings]);
+    }, [mapLoaded, foodListings, communities]);
 
     const fetchFoodListings = async () => {
         try {
@@ -114,8 +116,31 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
         }
     };
 
+    const fetchCommunities = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('communities')
+                .select('*')
+                .eq('is_active', true)
+                .not('latitude', 'is', null)
+                .not('longitude', 'is', null);
+
+            if (error) {
+                console.error('Communities fetch error:', error);
+                throw error;
+            }
+            
+            console.log('Fetched communities:', data);
+            console.log('Number of communities with coordinates:', data?.length || 0);
+            setCommunities(data || []);
+        } catch (error) {
+            console.error('Error fetching communities:', error);
+            setCommunities([]);
+        }
+    };
+
     const addMarkers = () => {
-        console.log('Adding markers for', foodListings.length, 'listings');
+        console.log('Adding markers for', foodListings.length, 'listings and', communities.length, 'communities');
         
         const mapboxgl = getMapboxgl();
         if (!mapboxgl || !map.current) {
@@ -127,11 +152,11 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
         markersRef.current.forEach(marker => marker.remove());
         markersRef.current = [];
 
-        // Add new markers
+        // Add food listing markers
         foodListings.forEach((listing) => {
-            console.log('Adding marker for:', listing.title, 'at', listing.latitude, listing.longitude);
+            console.log('Adding food marker for:', listing.title, 'at', listing.latitude, listing.longitude);
             
-            // Create custom marker element
+            // Create custom marker element for food
             const el = document.createElement('div');
             el.className = 'custom-marker';
             el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 50px; position: relative; z-index: 100;';
@@ -195,6 +220,79 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 anchor: 'bottom'
             })
                 .setLngLat([listing.longitude, listing.latitude])
+                .addTo(map.current);
+
+            markersRef.current.push(marker);
+        });
+
+        // Add community markers
+        communities.forEach((community) => {
+            console.log('Adding community marker for:', community.name, 'at', community.latitude, community.longitude);
+            
+            // Create custom marker element for community
+            const el = document.createElement('div');
+            el.className = 'custom-marker community-marker';
+            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 50px; position: relative; z-index: 90;';
+            el.innerHTML = `
+                <div style="
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: center;
+                    transition: transform 0.2s;
+                    pointer-events: none;
+                ">
+                    <div style="position: relative; pointer-events: none;">
+                        <div style="
+                            position: absolute;
+                            inset: -4px;
+                            background: rgba(44, 171, 227, 0.4);
+                            border-radius: 50% 50% 50% 0;
+                            transform: rotate(-45deg);
+                            filter: blur(4px);
+                            pointer-events: none;
+                        "></div>
+                        <div style="
+                            position: relative;
+                            background: #2CABE3;
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 50% 50% 50% 0;
+                            transform: rotate(-45deg);
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            pointer-events: none;
+                        ">
+                            <i class="fas fa-school" style="color: white; font-size: 14px; transform: rotate(45deg); pointer-events: none;"></i>
+                        </div>
+                        <div style="
+                            position: absolute;
+                            bottom: -8px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            width: 0;
+                            height: 0;
+                            border-left: 4px solid transparent;
+                            border-right: 4px solid transparent;
+                            border-top: 8px solid #2CABE3;
+                            pointer-events: none;
+                        "></div>
+                    </div>
+                </div>
+            `;
+
+            el.addEventListener('click', () => {
+                showCommunityPopup(community);
+            });
+
+            const marker = new mapboxgl.Marker({
+                element: el,
+                anchor: 'bottom'
+            })
+                .setLngLat([community.longitude, community.latitude])
                 .addTo(map.current);
 
             markersRef.current.push(marker);
@@ -308,6 +406,87 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
         if (onMarkerClick) {
             onMarkerClick(listing);
         }
+    };
+
+    const showCommunityPopup = (community) => {
+        const mapboxgl = getMapboxgl();
+        if (!mapboxgl || !map.current) {
+            console.warn('⚠️ Mapbox not ready for popup');
+            return;
+        }
+        
+        // Remove existing popup if clicking on a different community
+        if (popupRef.current) {
+            popupRef.current.remove();
+        }
+
+        const popupContent = document.createElement('div');
+        popupContent.className = 'p-3 max-w-xs';
+        popupContent.style.width = '300px';
+
+        popupContent.innerHTML = `
+            ${community.image ? `
+                <img 
+                    src="${community.image}" 
+                    alt="${community.name}"
+                    style="width: 100%; height: 128px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;"
+                />
+            ` : ''}
+            <h3 style="font-weight: bold; font-size: 18px; color: #111827; margin-bottom: 8px;">
+                ${community.name}
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-size: 14px; color: #374151;">
+                <div style="display: flex; align-items: start; gap: 8px;">
+                    <i class="fas fa-map-marker-alt" style="color: #2CABE3; margin-top: 2px;"></i>
+                    <span>${community.location}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-clock" style="color: #2CABE3;"></i>
+                    <span>${community.hours}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-phone" style="color: #2CABE3;"></i>
+                    <span>${community.phone}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-user" style="color: #2CABE3;"></i>
+                    <span>${community.contact}</span>
+                </div>
+            </div>
+            
+            <button id="view-community-btn" style="
+                width: 100%;
+                background: #2CABE3;
+                color: white;
+                font-weight: 500;
+                padding: 8px 16px;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                transition: background 0.2s;
+            " onmouseover="this.style.background='#2398c7'" onmouseout="this.style.background='#2CABE3'">
+                View Community
+            </button>
+        `;
+
+        popupRef.current = new mapboxgl.Popup({
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: '320px',
+            offset: 25
+        })
+            .setLngLat([community.longitude, community.latitude])
+            .setDOMContent(popupContent)
+            .addTo(map.current);
+
+        // Add event listener for view community button
+        setTimeout(() => {
+            const viewBtn = document.getElementById('view-community-btn');
+            if (viewBtn) {
+                viewBtn.addEventListener('click', () => navigate(`/community/${community.id}`));
+            }
+        }, 0);
     };
 
     return (
