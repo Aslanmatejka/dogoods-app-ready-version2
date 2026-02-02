@@ -116,14 +116,18 @@ function CommunityPage() {
 
         setLikingPost(postId);
         try {
-            await dataService.togglePostLike(postId);
+            console.log('Toggling like for post:', postId);
+            const result = await dataService.togglePostLike(postId);
+            console.log('Like toggle result:', result);
 
             setPosts(prevPosts => prevPosts.map(post => {
                 if (post.id === postId) {
                     const isLiked = userLikes.includes(postId);
+                    const newLikesCount = isLiked ? post.likes_count - 1 : post.likes_count + 1;
+                    console.log(`Updating post ${postId} likes from ${post.likes_count} to ${newLikesCount}`);
                     return {
                         ...post,
-                        likes_count: isLiked ? post.likes_count - 1 : post.likes_count + 1
+                        likes_count: newLikesCount
                     };
                 }
                 return post;
@@ -137,6 +141,7 @@ function CommunityPage() {
         } catch (error) {
             console.error('Error toggling like:', error);
             reportError(error);
+            alert('Failed to like post: ' + error.message);
         } finally {
             setLikingPost(null);
         }
