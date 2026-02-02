@@ -40,6 +40,7 @@ function AdminContentManagement() {
         try {
             setLoading(true);
             const data = await dataService.getCommunityPosts();
+            console.log('Fetched posts:', data);
             setPosts(data);
         } catch (error) {
             console.error('Error fetching posts:', error);
@@ -69,7 +70,9 @@ function AdminContentManagement() {
             let imageUrl = formData.image_url;
 
             if (imageFile) {
+                console.log('Uploading image file:', imageFile.name);
                 const { url } = await dataService.uploadFile(imageFile, 'food-images');
+                console.log('Image uploaded successfully, URL:', url);
                 imageUrl = url;
             }
 
@@ -78,6 +81,8 @@ function AdminContentManagement() {
                 image_url: imageUrl,
                 author_id: user?.id
             };
+
+            console.log('Saving post with data:', postData);
 
             if (editingPost) {
                 await dataService.updateCommunityPost(editingPost.id, postData);
