@@ -14,7 +14,7 @@ const formatDate = (date) => {
 };
 
 function UserListings() {
-    const { user: authUser, isAuthenticated } = useAuth();
+    const { user: authUser, isAuthenticated, loading: authLoading } = useAuth();
     const { listings, loading, error, createListing, updateListing, deleteListing } = useFoodListings({ user_id: authUser?.id });
     
     const [activeTab, setActiveTab] = React.useState('individual');
@@ -24,11 +24,12 @@ function UserListings() {
     const [successMessage, setSuccessMessage] = React.useState(null);
 
     React.useEffect(() => {
-        if (!isAuthenticated) {
+        // Only redirect if auth is done loading and user is not authenticated
+        if (!authLoading && !isAuthenticated) {
             window.location.href = '/login';
             return;
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, authLoading]);
 
     const handleSubmit = async (formData) => {
         try {
@@ -78,6 +79,18 @@ function UserListings() {
             console.error('Download template error:', error);
         }
     };
+
+    // Show loading while checking authentication
+    if (authLoading) {
+        return (
+            <div className="max-w-7xl mx-auto py-8 px-4" role="status" aria-busy="true">
+                <div className="flex flex-col items-center justify-center min-h-[400px]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mb-4"></div>
+                    <p className="text-gray-600">Checking authentication...</p>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
