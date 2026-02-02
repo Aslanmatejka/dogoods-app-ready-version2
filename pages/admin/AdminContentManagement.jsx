@@ -5,8 +5,10 @@ import Card from '../../components/common/Card';
 import dataService from '../../utils/dataService';
 import { reportError } from '../../utils/helpers';
 import AdminLayout from './AdminLayout';
+import { useAuthContext } from '../../utils/AuthContext';
 
 function AdminContentManagement() {
+    const { user } = useAuthContext();
     const [posts, setPosts] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [showForm, setShowForm] = React.useState(false);
@@ -73,7 +75,8 @@ function AdminContentManagement() {
 
             const postData = {
                 ...formData,
-                image_url: imageUrl
+                image_url: imageUrl,
+                author_id: user?.id
             };
 
             if (editingPost) {

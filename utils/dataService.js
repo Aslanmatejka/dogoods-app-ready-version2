@@ -1125,7 +1125,9 @@ class DataService {
         title: postData.title,
         content: postData.content,
         category: postData.category || 'general',
-        author_id: postData.author?.id || postData.author_id
+        author_id: postData.author?.id || postData.author_id,
+        image_url: postData.image_url || null,
+        post_type: postData.post_type || 'forum'
       };
       console.log('Debug: Creating community post with author_id:', dbData.author_id);
 
