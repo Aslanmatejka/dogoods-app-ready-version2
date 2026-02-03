@@ -6,8 +6,8 @@ import supabase from '../../utils/supabaseClient';
 // Access it from window.mapboxgl
 const getMapboxgl = () => window.mapboxgl;
 
-// Set Mapbox access token directly
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
+// Get Mapbox token from environment variable
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
 
 console.log('🔑 Mapbox token set:', MAPBOX_TOKEN.substring(0, 20) + '...');
 
@@ -17,62 +17,119 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const map = useRef(null);
     const markersRef = useRef([]);
     const popupRef = useRef(null);
+    const mapInitialized = useRef(false); // Prevent double initialization in Strict Mode
     const [foodListings, setFoodListings] = useState([]);
     const [communities, setCommunities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mapLoaded, setMapLoaded] = useState(false);
 
     useEffect(() => {
-        if (map.current) return;
-
+        // Prevent double initialization from React Strict Mode
+        if (mapInitialized.current) return;
+        
         const mapboxgl = getMapboxgl();
         if (!mapboxgl || !mapContainer.current) return;
-
-        if (!mapContainer.current) {
-            console.error('❌ Map container ref is null');
-            return;
-        }
 
         if (!MAPBOX_TOKEN) {
             console.error('❌ Mapbox token is missing');
             return;
         }
 
-        try {
+        mapInitialized.current = true;        try {
+            console.log('🗺️ Creating Mapbox map...');
+            
+            // Check if Mapbox is actually available
+            if (!mapboxgl) {
+                console.error('❌ Mapbox GL JS not loaded from CDN');
+                return;
+            }
+            
+            // Validate token
+            if (!MAPBOX_TOKEN || MAPBOX_TOKEN.length < 20) {
+                console.error('❌ Invalid Mapbox token:', MAPBOX_TOKEN);
+                return;
+            }
+            
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+            console.log('🔑 Mapbox accessToken set globally');
+            
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: 'mapbox://styles/mapbox/streets-v12', // Modern colorful style
-                center: [-122.27, 37.82], // East Bay - covers San Francisco, Oakland, and Berkeley
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [-122.27, 37.82],
                 zoom: 11,
                 attributionControl: true,
-                accessToken: MAPBOX_TOKEN,
                 renderWorldCopies: false,
-                preserveDrawingBuffer: false,
-                fadeDuration: 0, // No fade animation - instant rendering
-                refreshExpiredTiles: false // Don't refresh tiles
+                preserveDrawingBuffer: false
             });
+            console.log('🗺️ Map object created:', map.current);
 
             map.current.on('load', () => {
+                console.log('✅ Map loaded successfully!');
                 setMapLoaded(true);
             });
 
             map.current.on('error', (e) => {
-                console.error('❌ Map error:', e.error);
+                console.error('❌ Map error event:', e);
+                console.error('❌ Error type:', e.error?.message || 'Unknown');
+                console.error('❌ Error status:', e.error?.status || 'No status');
+            });
+
+            // Log data requests to see if Mapbox is trying to load tiles
+            map.current.on('dataloading', (e) => {
+                console.log('📡 Mapbox data loading:', e.dataType);
+            });
+
+            map.current.on('data', (e) => {
+                console.log('📦 Mapbox data received:', e.dataType);
+            });
+
+            map.current.on('sourcedataloading', (e) => {
+                console.log('🔄 Mapbox source loading:', e.sourceId);
             });
 
         } catch (error) {
-            console.error('❌ Map creation failed:', error);
+            console.error('❌ Map creation failed with error:', error);
+            console.error('❌ Error stack:', error.stack);
         }
+
+        // Aggressive fallback - if map doesn't load in 2 seconds, force it anyway
+        const loadTimeout = setTimeout(() => {
+            if (!mapLoaded && map.current) {
+                console.warn('⚠️ Map load timeout (2s) - forcing mapLoaded=true to show map');
+                console.warn('⚠️ Check Network tab for failed Mapbox API requests');
+                setMapLoaded(true);
+            }
+        }, 2000);
 
         // Add navigation controls
         if (map.current && mapboxgl) {
             map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
         }
 
+        console.log('🎯 Map initialization complete. Waiting for tiles...');
+        console.log('📍 Map center:', map.current?.getCenter());
+        console.log('🔍 Map zoom:', map.current?.getZoom());
+
         return () => {
+            // Skip cleanup during React Strict Mode's double-mount behavior in development
+            // The map should persist after the first mount
+            console.log('🔍 Cleanup called. mapInitialized:', mapInitialized.current);
+            
+            // Only truly cleanup when the component is actually being destroyed
+            // (not during Strict Mode's test unmount-remount cycle)
+            if (import.meta.env.DEV && mapInitialized.current) {
+                console.log('⏭️ Skipping cleanup in development - keeping map alive');
+                return;
+            }
+            
+            console.log('🧹 Cleanup: Removing map');
+            clearTimeout(loadTimeout);
             if (map.current) {
                 map.current.remove();
+                map.current = null;
             }
+            mapInitialized.current = false;
         };
     }, []);
 
@@ -84,8 +141,12 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
     useEffect(() => {
         // Add markers as soon as both map and data are ready
+        console.log('🗺️ Map loaded:', mapLoaded, 'Listings:', foodListings.length, 'Communities:', communities.length);
         if (mapLoaded && (foodListings.length > 0 || communities.length > 0)) {
+            console.log('✅ Calling addMarkers()');
             addMarkers();
+        } else {
+            console.log('⏳ Waiting for map or data...');
         }
     }, [mapLoaded, foodListings, communities]);
 
@@ -140,6 +201,11 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     };
 
     const addMarkers = () => {
+        if (!map.current || !map.current.getContainer()) {
+            console.warn('⚠️ Map not ready yet, skipping marker addition');
+            return;
+        }
+        
         console.log('Adding markers for', foodListings.length, 'listings and', communities.length, 'communities');
         
         const mapboxgl = getMapboxgl();
@@ -154,20 +220,31 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
         // Add food listing markers
         foodListings.forEach((listing) => {
-            console.log('Adding food marker for:', listing.title, 'at', listing.latitude, listing.longitude);
+            // Parse and validate coordinates
+            const lat = parseFloat(listing.latitude);
+            const lng = parseFloat(listing.longitude);
+            
+            // Validate coordinates
+            if (isNaN(lat) || isNaN(lng)) {
+                console.error('❌ Invalid coordinates for listing', listing.title);
+                return;
+            }
+            
+            console.log('✅ Adding food marker:', listing.title);
+            console.log('  Database values - lat:', listing.latitude, 'lng:', listing.longitude);
+            console.log('  Parsed as numbers - lat:', lat, 'lng:', lng);
+            console.log('  Mapbox format [lng, lat]:', [lng, lat]);
             
             // Create custom marker element for food
             const el = document.createElement('div');
             el.className = 'custom-marker';
-            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 50px; position: relative; z-index: 100;';
+            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 40px; position: relative; z-index: 100;';
             el.innerHTML = `
                 <div style="
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: flex-end;
-                    justify-content: center;
-                    transition: transform 0.2s;
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
                     pointer-events: none;
                 ">
                     <div style="position: relative; pointer-events: none;">
@@ -197,7 +274,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                         </div>
                         <div style="
                             position: absolute;
-                            bottom: -8px;
+                            top: 100%;
                             left: 50%;
                             transform: translateX(-50%);
                             width: 0;
@@ -215,32 +292,52 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 showPopup(listing);
             });
 
-            const marker = new mapboxgl.Marker({
-                element: el,
-                anchor: 'bottom'
-            })
-                .setLngLat([listing.longitude, listing.latitude])
-                .addTo(map.current);
+            try {
+                const marker = new mapboxgl.Marker({
+                    element: el,
+                    anchor: 'bottom'
+                })
+                    .setLngLat([lng, lat])
+                    .addTo(map.current);
 
-            markersRef.current.push(marker);
+                markersRef.current.push(marker);
+            } catch (error) {
+                console.error('❌ Failed to add food marker for', listing.title, ':', error.message);
+            }
         });
 
         // Add community markers
         communities.forEach((community) => {
-            console.log('Adding community marker for:', community.name, 'at', community.latitude, community.longitude);
+            // Parse and validate coordinates
+            const lat = parseFloat(community.latitude);
+            const lng = parseFloat(community.longitude);
+            
+            // Validate coordinates are valid numbers and in correct ranges
+            if (isNaN(lat) || isNaN(lng)) {
+                console.error('❌ Invalid coordinates for', community.name, '- lat:', community.latitude, 'lng:', community.longitude);
+                return;
+            }
+            
+            // San Francisco Bay Area bounds check: lat ~37-38, lng ~-122 to -121
+            if (lat < 36 || lat > 39 || lng > -121 || lng < -123) {
+                console.warn('⚠️ Coordinates outside Bay Area for', community.name, '- lat:', lat, 'lng:', lng);
+            }
+            
+            console.log('✅ Adding community marker:', community.name);
+            console.log('  Database values - lat:', community.latitude, 'lng:', community.longitude);
+            console.log('  Parsed as numbers - lat:', lat, 'lng:', lng);
+            console.log('  Mapbox format [lng, lat]:', [lng, lat]);
             
             // Create custom marker element for community
             const el = document.createElement('div');
             el.className = 'custom-marker community-marker';
-            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 50px; position: relative; z-index: 90;';
+            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 40px; position: relative; z-index: 90;';
             el.innerHTML = `
                 <div style="
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: flex-end;
-                    justify-content: center;
-                    transition: transform 0.2s;
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
                     pointer-events: none;
                 ">
                     <div style="position: relative; pointer-events: none;">
@@ -270,7 +367,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                         </div>
                         <div style="
                             position: absolute;
-                            bottom: -8px;
+                            top: 100%;
                             left: 50%;
                             transform: translateX(-50%);
                             width: 0;
@@ -288,14 +385,18 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 showCommunityPopup(community);
             });
 
-            const marker = new mapboxgl.Marker({
-                element: el,
-                anchor: 'bottom'
-            })
-                .setLngLat([community.longitude, community.latitude])
-                .addTo(map.current);
+            try {
+                const marker = new mapboxgl.Marker({
+                    element: el,
+                    anchor: 'bottom'
+                })
+                    .setLngLat([lng, lat])
+                    .addTo(map.current);
 
-            markersRef.current.push(marker);
+                markersRef.current.push(marker);
+            } catch (error) {
+                console.error('❌ Failed to add community marker:', error);
+            }
         });
     };
 
