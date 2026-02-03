@@ -389,7 +389,23 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                         Log In
                     </button>
                 </div>
-            ` : ''}
+            ` : `
+                <button id="view-details-btn" style="
+                    width: 100%;
+                    background: #16A34A;
+                    color: white;
+                    font-weight: 500;
+                    padding: 10px 16px;
+                    border-radius: 8px;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#16A34A'">
+                    <i class="fas fa-hand-holding-heart" style="margin-right: 6px;"></i>
+                    View Details & Claim
+                </button>
+            `}
         `;
 
         popupRef.current = new mapboxgl.Popup({
@@ -403,8 +419,8 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             .addTo(map.current);
 
         // Add event listeners after popup is added to DOM
-        if (showSignupPrompt) {
-            setTimeout(() => {
+        setTimeout(() => {
+            if (showSignupPrompt) {
                 const signupBtn = document.getElementById('signup-btn');
                 const loginBtn = document.getElementById('login-btn');
                 
@@ -414,8 +430,13 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 if (loginBtn) {
                     loginBtn.addEventListener('click', () => navigate('/login'));
                 }
-            }, 0);
-        }
+            } else {
+                const viewDetailsBtn = document.getElementById('view-details-btn');
+                if (viewDetailsBtn) {
+                    viewDetailsBtn.addEventListener('click', () => navigate(`/food/${listing.id}`));
+                }
+            }
+        }, 0);
 
         if (onMarkerClick) {
             onMarkerClick(listing);

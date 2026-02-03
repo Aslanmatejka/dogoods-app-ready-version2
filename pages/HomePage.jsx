@@ -15,9 +15,11 @@ import supabase from "../utils/supabaseClient";
 import Tutorial from "../components/common/Tutorial";
 import { useTutorial } from "../utils/TutorialContext";
 import FoodMap from "../components/common/FoodMap";
+import { useAuthContext } from "../utils/AuthContext";
 
 function HomePage() {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuthContext();
     const { listings: featuredListings, loading: loadingListings, error: listingsError } = useFoodListings({ status: 'approved' }, 12);
     const { impact, loading: impactLoading } = useImpact();
     const [communities, setCommunities] = React.useState([]);
@@ -222,7 +224,7 @@ function HomePage() {
                             </div>
                             
                             <div className="bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ height: '600px' }}>
-                                <FoodMap showSignupPrompt={true} />
+                                <FoodMap showSignupPrompt={!isAuthenticated} />
                             </div>
                             
                             <div className="mt-8 text-center">

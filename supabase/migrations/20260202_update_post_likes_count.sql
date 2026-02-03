@@ -21,6 +21,7 @@ $$ LANGUAGE plpgsql;
 
 -- Create trigger for INSERT on post_likes
 DROP TRIGGER IF EXISTS trigger_post_likes_insert ON post_likes;
+
 CREATE TRIGGER trigger_post_likes_insert
 AFTER INSERT ON post_likes
 FOR EACH ROW
@@ -28,6 +29,7 @@ EXECUTE FUNCTION update_post_likes_count();
 
 -- Create trigger for DELETE on post_likes
 DROP TRIGGER IF EXISTS trigger_post_likes_delete ON post_likes;
+
 CREATE TRIGGER trigger_post_likes_delete
 AFTER DELETE ON post_likes
 FOR EACH ROW
