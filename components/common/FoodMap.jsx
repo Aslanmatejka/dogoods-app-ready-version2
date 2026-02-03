@@ -235,72 +235,29 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             console.log('  Parsed as numbers - lat:', lat, 'lng:', lng);
             console.log('  Mapbox format [lng, lat]:', [lng, lat]);
             
-            // Create custom marker element for food
+            // Create simple marker element for testing
             const el = document.createElement('div');
-            el.className = 'custom-marker';
-            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 40px; position: relative; z-index: 100;';
-            el.innerHTML = `
-                <div style="
-                    position: absolute;
-                    bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    pointer-events: none;
-                ">
-                    <div style="position: relative; pointer-events: none;">
-                        <div style="
-                            position: absolute;
-                            inset: -4px;
-                            background: rgba(239, 68, 68, 0.4);
-                            border-radius: 50% 50% 50% 0;
-                            transform: rotate(-45deg);
-                            filter: blur(4px);
-                            pointer-events: none;
-                        "></div>
-                        <div style="
-                            position: relative;
-                            background: rgb(220, 38, 38);
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 50% 50% 50% 0;
-                            transform: rotate(-45deg);
-                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            pointer-events: none;
-                        ">
-                            <i class="fas fa-apple-alt" style="color: white; font-size: 14px; transform: rotate(45deg); pointer-events: none;"></i>
-                        </div>
-                        <div style="
-                            position: absolute;
-                            top: 100%;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            width: 0;
-                            height: 0;
-                            border-left: 4px solid transparent;
-                            border-right: 4px solid transparent;
-                            border-top: 8px solid rgb(220, 38, 38);
-                            pointer-events: none;
-                        "></div>
-                    </div>
-                </div>
-            `;
+            el.className = 'food-marker';
+            el.style.width = '24px';
+            el.style.height = '24px';
+            el.style.borderRadius = '50%';
+            el.style.backgroundColor = '#dc2626';
+            el.style.border = '3px solid white';
+            el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+            el.style.cursor = 'pointer';
+            el.title = listing.title;
 
             el.addEventListener('click', () => {
                 showPopup(listing);
             });
 
             try {
-                const marker = new mapboxgl.Marker({
-                    element: el,
-                    anchor: 'bottom'
-                })
+                const marker = new mapboxgl.Marker(el)
                     .setLngLat([lng, lat])
                     .addTo(map.current);
 
                 markersRef.current.push(marker);
+                console.log('  ✓ Marker added at coordinates:', [lng, lat]);
             } catch (error) {
                 console.error('❌ Failed to add food marker for', listing.title, ':', error.message);
             }
@@ -328,68 +285,24 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             console.log('  Parsed as numbers - lat:', lat, 'lng:', lng);
             console.log('  Mapbox format [lng, lat]:', [lng, lat]);
             
-            // Create custom marker element for community
+            // Create simple marker element for testing
             const el = document.createElement('div');
-            el.className = 'custom-marker community-marker';
-            el.style.cssText = 'pointer-events: auto; cursor: pointer; width: 40px; height: 40px; position: relative; z-index: 90;';
-            el.innerHTML = `
-                <div style="
-                    position: absolute;
-                    bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    pointer-events: none;
-                ">
-                    <div style="position: relative; pointer-events: none;">
-                        <div style="
-                            position: absolute;
-                            inset: -4px;
-                            background: rgba(44, 171, 227, 0.4);
-                            border-radius: 50% 50% 50% 0;
-                            transform: rotate(-45deg);
-                            filter: blur(4px);
-                            pointer-events: none;
-                        "></div>
-                        <div style="
-                            position: relative;
-                            background: #2CABE3;
-                            width: 32px;
-                            height: 32px;
-                            border-radius: 50% 50% 50% 0;
-                            transform: rotate(-45deg);
-                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            pointer-events: none;
-                        ">
-                            <i class="fas fa-school" style="color: white; font-size: 14px; transform: rotate(45deg); pointer-events: none;"></i>
-                        </div>
-                        <div style="
-                            position: absolute;
-                            top: 100%;
-                            left: 50%;
-                            transform: translateX(-50%);
-                            width: 0;
-                            height: 0;
-                            border-left: 4px solid transparent;
-                            border-right: 4px solid transparent;
-                            border-top: 8px solid #2CABE3;
-                            pointer-events: none;
-                        "></div>
-                    </div>
-                </div>
-            `;
+            el.className = 'community-marker';
+            el.style.width = '24px';
+            el.style.height = '24px';
+            el.style.borderRadius = '50%';
+            el.style.backgroundColor = '#3b82f6';
+            el.style.border = '3px solid white';
+            el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+            el.style.cursor = 'pointer';
+            el.title = community.name;
 
             el.addEventListener('click', () => {
                 showCommunityPopup(community);
             });
 
             try {
-                const marker = new mapboxgl.Marker({
-                    element: el,
-                    anchor: 'bottom'
-                })
+                const marker = new mapboxgl.Marker(el)
                     .setLngLat([lng, lat])
                     .addTo(map.current);
 
