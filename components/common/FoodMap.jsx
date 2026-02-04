@@ -433,7 +433,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             } else {
                 const viewDetailsBtn = document.getElementById('view-details-btn');
                 if (viewDetailsBtn) {
-                    viewDetailsBtn.addEventListener('click', () => navigate(`/food/${listing.id}`));
+                    viewDetailsBtn.addEventListener('click', () => navigate('/claim', { state: { food: listing } }));
                 }
             }
         }, 0);
