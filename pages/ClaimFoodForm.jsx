@@ -1,222 +1,206 @@
-
-
 import React from "react";
-import dataService from '../utils/dataService';
-import supabase from '../utils/supabaseClient';
 import { useNavigate, useLocation } from "react-router-dom";
 import Button from "../components/common/Button";
-import Input from "../components/common/Input";
+
+// Calculate next Friday from today
+const getNextFriday = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 5 = Friday
+    
+    let daysUntilFriday;
+    if (dayOfWeek <= 5) {
+        // If today is Sunday-Friday, get this Friday
+        daysUntilFriday = 5 - dayOfWeek;
+    } else {
+        // If today is Saturday, get next Friday (6 days away)
+        daysUntilFriday = 6;
+    }
+    
+    const nextFriday = new Date(today);
+    nextFriday.setDate(today.getDate() + daysUntilFriday);
+    
+    // Format as "Month dd"
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    return `${months[nextFriday.getMonth()]} ${nextFriday.getDate()}`;
+};
 
 export default function ClaimFoodForm() {
     const navigate = useNavigate();
     const location = useLocation();
     const food = location.state?.food;
-    const [formData, setFormData] = React.useState({
-        requester_name: "",
-        requester_email: "",
-        requester_phone: "",
-        school_district: "",
-        school: "",
-        school_contact: "",
-        school_contact_email: "",
-        school_contact_phone: "",
-        dietary_restrictions: "",
-        pickup_dropoff: "",
-        members_count: "",
-        people: "",
-        students: "",
-        school_staff: "",
-        food_title: food?.title || food?.name || "",
-        food_description: food?.description || "",
-        pickup_date: "",
-        reminder_hours_before: 24
-    });
-    const [submitted, setSubmitted] = React.useState(false);
-    const [userReminderPreference, setUserReminderPreference] = React.useState(24);
+    const pickupDeadline = getNextFriday();
 
-    React.useEffect(() => {
-        const loadUserPreferences = async () => {
-            const userResult = await supabase.auth.getUser();
-            const user = userResult.data?.user;
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('users')
-                    .select('default_reminder_hours')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile?.default_reminder_hours) {
-                    setUserReminderPreference(profile.default_reminder_hours);
-                    setFormData(prev => ({
-                        ...prev,
-                        reminder_hours_before: profile.default_reminder_hours
-                    }));
-                }
-            }
-        };
-        loadUserPreferences();
-    }, []);
-
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const [loading, setLoading] = React.useState(false);
-    const [submitError, setSubmitError] = React.useState(null);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setSubmitError(null);
-        try {
-            // Get current user UID for RLS
-            const userResult = await supabase.auth.getUser();
-            const user = userResult.data?.user;
-            if (!user) throw new Error('User must be logged in to claim food');
-            const claimer_id = user.id;
-
-            // Compose claim data, exclude food_description, food_title, and pickup_dropoff
-            const { food_description, food_title, pickup_dropoff, ...restFormData } = formData;
-
-            const claimData = {
-                ...restFormData,
-                food_id: food?.id || food?.objectId || null,
-                claimer_id,
-                status: 'pending',
-                people: parseInt(formData.people) || 0,
-                students: parseInt(formData.students) || 0,
-                school_staff: parseInt(formData.school_staff) || 0,
-                members_count: parseInt(formData.members_count) || 0,
-                pickup_date: formData.pickup_date || null,
-                reminder_hours_before: parseInt(formData.reminder_hours_before) || 24
-            };
-            await dataService.createFoodClaim(claimData);
-            setSubmitted(true);
-
-            // Trigger custom event for impact refresh
-            console.log('Food claim submitted, triggering impact refresh...');
-            window.dispatchEvent(new CustomEvent('foodClaimed'));
-        } catch (error) {
-            setSubmitError('Failed to submit claim. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (submitted) {
+    if (!food) {
         return (
-            <div className="max-w-md mx-auto py-8 px-4">
-                <h2 className="text-2xl font-bold mb-4">Thank you for claiming!</h2>
-                <p className="mb-4">Your claim has been submitted. We will contact you soon.</p>
-                <Button onClick={() => navigate("/find")}>Back to Find Food</Button>
+            <div className="max-w-2xl mx-auto py-8 px-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                    <i className="fas fa-exclamation-triangle text-yellow-600 text-3xl mb-3"></i>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">No Food Selected</h2>
+                    <p className="text-gray-600 mb-4">Please select a food item from the Find Food page.</p>
+                    <Button onClick={() => navigate("/find")}>Go to Find Food</Button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-2xl mx-auto py-8 px-4">
-            <h2 className="text-2xl font-bold mb-4">Claim Food</h2>
-            {food && (
-                <div className="mb-4 p-4 bg-gray-50 rounded border">
-                    <div className="font-semibold">Food: {food.title || food.name || "(No title)"}</div>
-                    <div className="text-sm text-gray-600">{food.description}</div>
+        <div className="max-w-4xl mx-auto py-8 px-4">
+            <div className="mb-6">
+                <Button 
+                    onClick={() => navigate("/find")}
+                    variant="secondary"
+                    className="mb-4"
+                >
+                    <i className="fas fa-arrow-left mr-2"></i>
+                    Back to Find Food
+                </Button>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Claim Food</h1>
+                <p className="text-gray-600">Review the details below and confirm your claim</p>
+            </div>
+
+            {/* Food Details Section */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    <i className="fas fa-utensils text-[#2CABE3] mr-3"></i>
+                    Food Details
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Food Image */}
+                    <div>
+                        {food.image_url ? (
+                            <img 
+                                src={food.image_url} 
+                                alt={food.title || food.name}
+                                className="w-full h-64 object-cover rounded-lg shadow-md"
+                            />
+                        ) : (
+                            <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <i className="fas fa-image text-gray-400 text-5xl"></i>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Food Information */}
+                    <div className="space-y-4">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                {food.title || food.name || "Food Item"}
+                            </h3>
+                            <p className="text-gray-600">{food.description || "No description available"}</p>
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-4 space-y-3">
+                            <div className="flex items-center">
+                                <i className="fas fa-box text-[#2CABE3] w-6"></i>
+                                <span className="text-gray-700 font-medium">Quantity:</span>
+                                <span className="ml-2 text-gray-900">
+                                    {food.quantity || "N/A"} {food.unit || ""}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center">
+                                <i className="fas fa-calendar-alt text-[#2CABE3] w-6"></i>
+                                <span className="text-gray-700 font-medium">Expiration Date:</span>
+                                <span className="ml-2 text-gray-900">
+                                    {food.expiry_date ? new Date(food.expiry_date).toLocaleDateString('en-US', { 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    }) : "Not specified"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            )}
-            <form className="bg-white rounded-2xl shadow-lg p-8 space-y-8 border border-gray-100" onSubmit={handleSubmit}>
-                {submitError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4" role="alert">
-                        <p className="text-red-700">
-                            <i className="fas fa-exclamation-circle mr-2"></i>
-                            {submitError}
+            </div>
+
+            {/* School Location Section */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    <i className="fas fa-school text-[#2CABE3] mr-3"></i>
+                    Pickup Location
+                </h2>
+                
+                <div className="space-y-3">
+                    <div>
+                        <span className="text-gray-700 font-medium">School Name:</span>
+                        <p className="text-lg text-gray-900">Lincoln Elementary School</p>
+                    </div>
+                    
+                    <div>
+                        <span className="text-gray-700 font-medium">Address:</span>
+                        <p className="text-lg text-gray-900">123 Main Street</p>
+                        <p className="text-lg text-gray-900">Alameda, CA 94501</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Pickup Windows Section */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    <i className="fas fa-clock text-[#2CABE3] mr-3"></i>
+                    Pickup Windows
+                </h2>
+                
+                <div className="space-y-3">
+                    <div className="flex items-start">
+                        <i className="fas fa-calendar-day text-[#2CABE3] mt-1 mr-3"></i>
+                        <div>
+                            <span className="font-semibold text-gray-900">Tuesday</span>
+                            <p className="text-gray-700">2:00 PM - 3:30 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                        <i className="fas fa-calendar-day text-[#2CABE3] mt-1 mr-3"></i>
+                        <div>
+                            <span className="font-semibold text-gray-900">Thursday</span>
+                            <p className="text-gray-700">2:00 PM - 3:30 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-start">
+                        <i className="fas fa-calendar-day text-[#2CABE3] mt-1 mr-3"></i>
+                        <div>
+                            <span className="font-semibold text-gray-900">Friday</span>
+                            <p className="text-gray-700">7:00 AM - 8:00 AM, 2:00 PM - 3:30 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Deadline Warning */}
+            <div className="bg-red-50 border-2 border-red-500 rounded-xl p-6 mb-6">
+                <div className="flex items-start">
+                    <i className="fas fa-exclamation-triangle text-red-600 text-2xl mt-1 mr-4"></i>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-bold text-red-900 mb-2">Important Pickup Deadline</h3>
+                        <p className="text-red-800 leading-relaxed">
+                            Your food must be picked up by <strong>Friday, {pickupDeadline} at 3:30 PM</strong> or it will be marked as unclaimed and added back into inventory for other people to access. You may re-submit your claim if you miss the latest pick-up window.
                         </p>
                     </div>
-                )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <Input label="Name / Organization" name="requester_name" value={formData.requester_name} onChange={handleFormChange} required maxLength={100} helperText="Enter your full name or organization name." />
-                    <Input label="Email" name="requester_email" type="email" value={formData.requester_email} onChange={handleFormChange} maxLength={100} helperText="Enter your email address." />
-                    <Input label="Phone" name="requester_phone" type="tel" value={formData.requester_phone} onChange={handleFormChange} maxLength={20} helperText="Enter your phone number." />
-                    <Input label="School District" name="school_district" type="select" value={formData.school_district} onChange={handleFormChange} required options={[{ value: '', label: 'Select District' },{ value: 'AUSD', label: 'AUSD' },{ value: 'OUSD', label: 'OUSD' },{ value: 'SLZUSD', label: 'SLZUSD' },{ value: 'BUSD', label: 'BUSD' }]} helperText="Select your school district." />
-                    <Input label="School" name="school" value={formData.school} onChange={handleFormChange} required maxLength={100} helperText="Enter your school name." />
-                    <Input label="School Contact (Case Worker)" name="school_contact" value={formData.school_contact} onChange={handleFormChange} required maxLength={100} helperText="Enter the name of your school contact or case worker." />
-                    <Input label="School Contact Email" name="school_contact_email" type="email" value={formData.school_contact_email} onChange={handleFormChange} maxLength={100} helperText="Enter the email address of your school contact." />
-                    <Input label="School Contact Phone" name="school_contact_phone" type="tel" value={formData.school_contact_phone} onChange={handleFormChange} maxLength={20} helperText="Enter the phone number of your school contact." />
-                    <Input label="Dietary Restrictions" name="dietary_restrictions" value={formData.dietary_restrictions} onChange={handleFormChange} maxLength={200} helperText="List any dietary restrictions." />
-                    <Input label="Total Members" name="members_count" type="number" value={formData.members_count} onChange={handleFormChange} required min={1} max={1000} helperText="Total number of people this food will serve." />
                 </div>
+            </div>
 
-                {/* Conditional Drop Off or Pickup Form */}
-                {formData.school_district === 'AUSD' ? (
-                    <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-                        <h3 className="text-lg font-bold text-blue-700 mb-4">Drop Off Details (AUSD Only)</h3>
-                        <Input label="Time" name="dropoff_time" type="time" value={formData.dropoff_time || ''} onChange={handleFormChange} required helperText="Select time." />
-                        <Input label="Place" name="dropoff_place" value={formData.dropoff_place || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter location." />
-                        <Input label="Contact" name="dropoff_contact" value={formData.dropoff_contact || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter contact." />
-                    </div>
-                ) : (
-                    <div className="mt-8 p-6 bg-[#2CABE3]/10 rounded-xl border border-[#2CABE3]/30">
-                        <h3 className="text-lg font-bold text-[#2CABE3] mb-4">Pickup Details</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input
-                                label="Pickup Date"
-                                name="pickup_date"
-                                type="date"
-                                value={formData.pickup_date || ''}
-                                onChange={handleFormChange}
-                                required
-                                min={new Date().toISOString().split('T')[0]}
-                                helperText="Select the date for pickup."
-                            />
-                            <Input
-                                label="Pickup Time"
-                                name="pickup_time"
-                                type="time"
-                                value={formData.pickup_time || ''}
-                                onChange={handleFormChange}
-                                required
-                                helperText="Select pickup time."
-                            />
-                        </div>
-                        <Input label="Pickup Place" name="pickup_place" value={formData.pickup_place || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter pickup location." />
-                        <Input label="Pickup Contact" name="pickup_contact" value={formData.pickup_contact || ''} onChange={handleFormChange} required maxLength={100} helperText="Enter contact for pickup." />
-
-                        <div className="mt-4 pt-4 border-t border-[#2CABE3]/30">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                <i className="fas fa-bell mr-2 text-[#2CABE3]"></i>
-                                Remind me before pickup
-                            </label>
-                            <select
-                                name="reminder_hours_before"
-                                value={formData.reminder_hours_before}
-                                onChange={handleFormChange}
-                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#2CABE3] focus:border-[#2CABE3] sm:text-sm rounded-md"
-                            >
-                                <option value={1}>1 hour before</option>
-                                <option value={2}>2 hours before</option>
-                                <option value={4}>4 hours before</option>
-                                <option value={12}>12 hours before</option>
-                                <option value={24}>24 hours before (1 day)</option>
-                                <option value={48}>48 hours before (2 days)</option>
-                            </select>
-                            <p className="text-xs text-gray-500 mt-1">
-                                You'll receive a notification reminder before your scheduled pickup time.
-                            </p>
-                        </div>
-                    </div>
-                )}
-                <div className="flex justify-end mt-8">
-                    <Button type="submit" variant="primary" className="px-8 py-3 text-lg font-semibold rounded-lg shadow-md bg-[#2CABE3] hover:opacity-90 transition" disabled={loading}>
-                        {loading ? (
-                            <span><i className="fas fa-spinner fa-spin mr-2"></i>Submitting...</span>
-                        ) : (
-                            'Submit Claim'
-                        )}
-                    </Button>
-                </div>
-            </form>
+            {/* Confirm Claim Button */}
+            <div className="flex justify-center">
+                <Button 
+                    variant="primary" 
+                    className="px-12 py-4 text-lg font-semibold bg-[#2CABE3] hover:opacity-90"
+                    onClick={() => {
+                        // TODO: Implement claim confirmation logic
+                        alert('Claim confirmed! (Logic to be implemented)');
+                    }}
+                >
+                    <i className="fas fa-check-circle mr-2"></i>
+                    Confirm Claim
+                </Button>
+            </div>
         </div>
     );
 }
