@@ -101,6 +101,7 @@ class AuthService {
               id: user.id,
               email: user.email,
               name: user.user_metadata?.name || user.email,
+              approval_number: user.user_metadata?.approval_number || null,
               account_type: user.user_metadata?.account_type || 'individual',
               avatar_url: user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.user_metadata?.name || user.email)}&background=random`,
               role: 'user',
