@@ -10,9 +10,9 @@ function SignupPageContent() {
     const [formData, setFormData] = React.useState({
         name: '',
         email: '',
+        approvalNumber: '',
         password: '',
         confirmPassword: '',
-        accountType: 'individual',
         agreeToTerms: false
     });
 
@@ -49,6 +49,10 @@ function SignupPageContent() {
             newErrors.email = 'Invalid email address';
         }
         
+        if (!formData.approvalNumber.trim()) {
+            newErrors.approvalNumber = 'Approval number is required';
+        }
+        
         if (!formData.password) {
             newErrors.password = 'Password is required';
         } else if (formData.password.length < 8) {
@@ -81,7 +85,7 @@ function SignupPageContent() {
                 options: {
                     data: {
                         name: formData.name.trim(),
-                        account_type: formData.accountType
+                        approval_number: formData.approvalNumber.trim()
                     }
                 }
             };
@@ -184,6 +188,30 @@ function SignupPageContent() {
                         </div>
 
                         <div>
+                            <label htmlFor="approvalNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                                Approval Number <span className="text-red-500" aria-hidden="true">*</span>
+                            </label>
+                            <input
+                                id="approvalNumber"
+                                name="approvalNumber"
+                                type="text"
+                                value={formData.approvalNumber}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.approvalNumber ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="Enter your approval number"
+                                aria-required="true"
+                                aria-invalid={!!errors.approvalNumber}
+                                aria-describedby="approval-number-description approval-number-error"
+                            />
+                            <p id="approval-number-description" className="mt-2 text-sm text-gray-600">
+                                You should have received an approval number from your school community closet contact. If you do not have this number, please speak to your school to get this approval number before signing up. An approval number is required to claim food from our community closets.
+                            </p>
+                            {errors.approvalNumber && (
+                                <p id="approval-number-error" className="mt-1 text-sm text-red-500" role="alert">{errors.approvalNumber}</p>
+                            )}
+                        </div>
+
+                        <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                                 Password <span className="text-red-500" aria-hidden="true">*</span>
                             </label>
@@ -223,24 +251,6 @@ function SignupPageContent() {
                             {errors.confirmPassword && (
                                 <p id="confirm-password-error" className="mt-1 text-sm text-red-500" role="alert">{errors.confirmPassword}</p>
                             )}
-                        </div>
-
-                        <div>
-                            <label htmlFor="accountType" className="block text-sm font-medium text-gray-700 mb-1">
-                                Account Type
-                            </label>
-                            <select
-                                id="accountType"
-                                name="accountType"
-                                value={formData.accountType}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                                <option value="individual">Individual</option>
-                                <option value="business">Business</option>
-                                <option value="nonprofit">Non-profit Organization</option>
-                                <option value="school">School</option>
-                            </select>
                         </div>
 
                         <div className="flex items-start">
