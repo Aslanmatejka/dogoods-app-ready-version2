@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Button from "../components/common/Button";
+import supabase from "../utils/supabaseClient";
+import communitiesStatic from '../utils/communities';
 
 // Calculate next Friday from today
 const getNextFriday = () => {
@@ -33,6 +35,48 @@ export default function ClaimFoodForm() {
     const location = useLocation();
     const food = location.state?.food;
     const pickupDeadline = getNextFriday();
+    const [community, setCommunity] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchCommunity = async () => {
+            if (!food?.community_id) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // Try to fetch from database first
+                const { data, error } = await supabase
+                    .from('communities')
+                    .select('*')
+                    .eq('id', food.community_id)
+                    .single();
+
+                if (data) {
+                    // Merge with static data for contact info
+                    const staticCommunity = communitiesStatic.find(c => c.name === data.name);
+                    setCommunity({
+                        ...staticCommunity,
+                        ...data
+                    });
+                } else if (error) {
+                    // Fallback to static data
+                    const staticCommunity = communitiesStatic.find(c => c.id === food.community_id);
+                    setCommunity(staticCommunity);
+                }
+            } catch (err) {
+                console.error('Error fetching community:', err);
+                // Fallback to static data
+                const staticCommunity = communitiesStatic.find(c => c.id === food.community_id);
+                setCommunity(staticCommunity);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCommunity();
+    }, [food?.community_id]);
 
     if (!food) {
         return (
@@ -126,18 +170,56 @@ export default function ClaimFoodForm() {
                     Pickup Location
                 </h2>
                 
-                <div className="space-y-3">
-                    <div>
-                        <span className="text-gray-700 font-medium">School Name:</span>
-                        <p className="text-lg text-gray-900">Lincoln Elementary School</p>
+                {loading ? (
+                    <div className="text-center py-4">
+                        <i className="fas fa-spinner fa-spin text-[#2CABE3] text-2xl"></i>
+                        <p className="text-gray-600 mt-2">Loading location...</p>
                     </div>
-                    
-                    <div>
-                        <span className="text-gray-700 font-medium">Address:</span>
-                        <p className="text-lg text-gray-900">123 Main Street</p>
-                        <p className="text-lg text-gray-900">Alameda, CA 94501</p>
+                ) : community ? (
+                    <div className="space-y-3">
+                        <div>
+                            <span className="text-gray-700 font-medium">School Name:</span>
+                            <p className="text-lg text-gray-900">{community.name}</p>
+                        </div>
+                        
+                        <div>
+                            <span className="text-gray-700 font-medium">Address:</span>
+                            <p className="text-lg text-gray-900">{community.location}</p>
+                        </div>
+
+                        {community.contact && (
+                            <div>
+                                <span className="text-gray-700 font-medium">Contact:</span>
+                                <p className="text-lg text-gray-900">{community.contact}</p>
+                            </div>
+                        )}
+
+                        {community.phone && (
+                            <div>
+                                <span className="text-gray-700 font-medium">Phone:</span>
+                                <p className="text-lg text-gray-900">
+                                    <a href={`tel:${community.phone}`} className="text-[#2CABE3] hover:underline">
+                                        {community.phone}
+                                    </a>
+                                </p>
+                            </div>
+                        )}
+
+                        {community.hours && (
+                            <div>
+                                <span className="text-gray-700 font-medium">Hours:</span>
+                                <p className="text-lg text-gray-900">{community.hours}</p>
+                            </div>
+                        )}
                     </div>
-                </div>
+                ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p className="text-yellow-800">
+                            <i className="fas fa-exclamation-triangle mr-2"></i>
+                            Location information not available. Please contact support.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Pickup Windows Section */}
