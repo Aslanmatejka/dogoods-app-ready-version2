@@ -28,6 +28,7 @@ import ImpactStory from './pages/ImpactStory';
 import StoriesPage from './pages/StoriesPage';
 import DonationSchedules from './pages/DonationSchedules';
 import FAQs from './pages/FAQs';
+import ContactPage from './pages/ContactPage';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ContentModeration from './pages/admin/ContentModeration.jsx';
 import { TutorialProvider } from './utils/TutorialContext.jsx';
@@ -98,6 +99,7 @@ function AppContent() {
                 <Route path="/stories" element={<StoriesPage />} />
                 <Route path="/sponsors" element={<SponsorsPage />} />
                 <Route path="/faqs" element={<FAQs />} />
+                <Route path="/contact" element={<ContactPage />} />
                 <Route path="/find" element={<ProtectedRoute><FindFoodPage /></ProtectedRoute>} />
                 <Route path="/near-me" element={<ProtectedRoute><NearMePage /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />

@@ -18,7 +18,8 @@ function Header({
             ]
         },
         { label: 'Impact Story', path: '/impact-story' },
-        { label: 'Sponsors', path: '/sponsors' }
+        { label: 'Sponsors', path: '/sponsors' },
+        { label: 'Contact', path: '/contact' }
     ]
 }) {
     const { user: authUser, isAuthenticated, signOut } = useAuth();
