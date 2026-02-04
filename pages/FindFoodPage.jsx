@@ -4,9 +4,11 @@ import { useNavigate, useLocation as useRouterLocation } from 'react-router-dom'
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import FoodCard from "../components/food/FoodCard";
+import FoodMap from "../components/common/FoodMap";
 import { toast } from "react-toastify";
 import { useFoodListings, useSearch } from "../utils/hooks/useSupabase";
 import { useGeoLocation } from "../utils/hooks/useLocation";
+import { useAuthContext } from "../utils/AuthContext";
 import UrgencyService from "../utils/urgencyService";
 
 // Category mapping for URL parameters
@@ -31,6 +33,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 function FindFoodPage({ initialCategory }) {
     const navigate = useNavigate();
     const routerLocation = useRouterLocation();
+    const { isAuthenticated } = useAuthContext();
     
     const { listings: foods, loading: foodsLoading, error: foodsError, fetchListings } = useFoodListings({ status: 'approved' });
     const { search, results: searchResults, loading: searchLoading } = useSearch();
@@ -280,6 +283,32 @@ function FindFoodPage({ initialCategory }) {
                         Browse available food listings and claim what you need for your school, family, or organization. All requests are confidential and reviewed promptly.
                     </p>
                 </div>
+
+                {/* Food Map Section */}
+                <section 
+                    className="mb-12 py-16 bg-gradient-to-br from-cyan-50 via-blue-50 to-cyan-50 rounded-2xl"
+                    aria-labelledby="food-map-heading"
+                >
+                    <div className="container mx-auto px-4">
+                        <div className="text-center mb-8">
+                            <h2 
+                                id="food-map-heading"
+                                className="text-3xl font-bold text-gray-900 mb-4"
+                            >
+                                <i className="fas fa-map-marked-alt text-cyan-600 mr-3"></i>
+                                Discover Food Locations Near You
+                            </h2>
+                            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                                Explore food locations in your area on our interactive map.
+                            </p>
+                        </div>
+                        
+                        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ height: '600px' }}>
+                            <FoodMap showSignupPrompt={!isAuthenticated} />
+                        </div>
+                    </div>
+                </section>
+
                 {/* Search Bar and Category Filter */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
                     <div className="flex-1 w-full md:w-auto">

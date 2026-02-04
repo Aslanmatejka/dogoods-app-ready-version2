@@ -1,12 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import React from "react";
-import FoodCard from "../components/food/FoodCard";
-import Button from "../components/common/Button";
-import CategoryCard from "../components/food/CategoryCard";
 import Card from "../components/common/Card";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import HeroSlideshow from "../components/common/HeroSlideshow";
-import { useFoodListings } from "../utils/hooks/useSupabase";
 import { formatDate, reportError } from "../utils/helpers";
 import { DonateVolunteerButtons } from "./CommunityPage";
 import communitiesStatic from '../utils/communities';
@@ -14,18 +10,13 @@ import { useImpact } from "../utils/hooks/useImpact";
 import supabase from "../utils/supabaseClient";
 import Tutorial from "../components/common/Tutorial";
 import { useTutorial } from "../utils/TutorialContext";
-import FoodMap from "../components/common/FoodMap";
-import { useAuthContext } from "../utils/AuthContext";
 
 function HomePage() {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuthContext();
-    const { listings: featuredListings, loading: loadingListings, error: listingsError } = useFoodListings({ status: 'approved' }, 12);
     const { impact, loading: impactLoading } = useImpact();
     const [communities, setCommunities] = React.useState([]);
     const [loadingCommunities, setLoadingCommunities] = React.useState(true);
     const [selectedLocation, setSelectedLocation] = React.useState('all');
-    const [showAllListings, setShowAllListings] = React.useState(false);
     const [showAllCommunities, setShowAllCommunities] = React.useState(false);
     const { isTutorialOpen, closeTutorial, completeTutorial, startTutorial, hasSeenTutorial } = useTutorial();
     
@@ -204,61 +195,6 @@ function HomePage() {
                         </section>
                     </HeroSlideshow>
 
-                    {/* Food Map Section - Before Signup */}
-                    <section 
-                        className="py-16 bg-gradient-to-br from-green-50 via-blue-50 to-green-50"
-                        aria-labelledby="food-map-heading"
-                    >
-                        <div className="container mx-auto px-4">
-                            <div className="text-center mb-8">
-                                <h2 
-                                    id="food-map-heading"
-                                    className="text-3xl font-bold text-gray-900 mb-4"
-                                >
-                                    <i className="fas fa-map-marked-alt text-green-600 mr-3"></i>
-                                    Discover Available Food Near You
-                                </h2>
-                                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                                    Explore food locations in your area. Sign up for free to claim items and connect with local donors!
-                                </p>
-                            </div>
-                            
-                            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden" style={{ height: '600px' }}>
-                                <FoodMap showSignupPrompt={!isAuthenticated} />
-                            </div>
-                            
-                            <div className="mt-8 text-center">
-                                <div className="bg-blue-100 border-2 border-blue-300 rounded-xl p-6 max-w-2xl mx-auto">
-                                    <div className="flex items-center justify-center gap-3 mb-3">
-                                        <i className="fas fa-info-circle text-blue-600 text-2xl"></i>
-                                        <h3 className="text-lg font-bold text-blue-900">Ready to Get Started?</h3>
-                                    </div>
-                                    <p className="text-blue-800 mb-4">
-                                        Create a free account to claim food, connect with donors, and help reduce food waste in your community.
-                                    </p>
-                                    <div className="flex gap-4 justify-center">
-                                        <Button 
-                                            variant="primary" 
-                                            size="lg"
-                                            onClick={() => handleNavigation('/signup')}
-                                        >
-                                            <i className="fas fa-user-plus mr-2"></i>
-                                            Sign Up Free
-                                        </Button>
-                                        <Button 
-                                            variant="secondary" 
-                                            size="lg"
-                                            onClick={() => handleNavigation('/login')}
-                                        >
-                                            <i className="fas fa-sign-in-alt mr-2"></i>
-                                            Log In
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
                     {/* How It Works Schematic */}
                     {/* <section
                         className="py-16 bg-gray-50"
@@ -361,138 +297,6 @@ function HomePage() {
                             </div>
                         </div>
                     </section> */}
-
-                    {/* Categories Section */}
-                    <section 
-                        className="py-16 bg-white"
-                        aria-labelledby="categories-heading"
-                    >
-                        <div className="container mx-auto px-4">
-                            <div className="text-center mb-12">
-                                <h2 
-                                    id="categories-heading"
-                                    className="text-3xl font-bold text-gray-900 mb-4"
-                                >
-                                    Browse by Category
-                                </h2>
-                                <p className="text-xl text-gray-600">
-                                    Need food now? Browse available food by category
-                                </p>
-                            </div>
-
-                            <div
-                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
-                                role="list"
-                                aria-label="Food categories"
-                            >
-                                {foodCategories.map((category, index) => (
-                                    <div key={index} role="listitem">
-                                        <CategoryCard
-                                            category={category}
-                                            onClick={() => handleNavigation(`/find?category=${category.id}`)}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* All Available Food Card */}
-                            <div className="mt-6 max-w-7xl mx-auto">
-                                <button
-                                    onClick={() => handleNavigation('/find')}
-                                    className="w-full bg-[#2CABE3] text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] hover:opacity-90 transition-all duration-300 p-8 flex items-center justify-center gap-3"
-                                    aria-label="View all available food"
-                                >
-                                    <i className="fas fa-utensils text-2xl"></i>
-                                    <span className="text-2xl font-bold">All Available Food</span>
-                                    <i className="fas fa-arrow-right text-2xl"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Featured Listings */}
-                    <section
-                        className="py-16 bg-gray-50"
-                        aria-labelledby="featured-heading"
-                    >
-                        <div className="container mx-auto px-4">
-                            <div className="text-center mb-12">
-                                <h2
-                                    id="featured-heading"
-                                    className="text-3xl font-bold text-gray-900 mb-4"
-                                >
-                                    Featured Food Listings
-                                </h2>
-                                <p className="text-xl text-gray-600">
-                                    Fresh food available now in your community
-                                </p>
-                            </div>
-
-                            {loadingListings ? (
-                                <div className="text-center py-8">
-                                    <i className="fas fa-spinner fa-spin text-blue-600 text-4xl mb-3"></i>
-                                    <p className="text-gray-500">Loading featured listings...</p>
-                                </div>
-                            ) : listingsError ? (
-                                <div className="text-center py-8 bg-white rounded-lg shadow-sm">
-                                    <i className="fas fa-exclamation-circle text-yellow-500 text-4xl mb-3"></i>
-                                    <p className="text-gray-500">Unable to load featured listings</p>
-                                </div>
-                            ) : featuredListings && featuredListings.length > 0 ? (
-                                <>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                        {(showAllListings ? featuredListings : featuredListings.slice(0, 3)).map((listing) => (
-                                            <FoodCard
-                                                key={listing.id}
-                                                food={listing}
-                                                onClaim={(food) => {
-                                                    navigate('/claim', { state: { food } });
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                    
-                                    {featuredListings.length > 3 && (
-                                        <div className="text-center mb-8">
-                                            <button
-                                                onClick={() => setShowAllListings(!showAllListings)}
-                                                className="px-6 py-2 text-white bg-[#2CABE3] hover:bg-[#2398c7] rounded-lg font-semibold transition-colors duration-200"
-                                            >
-                                                {showAllListings ? (
-                                                    <>
-                                                        Show Less
-                                                        <i className="fas fa-chevron-up ml-2" aria-hidden="true"></i>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        View More Featured Listings
-                                                        <i className="fas fa-chevron-down ml-2" aria-hidden="true"></i>
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-8 bg-white rounded-lg shadow-sm">
-                                    <i className="fas fa-box-open text-gray-400 text-4xl mb-3"></i>
-                                    <p className="text-gray-500">No featured listings available at the moment</p>
-                                </div>
-                            )}
-
-                            <div className="text-center mt-8">
-                                <Button
-                                    variant="primary"
-                                    onClick={() => handleNavigation('/find')}
-                                    className="font-semibold"
-                                    aria-label="View all available food"
-                                >
-                                    View All Available Food
-                                    <i className="fas fa-arrow-right ml-2" aria-hidden="true"></i>
-                                </Button>
-                            </div>
-                        </div>
-                    </section>
 
                     {/* Communities Section */}
                     <section 
@@ -658,15 +462,6 @@ function HomePage() {
                             )}
                             </>
                             )}
-                            <div className="text-center">
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => handleNavigation('/community')}
-                                    aria-label="View all food sharing communities"
-                                >
-                                    View all communities
-                                </Button>
-                            </div>
                         </div>
                     </section>
 
@@ -678,29 +473,7 @@ function HomePage() {
                         </div>
                     </section>
 
-                    {/* Call to Action */}
-                    <section
-                        className="py-16 bg-[#171366] text-white"
-                        aria-labelledby="cta-heading"
-                    >
-                        <div className="container mx-auto px-4 text-center">
-                            <h2 
-                                id="cta-heading"
-                                className="text-3xl font-bold mb-4"
-                            >
-                                Ready to start sharing?
-                            </h2>
-                            <p className="text-xl mb-8">Join our community today and make a difference</p>
-                            <Button
-                                variant="secondary"
-                                size="lg"
-                                onClick={() => handleNavigation('/signup')}
-                                aria-label="Sign up for food sharing community"
-                            >
-                                Sign Up Now
-                            </Button>
-                        </div>
-                    </section>
+
                 </div>
 
                 {/* Tutorial - Only on HomePage */}
