@@ -62,6 +62,10 @@ function CommunityDetailPage() {
     }, [id]);
 
     const handleClaim = (food) => {
+        if (!isAuthenticated) {
+            navigate('/login', { state: { from: `/community/${id}`, returnToFood: food } });
+            return;
+        }
         const claimFood = {
             ...food,
             id: food.id || food.objectId,
@@ -206,7 +210,7 @@ function CommunityDetailPage() {
                                 key={food.id}
                                 food={food}
                                 onClaim={() => handleClaim(food)}
-                                showClaimButton={isAuthenticated}
+                                showClaimButton={true}
                             />
                         ))}
                     </div>
