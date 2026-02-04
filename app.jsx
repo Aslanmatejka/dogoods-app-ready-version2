@@ -11,8 +11,6 @@ import MainLayout from './components/layout/MainLayout';
 import ProfilePage from './pages/ProfilePage';
 import UserDashboard from './pages/UserDashboard';
 import ShareFoodPage from './pages/ShareFoodPage';
-import CommunityPage from './pages/CommunityPage';
-import CommunityFoodPage from './pages/CommunityFoodPage';
 import UserSettings from './pages/UserSettings';
 import Notifications from './pages/Notifications';
 import UserListings from './pages/UserListings';
@@ -35,7 +33,6 @@ import { TutorialProvider } from './utils/TutorialContext.jsx';
 import DistributionAttendees from './pages/admin/DistributionAttendees.jsx';
 import FoodDistributionManagement from './pages/admin/FoodDistributionManagement.jsx';
 import UserManagement from './pages/admin/UserManagement.jsx';
-import CommunityManagement from './pages/admin/CommunityManagement.jsx';
 import AdminContentManagement from './pages/admin/AdminContentManagement.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
@@ -112,8 +109,6 @@ function AppContent() {
                 <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
                 <Route path="/share" element={<ProtectedRoute><ShareFoodPage /></ProtectedRoute>} />
                 <Route path="/claim" element={<ProtectedRoute><ClaimFoodForm /></ProtectedRoute>} />
-                <Route path="/community" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
-                <Route path="/community/:id" element={<ProtectedRoute><CommunityFoodPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
                 <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                 <Route path="/listings" element={<ProtectedRoute><UserListings /></ProtectedRoute>} />
@@ -122,7 +117,6 @@ function AppContent() {
                 <Route path="/admin/posts" element={<AdminRoute><AdminContentManagement /></AdminRoute>} />
                 <Route path="/admin/content" element={<AdminRoute><ContentModeration /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-                <Route path="/admin/communities" element={<AdminRoute><CommunityManagement /></AdminRoute>} />
                 <Route path="/admin/distribution" element={<AdminRoute><FoodDistributionManagement /></AdminRoute>} />
                 <Route path="/admin/attendees" element={<AdminRoute><DistributionAttendees /></AdminRoute>} />
                 <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
