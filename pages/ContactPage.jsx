@@ -60,7 +60,7 @@ function ContactPage() {
             {/* Header */}
             <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                    <i className="fas fa-envelope text-green-600 mr-3"></i>
+                    <i className="fas fa-envelope text-cyan-600 mr-3"></i>
                     Contact Us
                 </h1>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -72,21 +72,21 @@ function ContactPage() {
                 {/* Contact Information */}
                 <div className="space-y-6">
                     {/* Organization Info Card */}
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-lg p-8 border border-green-200">
+                    <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl shadow-lg p-8 border border-cyan-200">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                            <i className="fas fa-building text-green-600 mr-2"></i>
+                            <i className="fas fa-building text-cyan-600 mr-2"></i>
                             All Good Living Foundation
                         </h2>
 
                         <div className="space-y-4">
                             {/* Phone */}
                             <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                <div className="flex-shrink-0 w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center">
                                     <i className="fas fa-phone text-white"></i>
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
-                                    <a href="tel:510-522-6288" className="text-green-600 hover:text-green-700 font-medium">
+                                    <a href="tel:510-522-6288" className="text-cyan-600 hover:text-cyan-700 font-medium">
                                         510-522-6288
                                     </a>
                                 </div>
@@ -94,12 +94,12 @@ function ContactPage() {
 
                             {/* Email */}
                             <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                <div className="flex-shrink-0 w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center">
                                     <i className="fas fa-envelope text-white"></i>
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                                    <a href="mailto:info@allgoodlivingfoundation.org" className="text-green-600 hover:text-green-700 font-medium break-all">
+                                    <a href="mailto:info@allgoodlivingfoundation.org" className="text-cyan-600 hover:text-cyan-700 font-medium break-all">
                                         info@allgoodlivingfoundation.org
                                     </a>
                                 </div>
@@ -107,7 +107,7 @@ function ContactPage() {
 
                             {/* Address */}
                             <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                <div className="flex-shrink-0 w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center">
                                     <i className="fas fa-map-marker-alt text-white"></i>
                                 </div>
                                 <div>
@@ -116,7 +116,7 @@ function ContactPage() {
                                         href="https://www.google.com/maps/search/?api=1&query=1900+Thau+Way,+Alameda,+CA+94501"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-gray-700 hover:text-green-600"
+                                        className="text-gray-700 hover:text-cyan-600"
                                     >
                                         1900 Thau Way<br />
                                         Alameda, CA 94501
@@ -126,7 +126,7 @@ function ContactPage() {
 
                             {/* Hours */}
                             <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                                <div className="flex-shrink-0 w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center">
                                     <i className="fas fa-clock text-white"></i>
                                 </div>
                                 <div>
@@ -142,7 +142,7 @@ function ContactPage() {
                     <div className="grid grid-cols-2 gap-4">
                         <button
                             onClick={() => navigate('/donate')}
-                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
                         >
                             <i className="fas fa-heart mr-2"></i>
                             Donate
@@ -159,7 +159,7 @@ function ContactPage() {
                     {/* Map or additional info */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
                         <h3 className="font-bold text-gray-900 mb-3">
-                            <i className="fas fa-info-circle text-green-600 mr-2"></i>
+                            <i className="fas fa-info-circle text-cyan-600 mr-2"></i>
                             Get Involved
                         </h3>
                         <p className="text-gray-600 mb-3">
@@ -167,15 +167,15 @@ function ContactPage() {
                         </p>
                         <ul className="space-y-2 text-gray-700">
                             <li className="flex items-center gap-2">
-                                <i className="fas fa-check-circle text-green-600"></i>
+                                <i className="fas fa-check-circle text-cyan-600"></i>
                                 <span>Share excess food</span>
                             </li>
                             <li className="flex items-center gap-2">
-                                <i className="fas fa-check-circle text-green-600"></i>
+                                <i className="fas fa-check-circle text-cyan-600"></i>
                                 <span>Volunteer at events</span>
                             </li>
                             <li className="flex items-center gap-2">
-                                <i className="fas fa-check-circle text-green-600"></i>
+                                <i className="fas fa-check-circle text-cyan-600"></i>
                                 <span>Support our mission</span>
                             </li>
                         </ul>
@@ -185,7 +185,7 @@ function ContactPage() {
                 {/* Contact Form */}
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        <i className="fas fa-paper-plane text-green-600 mr-2"></i>
+                        <i className="fas fa-paper-plane text-cyan-600 mr-2"></i>
                         Send Us a Message
                     </h2>
 
@@ -202,7 +202,7 @@ function ContactPage() {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                                 placeholder="Your full name"
                             />
                         </div>
@@ -219,7 +219,7 @@ function ContactPage() {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                                 placeholder="your.email@example.com"
                             />
                         </div>
@@ -235,7 +235,7 @@ function ContactPage() {
                                 value={formData.reason}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent bg-white"
                             >
                                 <option value="">Select a reason...</option>
                                 <option value="technical_issue">Technical Issue</option>
@@ -256,7 +256,7 @@ function ContactPage() {
                                 onChange={handleChange}
                                 required
                                 rows="6"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
                                 placeholder="Tell us what's on your mind..."
                             />
                         </div>
@@ -265,7 +265,7 @@ function ContactPage() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                            className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? (
                                 <>
