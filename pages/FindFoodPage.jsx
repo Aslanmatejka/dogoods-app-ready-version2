@@ -50,7 +50,8 @@ function FindFoodPage({ initialCategory }) {
         category: initialCategory || '',
         type: 'all',
         radius: '10',
-        sortBy: 'newest'
+        sortBy: 'newest',
+        community: ''
     });
     const [formData, setFormData] = useState({
         requester_name: '',
@@ -66,19 +67,26 @@ function FindFoodPage({ initialCategory }) {
         pickup_dropoff: ''
     });
 
-    // Initial data load and category from URL
+    // Initial data load and category/community from URL
     useEffect(() => {
         // Scroll to top when page loads
         window.scrollTo(0, 0);
         
         fetchListings();
         
-        const categoryParam = new URLSearchParams(location.search).get('category');
+        const params = new URLSearchParams(routerLocation.search);
+        const categoryParam = params.get('category');
+        const communityParam = params.get('community');
+        
         if (categoryParam) {
             const mappedCategory = CATEGORY_MAPPING[categoryParam.toLowerCase()] || categoryParam;
             setFilters(prev => ({ ...prev, category: mappedCategory }));
         }
-    }, [fetchListings, location.search]);
+        
+        if (communityParam) {
+            setFilters(prev => ({ ...prev, community: communityParam }));
+        }
+    }, [fetchListings, routerLocation.search]);
 
     // Event handlers
     const handleSearch = async () => {
@@ -195,6 +203,10 @@ function FindFoodPage({ initialCategory }) {
 
         if (filters.category) {
             result = result.filter(food => food.category === filters.category);
+        }
+
+        if (filters.community) {
+            result = result.filter(food => food.community_id === filters.community || food.community === filters.community);
         }
 
         if (filters.type !== 'all') {

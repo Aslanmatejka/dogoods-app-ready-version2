@@ -383,7 +383,8 @@ function HomePage() {
                                         key={community.id}
                                         className="overflow-hidden"
                                         role="listitem"
-                                        hoverable={false}
+                                        hoverable={true}
+                                        onClick={() => navigate(`/community/${community.id}`)}
                                     >
                                         <img
                                             src={community.image}

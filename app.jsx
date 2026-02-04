@@ -27,6 +27,7 @@ import StoriesPage from './pages/StoriesPage';
 import DonationSchedules from './pages/DonationSchedules';
 import FAQs from './pages/FAQs';
 import ContactPage from './pages/ContactPage';
+import CommunityDetailPage from './pages/CommunityDetailPage';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ContentModeration from './pages/admin/ContentModeration.jsx';
 import { TutorialProvider } from './utils/TutorialContext.jsx';
@@ -88,6 +89,7 @@ function AppContent() {
         <MainLayout>
             <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/community/:id" element={<CommunityDetailPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
