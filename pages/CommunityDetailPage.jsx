@@ -134,6 +134,12 @@ function CommunityDetailPage() {
                         <div className="md:col-span-2">
                             <h1 className="text-3xl font-bold text-gray-800 mb-4">{community.name}</h1>
                             
+                            {community.description && (
+                                <p className="text-gray-600 mb-6 text-lg leading-relaxed">
+                                    {community.description}
+                                </p>
+                            )}
+                            
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-start text-gray-700">
                                     <i className="fas fa-map-marker-alt w-6 text-[#2CABE3] mt-1"></i>
