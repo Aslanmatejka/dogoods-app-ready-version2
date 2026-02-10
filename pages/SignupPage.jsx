@@ -10,10 +10,12 @@ function SignupPageContent() {
     const [formData, setFormData] = React.useState({
         name: '',
         email: '',
+        phone: '',
         approvalNumber: '',
         password: '',
         confirmPassword: '',
-        agreeToTerms: false
+        agreeToTerms: false,
+        smsOptIn: false
     });
 
     const [errors, setErrors] = React.useState({});
@@ -53,6 +55,15 @@ function SignupPageContent() {
             newErrors.approvalNumber = 'Approval number is required';
         }
         
+        // Validate phone if SMS opt-in is checked
+        if (formData.smsOptIn) {
+            if (!formData.phone.trim()) {
+                newErrors.phone = 'Phone number is required for SMS notifications';
+            } else if (!/^\+?[1-9]\d{1,14}$/.test(formData.phone.replace(/[\s()-]/g, ''))) {
+                newErrors.phone = 'Invalid phone number format (use format: +1234567890)';
+            }
+        }
+        
         if (!formData.password) {
             newErrors.password = 'Password is required';
         } else if (formData.password.length < 8) {
@@ -85,7 +96,11 @@ function SignupPageContent() {
                 options: {
                     data: {
                         name: formData.name.trim(),
-                        approval_number: formData.approvalNumber.trim()
+                        approval_number: formData.approvalNumber.trim(),
+                        phone: formData.phone.trim() || null,
+                        sms_opt_in: formData.smsOptIn,
+                        sms_opt_in_date: formData.smsOptIn ? new Date().toISOString() : null,
+                        sms_notifications_enabled: formData.smsOptIn
                     }
                 }
             };
@@ -212,6 +227,30 @@ function SignupPageContent() {
                         </div>
 
                         <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                                Phone Number {formData.smsOptIn && <span className="text-red-500" aria-hidden="true">*</span>}
+                            </label>
+                            <input
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#2CABE3] ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="+1234567890 or (123) 456-7890"
+                                aria-required={formData.smsOptIn}
+                                aria-invalid={!!errors.phone}
+                                aria-describedby="phone-description phone-error"
+                            />
+                            <p id="phone-description" className="mt-2 text-sm text-gray-600">
+                                Optional. Provide your phone number to receive SMS notifications about food claims and pickups.
+                            </p>
+                            {errors.phone && (
+                                <p id="phone-error" className="mt-1 text-sm text-red-500" role="alert">{errors.phone}</p>
+                            )}
+                        </div>
+
+                        <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                                 Password <span className="text-red-500" aria-hidden="true">*</span>
                             </label>
@@ -251,6 +290,32 @@ function SignupPageContent() {
                             {errors.confirmPassword && (
                                 <p id="confirm-password-error" className="mt-1 text-sm text-red-500" role="alert">{errors.confirmPassword}</p>
                             )}
+                        </div>
+
+                        <div className="border-t border-gray-200 pt-4">
+                            <div className="flex items-start mb-4">
+                                <div className="flex items-center h-5">
+                                    <input
+                                        id="smsOptIn"
+                                        name="smsOptIn"
+                                        type="checkbox"
+                                        checked={formData.smsOptIn}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded"
+                                        aria-describedby="sms-opt-in-description"
+                                    />
+                                </div>
+                                <div className="ml-3">
+                                    <label htmlFor="smsOptIn" className="text-sm font-medium text-gray-700">
+                                        Send me SMS notifications <span className="text-gray-500">(Optional)</span>
+                                    </label>
+                                    <p id="sms-opt-in-description" className="mt-1 text-xs text-gray-600">
+                                        By checking this box, you consent to receive SMS text messages from DoGoods about food claims, pickup reminders, and important updates. 
+                                        Message and data rates may apply. You can opt out at any time in your profile settings. 
+                                        By providing your phone number and opting in, you agree to our <Link to="/terms" className="text-[#2CABE3] hover:underline">SMS Terms of Service</Link>.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex items-start">

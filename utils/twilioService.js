@@ -38,15 +38,51 @@ class TwilioService {
     }
 
     /**
+     * Check if user has opted in to receive SMS
+     * @param {string} phone - Phone number to check
+     * @returns {Promise<boolean>} Whether user has opted in
+     */
+    async checkUserOptIn(phone) {
+        try {
+            const formattedPhone = this.formatPhoneNumber(phone);
+            
+            const { data, error } = await supabase
+                .from('users')
+                .select('sms_opt_in, sms_notifications_enabled')
+                .eq('phone', formattedPhone)
+                .single();
+
+            if (error || !data) {
+                console.warn('Could not verify SMS opt-in status:', error);
+                return false;
+            }
+
+            return data.sms_opt_in === true && data.sms_notifications_enabled === true;
+        } catch (error) {
+            console.error('Error checking SMS opt-in:', error);
+            return false;
+        }
+    }
+
+    /**
      * Send SMS via Supabase Edge Function
      * @param {Object} params - SMS parameters
      * @param {string} params.to - Recipient phone number
      * @param {string} params.message - Message content
      * @param {string} params.type - Message type (claim, reminder, verification, notification)
+     * @param {boolean} params.skipOptInCheck - Skip opt-in verification (use for verification codes)
      * @returns {Promise<Object>} Response from Twilio
      */
-    async sendSMS({ to, message, type = 'notification' }) {
+    async sendSMS({ to, message, type = 'notification', skipOptInCheck = false }) {
         try {
+            // Check if user has opted in to SMS (except for verification codes)
+            if (!skipOptInCheck && type !== 'verification') {
+                const isOptedIn = await this.checkUserOptIn(to);
+                if (!isOptedIn) {
+                    throw new Error('User has not opted in to receive SMS notifications');
+                }
+            }
+            
             const formattedPhone = this.formatPhoneNumber(to);
             
             const { data: { session } } = await supabase.auth.getSession();

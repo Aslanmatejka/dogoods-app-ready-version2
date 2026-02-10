@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Card from "../components/common/Card";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
@@ -17,6 +18,9 @@ function UserSettings() {
     const [formData, setFormData] = React.useState({
         name: '',
         email: '',
+        phone: '',
+        sms_opt_in: false,
+        sms_notifications_enabled: false,
         notifications: {
             email: false,
             push: false
@@ -46,6 +50,9 @@ function UserSettings() {
                 setFormData({
                     name: authUser.name || profile?.name || '',
                     email: authUser.email || '',
+                    phone: profile?.phone || '',
+                    sms_opt_in: profile?.sms_opt_in || false,
+                    sms_notifications_enabled: profile?.sms_notifications_enabled || false,
                     notifications: authUser.notifications || {
                         email: false,
                         push: false
@@ -106,7 +113,30 @@ function UserSettings() {
         
         try {
             // Update user profile in Supabase
-            if (section === 'Dietary') {
+            if (section === 'SMS') {
+                // Validate phone number if enabling SMS
+                if (formData.sms_opt_in && !formData.phone?.trim()) {
+                    throw new Error('Phone number is required to enable SMS notifications');
+                }
+                
+                const updates = {
+                    phone: formData.phone?.trim() || null,
+                    sms_notifications_enabled: formData.sms_notifications_enabled
+                };
+                
+                // Only update opt-in status if user is opting in (cannot un-opt-in, only disable)
+                if (formData.sms_opt_in && !formData.sms_opt_in) {
+                    updates.sms_opt_in = true;
+                    updates.sms_opt_in_date = new Date().toISOString();
+                }
+                
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update(updates)
+                    .eq('id', authUser.id);
+
+                if (updateError) throw updateError;
+            } else if (section === 'Dietary') {
                 const { error: updateError } = await supabase
                     .from('users')
                     .update({
@@ -222,6 +252,123 @@ function UserSettings() {
                                 onClick={() => handleSaveSettings('Account')}
                                 disabled={loading}
                                 aria-label="Save account settings"
+                            >
+                                {loading ? 'Saving...' : 'Save Changes'}
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* SMS Notification Settings */}
+                <Card>
+                    <div className="p-6">
+                        <h2 className="text-xl font-semibold mb-2">SMS Notifications</h2>
+                        <p className="text-sm text-gray-600 mb-6">
+                            Receive text messages about food claims, pickup reminders, and important updates.
+                        </p>
+                        
+                        <div className="space-y-4">
+                            {/* Phone Number */}
+                            <div>
+                                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Phone Number
+                                </label>
+                                <Input
+                                    id="phone"
+                                    name="phone"
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    placeholder="+1234567890 or (123) 456-7890"
+                                    className="w-full"
+                                    aria-describedby="phone-description"
+                                />
+                                <p id="phone-description" className="mt-1 text-xs text-gray-500">
+                                    Format: +1234567890 or (123) 456-7890
+                                </p>
+                            </div>
+
+                            {/* SMS Opt-in Status */}
+                            {formData.sms_opt_in ? (
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <div className="flex items-start">
+                                        <i className="fas fa-check-circle text-green-600 mt-0.5 mr-3"></i>
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-medium text-green-900">SMS Notifications Enabled</h3>
+                                            <p className="text-xs text-green-700 mt-1">
+                                                You've opted in to receive SMS notifications. You can disable notifications below at any time.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div className="flex items-start">
+                                        <i className="fas fa-info-circle text-blue-600 mt-0.5 mr-3"></i>
+                                        <div className="flex-1">
+                                            <h3 className="text-sm font-medium text-blue-900">SMS Notifications Not Enabled</h3>
+                                            <p className="text-xs text-blue-700 mt-1">
+                                                To receive SMS notifications, add your phone number above and check the box below to opt in.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* SMS Notifications Toggle */}
+                            <div className="border-t border-gray-200 pt-4">
+                                <div className="flex items-start">
+                                    <input
+                                        type="checkbox"
+                                        id="smsNotifications"
+                                        checked={formData.sms_notifications_enabled}
+                                        onChange={(e) => {
+                                            // If enabling and not opted in, also opt in
+                                            if (e.target.checked && !formData.sms_opt_in) {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    sms_opt_in: true,
+                                                    sms_notifications_enabled: true
+                                                }));
+                                            } else {
+                                                handleInputChange('sms_notifications_enabled', e.target.checked);
+                                            }
+                                        }}
+                                        className="h-4 w-4 text-[#2CABE3] focus:ring-[#2CABE3] border-gray-300 rounded mt-0.5"
+                                        aria-describedby="sms-notifications-description"
+                                    />
+                                    <div className="ml-3">
+                                        <label htmlFor="smsNotifications" className="text-sm font-medium text-gray-700">
+                                            Enable SMS Notifications
+                                        </label>
+                                        <p id="sms-notifications-description" className="text-xs text-gray-600 mt-1">
+                                            {formData.sms_opt_in 
+                                                ? 'Uncheck to stop receiving SMS messages. You can re-enable at any time.'
+                                                : 'By enabling this, you consent to receive SMS notifications from DoGoods. Message and data rates may apply. You can opt out at any time.'
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Legal Notice */}
+                            <div className="text-xs text-gray-500 pt-2 border-t border-gray-200">
+                                <p className="mb-1">
+                                    <strong>SMS Terms:</strong> By opting in, you agree to receive automated text messages at the phone number provided. 
+                                    Consent is not a condition of purchase. Message frequency varies. Message and data rates may apply.
+                                </p>
+                                <p>
+                                    Reply STOP to cancel or HELP for help. View our <Link to="/terms" className="text-[#2CABE3] hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-[#2CABE3] hover:underline">Privacy Policy</Link>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <Button
+                                variant="primary"
+                                onClick={() => handleSaveSettings('SMS')}
+                                disabled={loading || (formData.sms_notifications_enabled && !formData.phone?.trim())}
+                                aria-label="Save SMS notification settings"
                             >
                                 {loading ? 'Saving...' : 'Save Changes'}
                             </Button>
