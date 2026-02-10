@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Button from "../components/common/Button";
 import supabase from "../utils/supabaseClient";
 import communitiesStatic from '../utils/communities';
+import twilioService from '../utils/twilioService';
+import { useAuthContext } from '../utils/AuthContext';
+import { toast } from 'react-toastify';
 
 // Calculate next Friday from today
 const getNextFriday = () => {
@@ -33,10 +36,12 @@ const getNextFriday = () => {
 export default function ClaimFoodForm() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuthContext();
     const food = location.state?.food;
     const pickupDeadline = getNextFriday();
     const [community, setCommunity] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
+    const [claiming, setClaiming] = React.useState(false);
 
     React.useEffect(() => {
         const fetchCommunity = async () => {
@@ -77,6 +82,76 @@ export default function ClaimFoodForm() {
 
         fetchCommunity();
     }, [food?.community_id]);
+
+    const handleConfirmClaim = async () => {
+        if (!user) {
+            toast.error('Please log in to claim food');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setClaiming(true);
+
+            // Create claim in database
+            const { data: claimData, error: claimError } = await supabase
+                .from('food_claims')
+                .insert({
+                    food_listing_id: food.id,
+                    claimer_id: user.id,
+                    status: 'pending',
+                    pickup_deadline: pickupDeadline,
+                })
+                .select()
+                .single();
+
+            if (claimError) throw claimError;
+
+            // Update food listing status
+            const { error: updateError } = await supabase
+                .from('food_listings')
+                .update({ status: 'claimed' })
+                .eq('id', food.id);
+
+            if (updateError) throw updateError;
+
+            // Send SMS notifications if phone numbers are available
+            try {
+                // Send confirmation to claimer
+                if (user.phone) {
+                    await twilioService.sendClaimConfirmation({
+                        claimerPhone: user.phone,
+                        claimerName: user.name || 'there',
+                        foodTitle: food.title || food.name,
+                        pickupLocation: community?.name || food.location,
+                        pickupDeadline: pickupDeadline,
+                    });
+                }
+
+                // Send notification to donor
+                if (food.donor_phone) {
+                    await twilioService.sendClaimNotification({
+                        donorPhone: food.donor_phone,
+                        donorName: food.donor_name || 'Donor',
+                        claimerName: user.name || 'A community member',
+                        foodTitle: food.title || food.name,
+                        pickupLocation: community?.name || food.location,
+                    });
+                }
+            } catch (smsError) {
+                // Don't fail the claim if SMS fails
+                console.error('SMS notification error:', smsError);
+            }
+
+            toast.success('Food claimed successfully!');
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Error claiming food:', error);
+            toast.error(error.message || 'Failed to claim food');
+        } finally {
+            setClaiming(false);
+        }
+    };
 
     if (!food) {
         return (
@@ -274,13 +349,11 @@ export default function ClaimFoodForm() {
                 <Button 
                     variant="primary" 
                     className="px-12 py-4 text-lg font-semibold bg-[#2CABE3] hover:opacity-90"
-                    onClick={() => {
-                        // TODO: Implement claim confirmation logic
-                        alert('Claim confirmed! (Logic to be implemented)');
-                    }}
+                    onClick={handleConfirmClaim}
+                    disabled={claiming}
                 >
                     <i className="fas fa-check-circle mr-2"></i>
-                    Confirm Claim
+                    {claiming ? 'Processing...' : 'Confirm Claim'}
                 </Button>
             </div>
         </div>
