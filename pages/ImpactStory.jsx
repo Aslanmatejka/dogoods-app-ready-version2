@@ -698,7 +698,6 @@ function ImpactStory() {
                         </div>
                     </div>
 
-                    {/* TEMPORARILY DISABLED - View All Stories button removed per request
                     <div className="text-center mt-12">
                         <button onClick={() => navigate('/stories')} 
                             className="bg-[#2CABE3] text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
@@ -712,7 +711,6 @@ function ImpactStory() {
                             </span>
                         </button>
                     </div>
-                    */}
                 </div>
             </section>
 
