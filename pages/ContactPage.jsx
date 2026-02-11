@@ -150,7 +150,7 @@ function ContactPage() {
                             Donate
                         </a>
                         <a
-                            href="https://www.allgoodlivingfoundation.org/volunteer"
+                            href="https://allgoodlivingfoundation.org/volunteer-form"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 text-center"
