@@ -68,6 +68,7 @@ function Footer({
                                         <span>Find Food</span>
                                     </a>
                                 </li>
+                                {/* TEMPORARILY DISABLED
                                 <li>
                                     <a
                                         href="/share"
@@ -77,6 +78,7 @@ function Footer({
                                         <span>Share Food</span>
                                     </a>
                                 </li>
+                                */}
                                 <li>
                                     <a
                                         href="https://allgoodlivingfoundation.org/volunteer-form"

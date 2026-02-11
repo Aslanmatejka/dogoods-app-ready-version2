@@ -115,6 +115,7 @@ function UserDashboard() {
 
     // Quick actions
     const quickActions = [
+        /* TEMPORARILY DISABLED
         {
             title: 'Share Food',
             description: 'Share your surplus food',
@@ -122,6 +123,7 @@ function UserDashboard() {
             path: '/share',
             color: 'bg-[#2CABE3]'
         },
+        */
         {
             title: 'Find Food',
             description: 'Browse available items',

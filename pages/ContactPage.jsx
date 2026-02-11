@@ -140,20 +140,24 @@ function ContactPage() {
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-4">
-                        <button
-                            onClick={() => navigate('/donate')}
-                            className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                        <a
+                            href="https://www.allgoodlivingfoundation.org/donate"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 text-center"
                         >
                             <i className="fas fa-heart mr-2"></i>
                             Donate
-                        </button>
-                        <button
-                            onClick={() => navigate('/volunteer')}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                        </a>
+                        <a
+                            href="https://www.allgoodlivingfoundation.org/volunteer"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 text-center"
                         >
                             <i className="fas fa-hands-helping mr-2"></i>
                             Volunteer
-                        </button>
+                        </a>
                     </div>
 
                     {/* Map or additional info */}
@@ -168,15 +172,15 @@ function ContactPage() {
                         <ul className="space-y-2 text-gray-700">
                             <li className="flex items-center gap-2">
                                 <i className="fas fa-check-circle text-cyan-600"></i>
-                                <span>Share excess food</span>
+                                <span>Volunteer with us</span>
                             </li>
                             <li className="flex items-center gap-2">
                                 <i className="fas fa-check-circle text-cyan-600"></i>
-                                <span>Volunteer at events</span>
+                                <span>Make a donation</span>
                             </li>
                             <li className="flex items-center gap-2">
                                 <i className="fas fa-check-circle text-cyan-600"></i>
-                                <span>Support our mission</span>
+                                <span>Become a sponsor</span>
                             </li>
                         </ul>
                     </div>

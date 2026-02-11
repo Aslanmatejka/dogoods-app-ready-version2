@@ -536,6 +536,7 @@ function StoriesPage() {
                     </div>
 
                     {/* Call to Action */}
+                    {/* TEMPORARILY DISABLED
                     <div className="text-center mt-12">
                         <button 
                             onClick={() => navigate('/share')} 
@@ -550,6 +551,7 @@ function StoriesPage() {
                             </span>
                         </button>
                     </div>
+                    */}
                 </div>
             </div>
             </div>

@@ -435,6 +435,7 @@ function ImpactStory() {
                             >
                                 {getContent('featuredP2', 'Our platform connects donors with recipients within minutes, ensuring fresh food reaches those who need it most. Through intelligent routing and automated coordination, we\'ve created a seamless network that turns potential waste into community nourishment.')} 
                             </p>
+                            {/* TEMPORARILY DISABLED
                             <button onClick={() => window.location.href='/share'} 
                                 className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all inline-flex items-center gap-2">
                                 <span 
@@ -446,6 +447,7 @@ function ImpactStory() {
                                     {getContent('featuredButtonText', 'Join Our Network →')}
                                 </span>
                             </button>
+                            */}
                         </div>
                     </div>
                 </div>
@@ -696,6 +698,7 @@ function ImpactStory() {
                         </div>
                     </div>
 
+                    {/* TEMPORARILY DISABLED - View All Stories button removed per request
                     <div className="text-center mt-12">
                         <button onClick={() => navigate('/stories')} 
                             className="bg-[#2CABE3] text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
@@ -709,6 +712,7 @@ function ImpactStory() {
                             </span>
                         </button>
                     </div>
+                    */}
                 </div>
             </section>
 
@@ -732,6 +736,7 @@ function ImpactStory() {
                         {getContent('ctaSubtitle', 'Every meal shared, every pound of food saved, every life touched—it all starts with you.')}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        {/* TEMPORARILY DISABLED
                         <a href="/share" 
                             className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             <span 
@@ -743,6 +748,7 @@ function ImpactStory() {
                                 {getContent('ctaButton1Text', 'Join the Platform')}
                             </span>
                         </a>
+                        */}
                         <a href="https://allgoodlivingfoundation.org/donate/" 
                             target="_blank"
                             rel="noopener noreferrer"

@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 
 function Header({
     menuItems = [
-        { label: 'Share Food', path: '/share' },
+        // { label: 'Share Food', path: '/share' }, // TEMPORARILY DISABLED
         { label: 'Find Food', path: '/find' },
         { 
             label: 'Support Us', 
@@ -345,6 +345,7 @@ function Header({
                                                     Your Profile
                                                 </a>
                                             </li>
+                                            {/* TEMPORARILY DISABLED
                                             <li>
                                                 <a
                                                     href="/listings"
@@ -354,6 +355,7 @@ function Header({
                                                     My Listings
                                                 </a>
                                             </li>
+                                            */}
                                             {authUser?.role === 'admin' && (
                                                 <li>
                                                     <a
