@@ -266,13 +266,32 @@ function ImpactStory() {
         
         try {
             if (!isAdmin) {
-                console.error('❌ Not authorized: User is not admin');
                 alert('⚠️ You must be logged in as an admin to save changes.');
                 return;
             }
             
-            console.log('🔄 Step 1: Preparing data for Supabase...');
-            console.log('📦 Sample content keys:', Object.keys(editableContent).slice(0, 5));
+            console.log('🔄 Using direct fetch to Supabase REST API...');
+            
+            // Get the Supabase URL and key from the client config
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+            
+            // Get access token from current session
+            let accessToken = supabaseKey; // fallback to anon key
+            try {
+                const { data: { session } } = await Promise.race([
+                    supabase.auth.getSession(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+                ]);
+                if (session?.access_token) {
+                    accessToken = session.access_token;
+                    console.log('🔐 Using authenticated token');
+                } else {
+                    console.log('🔐 Using anon key (no session)');
+                }
+            } catch (e) {
+                console.log('🔐 Session check timed out, using anon key');
+            }
             
             const payload = {
                 page_name: 'impact-story',
@@ -280,23 +299,33 @@ function ImpactStory() {
                 updated_at: new Date().toISOString()
             };
             
-            console.log('🔄 Step 2: Calling Supabase upsert (without select)...');
+            console.log('📤 Sending fetch request...');
             
-            // Try upsert without .select() to avoid hanging
-            const { data, error } = await supabase
-                .from('page_content')
-                .upsert(payload, { onConflict: 'page_name' });
-
-            console.log('✅ Step 3: Response received!');
-
-            if (error) {
-                console.error('❌ Supabase error:', error);
-                alert(`❌ Failed to save!\n\n${error.message}`);
+            const response = await fetch(
+                `${supabaseUrl}/rest/v1/page_content?on_conflict=page_name`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
+            
+            console.log('📥 Response status:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ API error:', errorText);
+                alert(`❌ Failed to save (${response.status}):\n\n${errorText}`);
                 return;
             }
             
-            console.log('✅ Saved successfully:', data);
-            alert('✅ Changes saved to database!');
+            console.log('✅ Saved to Supabase successfully!');
+            alert('✅ Changes saved successfully to database!');
             
             setOriginalContent({ ...editableContent });
             setIsEditMode(false);
