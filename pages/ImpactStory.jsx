@@ -271,28 +271,7 @@ function ImpactStory() {
                 return;
             }
             
-            console.log('🔄 Step 1: Checking authentication...');
-            
-            // Get current session to verify authentication
-            let sessionData;
-            try {
-                const sessionResponse = await supabase.auth.getSession();
-                sessionData = sessionResponse.data;
-                console.log('🔐 Session exists:', !!sessionData?.session);
-                console.log('🔐 User ID:', sessionData?.session?.user?.id || 'none');
-            } catch (sessionError) {
-                console.error('❌ Session check failed:', sessionError);
-                alert(`⚠️ Could not verify authentication: ${sessionError.message}`);
-                return;
-            }
-            
-            if (!sessionData?.session) {
-                console.error('❌ Not authenticated: No active session');
-                alert('⚠️ You must be logged in to save changes.');
-                return;
-            }
-            
-            console.log('🔄 Step 2: Saving to Supabase...');
+            console.log('🔄 Step 1: Saving directly to Supabase (skipping auth check)...');
             
             const { data, error } = await supabase
                 .from('page_content')
@@ -305,7 +284,7 @@ function ImpactStory() {
                 })
                 .select();
 
-            console.log('🔄 Step 3: Processing response...');
+            console.log('🔄 Step 2: Processing response...');
 
             if (error) {
                 console.error('❌ Supabase error:', error);
