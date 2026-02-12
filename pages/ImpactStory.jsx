@@ -237,7 +237,48 @@ function ImpactStory() {
         }
 
         try {
+            // Verify user is authenticated and admin
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                alert('⚠️ You must be logged in to save changes.');
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '💾 Save Changes';
+                }
+                return;
+            }
+
+            console.log('Current user:', user.id);
             console.log('Saving content:', editableContent);
+            
+            // Check if user is admin in database
+            const { data: userData, error: userError } = await supabase
+                .from('users')
+                .select('is_admin, email')
+                .eq('id', user.id)
+                .single();
+
+            if (userError) {
+                console.error('Error checking admin status:', userError);
+                alert(`⚠️ Could not verify admin status: ${userError.message}`);
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '💾 Save Changes';
+                }
+                return;
+            }
+
+            if (!userData?.is_admin) {
+                alert('⚠️ Only administrators can save changes to this page.');
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '💾 Save Changes';
+                }
+                return;
+            }
+
+            console.log('Admin verified:', userData.email);
             
             // Save to Supabase
             const { data, error } = await supabase
@@ -253,29 +294,30 @@ function ImpactStory() {
 
             if (error) {
                 console.error('Supabase save error:', error);
-                alert(`Failed to save changes to the server: ${error.message}\n\nChanges will only be saved locally.`);
+                console.error('Error details:', JSON.stringify(error, null, 2));
+                alert(`❌ Failed to save changes to the server:\n\n${error.message}\n\nError code: ${error.code}\n\nChanges will only be saved locally.`);
                 // Fallback to localStorage
                 localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
                 if (saveButton) {
                     saveButton.disabled = false;
-                    saveButton.textContent = 'Save Changes';
+                    saveButton.textContent = '💾 Save Changes';
                 }
             } else {
-                console.log('Successfully saved to Supabase:', data);
+                console.log('✅ Successfully saved to Supabase:', data);
                 // Also save to localStorage as backup
                 localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-                alert('✓ Changes saved successfully to database!');
+                alert('✅ Changes saved successfully to database!');
                 setIsEditMode(false);
             }
         } catch (error) {
             console.error('Unexpected error saving changes:', error);
             reportError(error, { context: 'Impact story edit' });
-            alert(`An unexpected error occurred: ${error.message}\n\nChanges will only be saved locally.`);
+            alert(`❌ An unexpected error occurred:\n\n${error.message}\n\nChanges will only be saved locally.`);
             // Still save to localStorage
             localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
             if (saveButton) {
                 saveButton.disabled = false;
-                saveButton.textContent = 'Save Changes';
+                saveButton.textContent = '💾 Save Changes';
             }
         }
     };
