@@ -270,102 +270,40 @@ function ImpactStory() {
     };
 
     const saveChanges = async () => {
-        const saveButton = document.querySelector('.save-btn');
-        if (saveButton) {
-            saveButton.disabled = true;
-            saveButton.textContent = 'Saving...';
-        }
-
         try {
-            // Verify user is authenticated and admin
-            const { data: { user } } = await supabase.auth.getUser();
+            console.log('=== SAVE STARTED ===');
+            console.log('Content to save:', JSON.stringify(editableContent, null, 2));
             
-            if (!user) {
-                alert('⚠️ You must be logged in to save changes.');
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.textContent = '💾 Save Changes';
-                }
-                return;
-            }
-
-            console.log('Current user:', user.id);
-            console.log('Saving content:', editableContent);
+            // Save to localStorage immediately
+            localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+            console.log('Saved to localStorage');
             
-            // Check if user is admin in database
-            const { data: userData, error: userError } = await supabase
-                .from('users')
-                .select('is_admin, email')
-                .eq('id', user.id)
-                .single();
-
-            if (userError) {
-                console.error('Error checking admin status:', userError);
-                alert(`⚠️ Could not verify admin status: ${userError.message}`);
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.textContent = '💾 Save Changes';
-                }
-                return;
-            }
-
-            if (!userData?.is_admin) {
-                alert('⚠️ Only administrators can save changes to this page.');
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.textContent = '💾 Save Changes';
-                }
-                return;
-            }
-
-            console.log('Admin verified:', userData.email);
-            
-            // Save to Supabase
+            // Try to save to Supabase
             const { data, error } = await supabase
                 .from('page_content')
                 .upsert({
                     page_name: 'impact-story',
                     content: editableContent,
                     updated_at: new Date().toISOString()
-                }, {
-                    onConflict: 'page_name'
                 })
                 .select();
 
             if (error) {
-                console.error('Supabase save error:', error);
-                console.error('Error details:', JSON.stringify(error, null, 2));
-                alert(`❌ Failed to save changes to the server:\n\n${error.message}\n\nError code: ${error.code}\n\nChanges will only be saved locally.`);
-                // Fallback to localStorage
-                localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.textContent = '💾 Save Changes';
-                }
+                console.error('Supabase error:', error);
+                alert(`⚠️ Saved locally only. Database error: ${error.message}`);
             } else {
-                console.log('✅ Successfully saved to Supabase:', data);
-                // Also save to localStorage as backup
-                localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-                // Update original content to the newly saved content
+                console.log('✅ Saved to Supabase:', data);
+                alert('✅ Changes saved successfully!');
+                // Update original content to prevent reverting
                 setOriginalContent({ ...editableContent });
-                alert('✅ Changes saved successfully to database!');
-                setIsEditMode(false);
-                // Re-enable button in case user wants to edit again
-                if (saveButton) {
-                    saveButton.disabled = false;
-                    saveButton.textContent = '💾 Save Changes';
-                }
             }
+            
+            setIsEditMode(false);
+            console.log('=== SAVE COMPLETED ===');
         } catch (error) {
-            console.error('Unexpected error saving changes:', error);
-            reportError(error, { context: 'Impact story edit' });
-            alert(`❌ An unexpected error occurred:\n\n${error.message}\n\nChanges will only be saved locally.`);
-            // Still save to localStorage
-            localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-            if (saveButton) {
-                saveButton.disabled = false;
-                saveButton.textContent = '💾 Save Changes';
-            }
+            console.error('Save error:', error);
+            alert(`Error: ${error.message}\n\nChanges saved locally only.`);
+            setIsEditMode(false);
         }
     };
 
