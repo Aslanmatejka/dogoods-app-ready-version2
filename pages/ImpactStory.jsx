@@ -280,21 +280,12 @@ function ImpactStory() {
                 updated_at: new Date().toISOString()
             };
             
-            console.log('🔄 Step 2: Calling Supabase upsert...');
+            console.log('🔄 Step 2: Calling Supabase upsert (without select)...');
             
-            // Add timeout wrapper
-            const upsertPromise = supabase
+            // Try upsert without .select() to avoid hanging
+            const { data, error } = await supabase
                 .from('page_content')
-                .upsert(payload, { onConflict: 'page_name' })
-                .select();
-            
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Supabase request timeout (10s)')), 10000)
-            );
-            
-            console.log('⏱️ Waiting for Supabase response (10s timeout)...');
-            
-            const { data, error } = await Promise.race([upsertPromise, timeoutPromise]);
+                .upsert(payload, { onConflict: 'page_name' });
 
             console.log('✅ Step 3: Response received!');
 
