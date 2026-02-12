@@ -230,6 +230,12 @@ function ImpactStory() {
     };
 
     const saveChanges = async () => {
+        const saveButton = document.querySelector('.save-btn');
+        if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.textContent = 'Saving...';
+        }
+
         try {
             console.log('Saving content:', editableContent);
             
@@ -250,20 +256,27 @@ function ImpactStory() {
                 alert(`Failed to save changes to the server: ${error.message}\n\nChanges will only be saved locally.`);
                 // Fallback to localStorage
                 localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Save Changes';
+                }
             } else {
                 console.log('Successfully saved to Supabase:', data);
                 // Also save to localStorage as backup
                 localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
                 alert('✓ Changes saved successfully to database!');
+                setIsEditMode(false);
             }
-
-            setIsEditMode(false);
         } catch (error) {
             console.error('Unexpected error saving changes:', error);
             reportError(error, { context: 'Impact story edit' });
             alert(`An unexpected error occurred: ${error.message}\n\nChanges will only be saved locally.`);
             // Still save to localStorage
             localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+            if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Save Changes';
+            }
         }
     };
 
@@ -387,6 +400,30 @@ function ImpactStory() {
                     outline-color: #1d4ed8;
                     opacity: 0.8;
                 }
+
+                .edit-mode-banner {
+                    animation: slideUp 0.5s ease-out;
+                }
+
+                @keyframes slideUp {
+                    from {
+                        transform: translateY(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+
+                .save-btn:disabled {
+                    animation: pulse 1s infinite;
+                }
+
+                @keyframes pulse {
+                    0%, 100% { opacity: 0.6; }
+                    50% { opacity: 0.8; }
+                }
             `}</style>
 
             {/* Admin Edit Button */}
@@ -409,15 +446,15 @@ function ImpactStory() {
                             <p className="text-sm text-gray-600 mb-4">Click on any section to edit</p>
                             <button
                                 onClick={saveChanges}
-                                className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-2"
+                                className="save-btn w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Save Changes
+                                💾 Save Changes
                             </button>
                             <button
                                 onClick={cancelEdit}
                                 className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
                             >
-                                Cancel
+                                ✕ Cancel
                             </button>
                         </div>
                     )}
@@ -425,6 +462,31 @@ function ImpactStory() {
             )}
 
             <div className={isEditMode ? 'edit-mode' : ''}>
+            {/* Floating Save Bar for Edit Mode */}
+            {isEditMode && (
+                <div className="edit-mode-banner fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-green-600 to-teal-600 text-white py-4 px-6 shadow-2xl">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <p className="text-lg font-bold">✏️ Edit Mode Active</p>
+                            <p className="text-sm text-green-100">Click on any text or image to edit. Changes will be saved to the database.</p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={saveChanges}
+                                className="save-btn bg-white text-green-600 px-8 py-3 rounded-lg font-bold hover:bg-green-50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            >
+                                💾 Save Changes
+                            </button>
+                            <button
+                                onClick={cancelEdit}
+                                className="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-all transform hover:scale-105"
+                            >
+                                ✕ Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Hero Section */}
             <section className="bg-[#D9E1F1] py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
