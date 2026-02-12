@@ -1,8 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabaseClient';
 import { reportError } from '../utils/helpers';
 import { useAuthContext } from '../utils/AuthContext';
+
+// EditableText component for proper contentEditable handling
+const EditableText = ({ content, onEdit, isEditable, className, tag: Tag = 'div' }) => {
+    const elementRef = useRef(null);
+    const [isEditing, setIsEditing] = useState(false);
+
+    useEffect(() => {
+        if (elementRef.current && !isEditing) {
+            elementRef.current.textContent = content;
+        }
+    }, [content, isEditing]);
+
+    const handleBlur = () => {
+        if (elementRef.current && isEditable) {
+            onEdit(elementRef.current.textContent);
+            setIsEditing(false);
+        }
+    };
+
+    const handleFocus = () => {
+        if (isEditable) {
+            setIsEditing(true);
+        }
+    };
+
+    return (
+        <Tag
+            ref={elementRef}
+            className={className}
+            contentEditable={isEditable}
+            suppressContentEditableWarning
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+        >
+            {content}
+        </Tag>
+    );
+};
 
 function ImpactStory() {
     const { isAdmin } = useAuthContext();
@@ -211,6 +249,7 @@ function ImpactStory() {
     };
 
     const handleContentEdit = (key, value) => {
+        console.log(`Editing ${key}:`, value);
         setEditableContent(prev => ({
             ...prev,
             [key]: value
@@ -222,6 +261,7 @@ function ImpactStory() {
         
         const newUrl = prompt('Enter new image URL:', currentUrl);
         if (newUrl && newUrl !== currentUrl) {
+            console.log(`Updating image ${key}:`, newUrl);
             setEditableContent(prev => ({
                 ...prev,
                 [key]: newUrl
@@ -306,8 +346,15 @@ function ImpactStory() {
                 console.log('✅ Successfully saved to Supabase:', data);
                 // Also save to localStorage as backup
                 localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+                // Update original content to the newly saved content
+                setOriginalContent({ ...editableContent });
                 alert('✅ Changes saved successfully to database!');
                 setIsEditMode(false);
+                // Re-enable button in case user wants to edit again
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '💾 Save Changes';
+                }
             }
         } catch (error) {
             console.error('Unexpected error saving changes:', error);
@@ -532,22 +579,20 @@ function ImpactStory() {
             {/* Hero Section */}
             <section className="bg-[#D9E1F1] py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 
+                    <EditableText
+                        tag="h1"
+                        content={getContent('heroTitle', 'Our Impact Story')}
+                        onEdit={(value) => handleContentEdit('heroTitle', value)}
+                        isEditable={isEditMode}
                         className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 fade-in editable"
-                        contentEditable={isEditMode}
-                        suppressContentEditableWarning
-                        onBlur={(e) => handleContentEdit('heroTitle', e.target.textContent)}
-                    >
-                        {getContent('heroTitle', 'Our Impact Story')}
-                    </h1>
-                    <p 
+                    />
+                    <EditableText
+                        tag="p"
+                        content={getContent('heroSubtitle', 'Transforming food waste into community nourishment through AI-powered logistics and compassionate connections')}
+                        onEdit={(value) => handleContentEdit('heroSubtitle', value)}
+                        isEditable={isEditMode}
                         className="text-xl text-gray-700 max-w-3xl mx-auto fade-in mb-8 editable"
-                        contentEditable={isEditMode}
-                        suppressContentEditableWarning
-                        onBlur={(e) => handleContentEdit('heroSubtitle', e.target.textContent)}
-                    >
-                        {getContent('heroSubtitle', 'Transforming food waste into community nourishment through AI-powered logistics and compassionate connections')}
-                    </p>
+                    />
                     <div className="flex justify-center gap-8 mt-8">
                         <a href="#featured" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Featured
