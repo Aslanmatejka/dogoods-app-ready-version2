@@ -260,21 +260,31 @@ function ImpactStory() {
     };
 
     const saveChanges = async () => {
+        console.log('=== SAVE STARTED ===');
+        console.log('👤 Admin status:', isAdmin);
+        console.log('📊 Fields to save:', Object.keys(editableContent).length);
+        
         try {
-            console.log('=== SAVE STARTED ===');
-            console.log('👤 Admin status:', isAdmin);
-            console.log('📊 Fields to save:', Object.keys(editableContent).length);
-            
             if (!isAdmin) {
                 console.error('❌ Not authorized: User is not admin');
                 alert('⚠️ You must be logged in as an admin to save changes.');
                 return;
             }
             
+            console.log('🔄 Step 1: Checking authentication...');
+            
             // Get current session to verify authentication
-            const { data: sessionData } = await supabase.auth.getSession();
-            console.log('🔐 Session exists:', !!sessionData?.session);
-            console.log('🔐 User ID:', sessionData?.session?.user?.id || 'none');
+            let sessionData;
+            try {
+                const sessionResponse = await supabase.auth.getSession();
+                sessionData = sessionResponse.data;
+                console.log('🔐 Session exists:', !!sessionData?.session);
+                console.log('🔐 User ID:', sessionData?.session?.user?.id || 'none');
+            } catch (sessionError) {
+                console.error('❌ Session check failed:', sessionError);
+                alert(`⚠️ Could not verify authentication: ${sessionError.message}`);
+                return;
+            }
             
             if (!sessionData?.session) {
                 console.error('❌ Not authenticated: No active session');
@@ -282,7 +292,7 @@ function ImpactStory() {
                 return;
             }
             
-            console.log('🔄 Saving to Supabase...');
+            console.log('🔄 Step 2: Saving to Supabase...');
             
             const { data, error } = await supabase
                 .from('page_content')
@@ -294,6 +304,8 @@ function ImpactStory() {
                     onConflict: 'page_name'
                 })
                 .select();
+
+            console.log('🔄 Step 3: Processing response...');
 
             if (error) {
                 console.error('❌ Supabase error:', error);
@@ -316,8 +328,9 @@ function ImpactStory() {
             
             console.log('=== SAVE COMPLETED ===');
         } catch (error) {
-            console.error('❌ Save error:', error);
-            alert(`❌ Error saving changes: ${error.message}`);
+            console.error('❌ Unexpected error in save function:', error);
+            console.error('Error stack:', error.stack);
+            alert(`❌ Unexpected error saving changes:\n\n${error.message}\n\nCheck console for details.`);
         }
     };
 
