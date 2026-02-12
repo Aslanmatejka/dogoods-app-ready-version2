@@ -104,7 +104,7 @@ function ImpactStory() {
     useEffect(() => {
         const loadSavedContent = async () => {
             try {
-                // Try loading from Supabase first
+                console.log('📥 Loading content from Supabase...');
                 const { data, error } = await supabase
                     .from('page_content')
                     .select('content')
@@ -112,27 +112,17 @@ function ImpactStory() {
                     .maybeSingle();
 
                 if (data && !error && data.content) {
+                    console.log('✅ Loaded from Supabase:', Object.keys(data.content).length, 'fields');
                     // Merge saved content with defaults to ensure all fields exist
                     setEditableContent({ ...defaultContent, ...data.content });
                 } else {
-                    // Fallback to localStorage
-                    const saved = localStorage.getItem('impactStoryContent');
-                    if (saved) {
-                        const parsedContent = JSON.parse(saved);
-                        setEditableContent({ ...defaultContent, ...parsedContent });
-                    }
+                    console.log('ℹ️ No saved content found, using defaults');
+                    setEditableContent(defaultContent);
                 }
             } catch (error) {
-                console.error('Error loading content:', error);
-                const saved = localStorage.getItem('impactStoryContent');
-                if (saved) {
-                    try {
-                        const parsedContent = JSON.parse(saved);
-                        setEditableContent({ ...defaultContent, ...parsedContent });
-                    } catch (parseError) {
-                        console.error('Error parsing saved content:', parseError);
-                    }
-                }
+                console.error('❌ Error loading content from Supabase:', error);
+                console.log('ℹ️ Using default content');
+                setEditableContent(defaultContent);
             }
         };
 
@@ -273,61 +263,61 @@ function ImpactStory() {
         try {
             console.log('=== SAVE STARTED ===');
             console.log('👤 Admin status:', isAdmin);
-            console.log('Content to save:', JSON.stringify(editableContent, null, 2));
+            console.log('📊 Fields to save:', Object.keys(editableContent).length);
             
-            // Save to localStorage immediately
-            localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-            console.log('✅ Saved to localStorage');
-            
-            // Try to save to Supabase
-            console.log('🔄 Attempting Supabase save...');
-            console.log('Supabase client exists:', !!supabase);
-            
-            try {
-                // Get current session to verify authentication
-                const { data: sessionData } = await supabase.auth.getSession();
-                console.log('🔐 Session exists:', !!sessionData?.session);
-                console.log('🔐 User ID:', sessionData?.session?.user?.id || 'none');
-                
-                const { data, error } = await supabase
-                    .from('page_content')
-                    .upsert({
-                        page_name: 'impact-story',
-                        content: editableContent,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'page_name'  // Specify which column to use for conflict resolution
-                    })
-                    .select();
-
-                console.log('Supabase response received');
-                
-                if (error) {
-                    console.error('❌ Supabase error:', error);
-                    console.error('Error details:', {
-                        message: error.message,
-                        code: error.code,
-                        hint: error.hint,
-                        details: error.details
-                    });
-                    alert(`⚠️ Saved locally only.\n\nDatabase error: ${error.message}\n\n${error.hint || ''}`);
-                } else {
-                    console.log('✅ Saved to Supabase successfully:', data);
-                    alert('✅ Changes saved successfully to database!');
-                    // Update original content to prevent reverting
-                    setOriginalContent({ ...editableContent });
-                }
-            } catch (supabaseError) {
-                console.error('❌ Supabase call failed:', supabaseError);
-                alert(`⚠️ Saved locally only. Could not reach database: ${supabaseError.message}`);
+            if (!isAdmin) {
+                console.error('❌ Not authorized: User is not admin');
+                alert('⚠️ You must be logged in as an admin to save changes.');
+                return;
             }
             
+            // Get current session to verify authentication
+            const { data: sessionData } = await supabase.auth.getSession();
+            console.log('🔐 Session exists:', !!sessionData?.session);
+            console.log('🔐 User ID:', sessionData?.session?.user?.id || 'none');
+            
+            if (!sessionData?.session) {
+                console.error('❌ Not authenticated: No active session');
+                alert('⚠️ You must be logged in to save changes.');
+                return;
+            }
+            
+            console.log('🔄 Saving to Supabase...');
+            
+            const { data, error } = await supabase
+                .from('page_content')
+                .upsert({
+                    page_name: 'impact-story',
+                    content: editableContent,
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'page_name'
+                })
+                .select();
+
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    code: error.code,
+                    hint: error.hint,
+                    details: error.details
+                });
+                alert(`❌ Failed to save to database!\n\nError: ${error.message}\n\n${error.hint || 'Please check your permissions and try again.'}`);
+                return;
+            }
+            
+            console.log('✅ Saved to Supabase successfully:', data);
+            alert('✅ Changes saved successfully to database!');
+            
+            // Update original content to prevent reverting
+            setOriginalContent({ ...editableContent });
             setIsEditMode(false);
+            
             console.log('=== SAVE COMPLETED ===');
         } catch (error) {
-            console.error('❌ Outer save error:', error);
-            alert(`Error: ${error.message}\n\nChanges saved locally only.`);
-            setIsEditMode(false);
+            console.error('❌ Save error:', error);
+            alert(`❌ Error saving changes: ${error.message}`);
         }
     };
 
