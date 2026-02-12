@@ -11,8 +11,56 @@ function ImpactStory() {
     const [newsletterError, setNewsletterError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [editableContent, setEditableContent] = useState({});
-    const [originalContent, setOriginalContent] = useState({});
+    
+    // Default content structure with all editable fields
+    const defaultContent = {
+        heroTitle: 'Our Impact Story',
+        heroSubtitle: 'Transforming food waste into community nourishment through AI-powered logistics and compassionate connections',
+        featuredImage: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop',
+        featuredTitle: 'Bridging the Gap Between Surplus and Need',
+        featuredP1: 'Every day, restaurants, grocery stores, and food producers have perfectly good food that goes to waste, while families in our communities struggle with food insecurity. DoGoods uses AI-powered logistics to bridge this gap in real-time.',
+        featuredP2: 'Our platform connects donors with recipients within minutes, ensuring fresh food reaches those who need it most. Through intelligent routing and automated coordination, we\'ve created a seamless network that turns potential waste into community nourishment.',
+        featuredButtonText: 'Join Our Network →',
+        sarahImage: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop',
+        sarahTitle: 'Sarah\'s Story: From Volunteer to Champion',
+        sarahQuote: '"I started as a volunteer driver, picking up surplus food from local restaurants. Now I coordinate our entire network in the Bay Area. Seeing families receive fresh, nutritious meals—food that would have been wasted—gives me purpose every single day. We\'re not just feeding people; we\'re building a community that cares."',
+        sarahAttribution: '— Sarah Martinez, Community Coordinator, Alameda',
+        michaelImage: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=2070&auto=format&fit=crop',
+        michaelTitle: 'Restaurant Partnership: A Win-Win Solution',
+        michaelQuote: '"As a restaurant owner, I used to feel terrible about food waste at the end of each day. DoGoods transformed that guilt into impact. Now, instead of throwing away perfectly good food, I know it\'s helping families in our neighborhood. The platform makes it effortless—I post what I have, and within an hour, it\'s picked up and distributed."',
+        michaelAttribution: '— Michael Chen, Owner, Golden Wok Restaurant',
+        newsImage: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop',
+        newsQuote: '"DoGoods helped us feed over 500 families during the holidays. The AI routing meant we could distribute fresh food within 2 hours of donation—something that was impossible before."',
+        newsAttribution: 'Director of Community Services',
+        newsOrg: 'Alameda County Food Bank',
+        newsStats: "Thanks to our network of 150+ partners, we've prevented over 2 million pounds of food waste while providing nutritious meals to families who need them most.",
+        newsButtonText: 'Support Our Mission',
+        gallery1Image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop',
+        gallery1Title: 'Community Centers',
+        gallery1Desc: 'Partnering with 45+ community centers across the Bay Area to provide fresh meals and groceries to families in need, serving over 10,000 people monthly.',
+        gallery2Image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=800&auto=format&fit=crop',
+        gallery2Title: 'Restaurant Partners',
+        gallery2Desc: 'Working with 200+ restaurants and grocers to rescue surplus food daily. Our AI routing ensures food reaches recipients within 60 minutes of donation.',
+        gallery3Image: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800&auto=format&fit=crop',
+        gallery3Title: 'Environmental Impact',
+        gallery3Desc: 'By preventing food waste, we\'ve reduced over 1,200 tons of CO2 emissions and conserved resources equivalent to 30 million gallons of water.',
+        galleryButtonText: 'View All Stories',
+        ctaTitle: 'Be Part of Our Story',
+        ctaSubtitle: 'Every meal shared, every pound of food saved, every life touched—it all starts with you.',
+        ctaButton1Text: 'Join the Platform',
+        ctaButton2Text: 'Support Our Mission',
+        newsletterTitle: 'Stay Updated on Our Impact',
+        newsletterDesc: 'Subscribe to our newsletter for inspiring stories, impact updates, and ways to get involved in fighting food waste.',
+        newsletterFirstNameLabel: 'First Name *',
+        newsletterLastNameLabel: 'Last Name *',
+        newsletterEmailLabel: 'Email Address *',
+        newsletterConsent: 'I agree to receive updates and newsletters from DoGoods. You can unsubscribe at any time.',
+        newsletterButtonText: 'Subscribe to Newsletter',
+        newsletterButtonSubmitting: 'Subscribing...'
+    };
+    
+    const [editableContent, setEditableContent] = useState(defaultContent);
+    const [originalContent, setOriginalContent] = useState(defaultContent);
 
     // Load saved content on mount
     useEffect(() => {
@@ -25,20 +73,27 @@ function ImpactStory() {
                     .eq('page_name', 'impact-story')
                     .maybeSingle();
 
-                if (data && !error) {
-                    setEditableContent(data.content);
+                if (data && !error && data.content) {
+                    // Merge saved content with defaults to ensure all fields exist
+                    setEditableContent({ ...defaultContent, ...data.content });
                 } else {
                     // Fallback to localStorage
                     const saved = localStorage.getItem('impactStoryContent');
                     if (saved) {
-                        setEditableContent(JSON.parse(saved));
+                        const parsedContent = JSON.parse(saved);
+                        setEditableContent({ ...defaultContent, ...parsedContent });
                     }
                 }
             } catch (error) {
                 console.error('Error loading content:', error);
                 const saved = localStorage.getItem('impactStoryContent');
                 if (saved) {
-                    setEditableContent(JSON.parse(saved));
+                    try {
+                        const parsedContent = JSON.parse(saved);
+                        setEditableContent({ ...defaultContent, ...parsedContent });
+                    } catch (parseError) {
+                        console.error('Error parsing saved content:', parseError);
+                    }
                 }
             }
         };
@@ -176,32 +231,39 @@ function ImpactStory() {
 
     const saveChanges = async () => {
         try {
+            console.log('Saving content:', editableContent);
+            
             // Save to Supabase
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('page_content')
                 .upsert({
                     page_name: 'impact-story',
                     content: editableContent,
                     updated_at: new Date().toISOString()
-                });
+                }, {
+                    onConflict: 'page_name'
+                })
+                .select();
 
             if (error) {
-                console.error('Error saving to Supabase:', error);
+                console.error('Supabase save error:', error);
+                alert(`Failed to save changes to the server: ${error.message}\n\nChanges will only be saved locally.`);
                 // Fallback to localStorage
                 localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+            } else {
+                console.log('Successfully saved to Supabase:', data);
+                // Also save to localStorage as backup
+                localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
+                alert('✓ Changes saved successfully to database!');
             }
 
-            // Also save to localStorage as backup
-            localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-            
-            alert('Changes saved successfully!');
             setIsEditMode(false);
         } catch (error) {
-            console.error('Error saving changes:', error);
+            console.error('Unexpected error saving changes:', error);
             reportError(error, { context: 'Impact story edit' });
+            alert(`An unexpected error occurred: ${error.message}\n\nChanges will only be saved locally.`);
             // Still save to localStorage
             localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-            alert('Saved to local storage. Changes may not persist across sessions.');
         }
     };
 
