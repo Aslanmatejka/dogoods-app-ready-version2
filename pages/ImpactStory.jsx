@@ -295,6 +295,8 @@ function ImpactStory() {
                         page_name: 'impact-story',
                         content: editableContent,
                         updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'page_name'  // Specify which column to use for conflict resolution
                     })
                     .select();
 
