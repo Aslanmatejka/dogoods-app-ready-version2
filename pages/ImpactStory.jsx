@@ -272,6 +272,7 @@ function ImpactStory() {
     const saveChanges = async () => {
         try {
             console.log('=== SAVE STARTED ===');
+            console.log('👤 Admin status:', isAdmin);
             console.log('Content to save:', JSON.stringify(editableContent, null, 2));
             
             // Save to localStorage immediately
@@ -283,6 +284,11 @@ function ImpactStory() {
             console.log('Supabase client exists:', !!supabase);
             
             try {
+                // Get current session to verify authentication
+                const { data: sessionData } = await supabase.auth.getSession();
+                console.log('🔐 Session exists:', !!sessionData?.session);
+                console.log('🔐 User ID:', sessionData?.session?.user?.id || 'none');
+                
                 const { data, error } = await supabase
                     .from('page_content')
                     .upsert({
@@ -296,7 +302,13 @@ function ImpactStory() {
                 
                 if (error) {
                     console.error('❌ Supabase error:', error);
-                    alert(`⚠️ Saved locally only. Database error: ${error.message}`);
+                    console.error('Error details:', {
+                        message: error.message,
+                        code: error.code,
+                        hint: error.hint,
+                        details: error.details
+                    });
+                    alert(`⚠️ Saved locally only.\n\nDatabase error: ${error.message}\n\n${error.hint || ''}`);
                 } else {
                     console.log('✅ Saved to Supabase successfully:', data);
                     alert('✅ Changes saved successfully to database!');
@@ -305,7 +317,7 @@ function ImpactStory() {
                 }
             } catch (supabaseError) {
                 console.error('❌ Supabase call failed:', supabaseError);
-                alert(`⚠️ Saved locally only. Could not reach database.`);
+                alert(`⚠️ Saved locally only. Could not reach database: ${supabaseError.message}`);
             }
             
             setIsEditMode(false);
