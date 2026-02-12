@@ -270,48 +270,24 @@ function ImpactStory() {
                 return;
             }
             
-            console.log('🔄 Using direct fetch to Supabase REST API...');
+            console.log('🔄 Calling save_page_content database function...');
             
-            // Get the Supabase URL and key from the client config
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
             const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
             
-            // Get access token from current session
-            let accessToken = supabaseKey; // fallback to anon key
-            try {
-                const { data: { session } } = await Promise.race([
-                    supabase.auth.getSession(),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
-                ]);
-                if (session?.access_token) {
-                    accessToken = session.access_token;
-                    console.log('🔐 Using authenticated token');
-                } else {
-                    console.log('🔐 Using anon key (no session)');
-                }
-            } catch (e) {
-                console.log('🔐 Session check timed out, using anon key');
-            }
-            
-            const payload = {
-                page_name: 'impact-story',
-                content: editableContent,
-                updated_at: new Date().toISOString()
-            };
-            
-            console.log('📤 Sending fetch request...');
-            
             const response = await fetch(
-                `${supabaseUrl}/rest/v1/page_content?on_conflict=page_name`,
+                `${supabaseUrl}/rest/v1/rpc/save_page_content`,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': supabaseKey,
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Prefer': 'resolution=merge-duplicates'
+                        'Authorization': `Bearer ${supabaseKey}`
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        p_page_name: 'impact-story',
+                        p_content: editableContent
+                    })
                 }
             );
             
@@ -324,7 +300,8 @@ function ImpactStory() {
                 return;
             }
             
-            console.log('✅ Saved to Supabase successfully!');
+            const result = await response.json();
+            console.log('✅ Saved to Supabase successfully!', result);
             alert('✅ Changes saved successfully to database!');
             
             setOriginalContent({ ...editableContent });
