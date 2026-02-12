@@ -271,45 +271,49 @@ function ImpactStory() {
                 return;
             }
             
-            console.log('🔄 Step 1: Saving directly to Supabase (skipping auth check)...');
+            console.log('🔄 Step 1: Preparing data for Supabase...');
+            console.log('📦 Sample content keys:', Object.keys(editableContent).slice(0, 5));
             
-            const { data, error } = await supabase
+            const payload = {
+                page_name: 'impact-story',
+                content: editableContent,
+                updated_at: new Date().toISOString()
+            };
+            
+            console.log('🔄 Step 2: Calling Supabase upsert...');
+            
+            // Add timeout wrapper
+            const upsertPromise = supabase
                 .from('page_content')
-                .upsert({
-                    page_name: 'impact-story',
-                    content: editableContent,
-                    updated_at: new Date().toISOString()
-                }, {
-                    onConflict: 'page_name'
-                })
+                .upsert(payload, { onConflict: 'page_name' })
                 .select();
+            
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Supabase request timeout (10s)')), 10000)
+            );
+            
+            console.log('⏱️ Waiting for Supabase response (10s timeout)...');
+            
+            const { data, error } = await Promise.race([upsertPromise, timeoutPromise]);
 
-            console.log('🔄 Step 2: Processing response...');
+            console.log('✅ Step 3: Response received!');
 
             if (error) {
                 console.error('❌ Supabase error:', error);
-                console.error('Error details:', {
-                    message: error.message,
-                    code: error.code,
-                    hint: error.hint,
-                    details: error.details
-                });
-                alert(`❌ Failed to save to database!\n\nError: ${error.message}\n\n${error.hint || 'Please check your permissions and try again.'}`);
+                alert(`❌ Failed to save!\n\n${error.message}`);
                 return;
             }
             
-            console.log('✅ Saved to Supabase successfully:', data);
-            alert('✅ Changes saved successfully to database!');
+            console.log('✅ Saved successfully:', data);
+            alert('✅ Changes saved to database!');
             
-            // Update original content to prevent reverting
             setOriginalContent({ ...editableContent });
             setIsEditMode(false);
             
             console.log('=== SAVE COMPLETED ===');
         } catch (error) {
-            console.error('❌ Unexpected error in save function:', error);
-            console.error('Error stack:', error.stack);
-            alert(`❌ Unexpected error saving changes:\n\n${error.message}\n\nCheck console for details.`);
+            console.error('❌ Error:', error);
+            alert(`❌ Error: ${error.message}`);
         }
     };
 
