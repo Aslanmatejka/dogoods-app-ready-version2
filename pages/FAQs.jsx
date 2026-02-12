@@ -173,7 +173,7 @@ function FAQs() {
                     <div className="mt-16 bg-gradient-to-r from-green-600 to-teal-600 rounded-2xl p-8 text-white text-center">
                         <h3 className="text-2xl font-bold mb-4">Still Have Questions?</h3>
                         <p className="text-green-100 mb-6 max-w-2xl mx-auto">
-                            Can't find what you're looking for? Our team is here to help!
+                            Can&apos;t find what you&apos;re looking for? Our team is here to help!
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import supabase from '../utils/supabaseClient';
 
 function ContactPage() {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -64,7 +62,7 @@ function ContactPage() {
                     Contact Us
                 </h1>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Have a question or want to get involved? We'd love to hear from you!
+                    Have a question or want to get involved? We&apos;d love to hear from you!
                 </p>
             </div>
 
@@ -167,7 +165,7 @@ function ContactPage() {
                             Get Involved
                         </h3>
                         <p className="text-gray-600 mb-3">
-                            We're always looking for passionate individuals to help us reduce food waste and feed our community.
+                            We&apos;re always looking for passionate individuals to help us reduce food waste and feed our community.
                         </p>
                         <ul className="space-y-2 text-gray-700">
                             <li className="flex items-center gap-2">
