@@ -276,32 +276,42 @@ function ImpactStory() {
             
             // Save to localStorage immediately
             localStorage.setItem('impactStoryContent', JSON.stringify(editableContent));
-            console.log('Saved to localStorage');
+            console.log('✅ Saved to localStorage');
             
             // Try to save to Supabase
-            const { data, error } = await supabase
-                .from('page_content')
-                .upsert({
-                    page_name: 'impact-story',
-                    content: editableContent,
-                    updated_at: new Date().toISOString()
-                })
-                .select();
+            console.log('🔄 Attempting Supabase save...');
+            console.log('Supabase client exists:', !!supabase);
+            
+            try {
+                const { data, error } = await supabase
+                    .from('page_content')
+                    .upsert({
+                        page_name: 'impact-story',
+                        content: editableContent,
+                        updated_at: new Date().toISOString()
+                    })
+                    .select();
 
-            if (error) {
-                console.error('Supabase error:', error);
-                alert(`⚠️ Saved locally only. Database error: ${error.message}`);
-            } else {
-                console.log('✅ Saved to Supabase:', data);
-                alert('✅ Changes saved successfully!');
-                // Update original content to prevent reverting
-                setOriginalContent({ ...editableContent });
+                console.log('Supabase response received');
+                
+                if (error) {
+                    console.error('❌ Supabase error:', error);
+                    alert(`⚠️ Saved locally only. Database error: ${error.message}`);
+                } else {
+                    console.log('✅ Saved to Supabase successfully:', data);
+                    alert('✅ Changes saved successfully to database!');
+                    // Update original content to prevent reverting
+                    setOriginalContent({ ...editableContent });
+                }
+            } catch (supabaseError) {
+                console.error('❌ Supabase call failed:', supabaseError);
+                alert(`⚠️ Saved locally only. Could not reach database.`);
             }
             
             setIsEditMode(false);
             console.log('=== SAVE COMPLETED ===');
         } catch (error) {
-            console.error('Save error:', error);
+            console.error('❌ Outer save error:', error);
             alert(`Error: ${error.message}\n\nChanges saved locally only.`);
             setIsEditMode(false);
         }
