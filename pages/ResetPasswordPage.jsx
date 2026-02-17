@@ -33,14 +33,34 @@ function ResetPasswordPage() {
             if (errorMsg) setError(errorMsg);
         };
 
+        // Check if user arrived via OTP verification (already has session)
+        const isOtpVerified = searchParams.get('verified') === 'true';
+
         // Check if URL has recovery indicators BEFORE Supabase consumes them
         const hash = window.location.hash || '';
         const hasRecoveryHash = hash.includes('type=recovery') || hash.includes('access_token');
         const hasCode = searchParams.get('code');
         const hasToken = searchParams.get('token');
-        const hasRecoveryParams = hasRecoveryHash || hasCode || hasToken;
+        const hasRecoveryParams = hasRecoveryHash || hasCode || hasToken || isOtpVerified;
 
-        console.log('🔑 Reset page: checking URL params', { hasRecoveryHash, hasCode, hasToken });
+        console.log('🔑 Reset page: checking URL params', { hasRecoveryHash, hasCode, hasToken, isOtpVerified });
+
+        // If user came from OTP verification, check for existing session immediately
+        if (isOtpVerified) {
+            (async () => {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        resolve(true);
+                    } else {
+                        resolve(false, 'Session expired. Please request a new password reset.');
+                    }
+                } catch {
+                    resolve(false, 'Session verification failed. Please try again.');
+                }
+            })();
+            return () => { isMounted = false; };
+        }
 
         // Listen for Supabase auth events (detectSessionInUrl will fire these)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

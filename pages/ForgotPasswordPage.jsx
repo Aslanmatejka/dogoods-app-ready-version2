@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import authService from '../utils/authService';
+import supabase from '../utils/supabaseClient';
 
 function ForgotPasswordPage() {
     const navigate = useNavigate();
@@ -10,10 +11,22 @@ function ForgotPasswordPage() {
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [success, setSuccess] = React.useState(false);
+    const [otpCode, setOtpCode] = React.useState('');
+    const [verifying, setVerifying] = React.useState(false);
+    const [resendCooldown, setResendCooldown] = React.useState(0);
 
     const validateEmail = (email) => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
+
+    // Cooldown timer for resend
+    React.useEffect(() => {
+        if (resendCooldown <= 0) return;
+        const timer = setInterval(() => {
+            setResendCooldown(prev => prev - 1);
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [resendCooldown]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,6 +47,7 @@ function ForgotPasswordPage() {
         try {
             await authService.resetPassword(email);
             setSuccess(true);
+            setResendCooldown(60);
         } catch (error) {
             console.error('Password reset error:', error);
             setError('Failed to send reset email. Please try again.');
@@ -42,31 +56,173 @@ function ForgotPasswordPage() {
         }
     };
 
+    const handleResend = async () => {
+        if (resendCooldown > 0) return;
+        setError(null);
+        setLoading(true);
+        try {
+            await authService.resetPassword(email);
+            setResendCooldown(60);
+        } catch (error) {
+            console.error('Resend error:', error);
+            setError('Failed to resend code. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        setError(null);
+
+        const code = otpCode.trim();
+        if (!code) {
+            setError('Please enter the 6-digit code from your email');
+            return;
+        }
+
+        if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+            setError('Please enter a valid 6-digit code');
+            return;
+        }
+
+        setVerifying(true);
+
+        try {
+            const { data, error: verifyError } = await supabase.auth.verifyOtp({
+                email: email,
+                token: code,
+                type: 'recovery',
+            });
+
+            if (verifyError) {
+                throw verifyError;
+            }
+
+            if (data?.session) {
+                // OTP verified successfully, user now has a valid session
+                navigate('/reset-password?verified=true');
+            } else {
+                setError('Verification failed. Please try again or request a new code.');
+            }
+        } catch (error) {
+            console.error('OTP verification error:', error);
+            if (error.message?.includes('expired') || error.message?.includes('invalid')) {
+                setError('Code has expired or is invalid. Please request a new one.');
+            } else if (error.message?.includes('Token')) {
+                setError('Invalid code. Please check and try again.');
+            } else {
+                setError(error.message || 'Verification failed. Please try again.');
+            }
+        } finally {
+            setVerifying(false);
+        }
+    };
+
     if (success) {
         return (
             <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                        <div className="text-center">
+                        <div className="text-center mb-6">
                             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                                <i className="fas fa-check text-green-600 text-xl"></i>
+                                <i className="fas fa-envelope text-green-600 text-xl"></i>
                             </div>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 Check your email
                             </h3>
-                            <p className="text-sm text-gray-600 mb-6">
-                                We've sent a password reset link to <strong>{email}</strong>
+                            <p className="text-sm text-gray-600 mb-2">
+                                We&apos;ve sent a 6-digit code to <strong>{email}</strong>
                             </p>
                             <p className="text-sm text-gray-500 mb-6">
-                                Click the link in the email to reset your password. The link will expire in 1 hour.
+                                Enter the code below to reset your password. The code expires in 1 hour.
                             </p>
+                        </div>
+
+                        <form onSubmit={handleVerifyOtp} className="space-y-4">
+                            <div>
+                                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+                                    6-Digit Code
+                                </label>
+                                <input
+                                    id="otp"
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength={6}
+                                    value={otpCode}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        setOtpCode(val);
+                                        if (error) setError(null);
+                                    }}
+                                    placeholder="Enter 6-digit code"
+                                    className="w-full px-4 py-3 text-center text-2xl tracking-[0.5em] font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    autoFocus
+                                    autoComplete="one-time-code"
+                                />
+                            </div>
+
+                            {error && (
+                                <div className="rounded-md bg-red-50 p-3">
+                                    <div className="flex">
+                                        <div className="flex-shrink-0">
+                                            <i className="fas fa-exclamation-circle text-red-400"></i>
+                                        </div>
+                                        <div className="ml-3">
+                                            <p className="text-sm text-red-800">{error}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <Button
+                                type="submit"
                                 variant="primary"
-                                onClick={() => navigate('/login')}
                                 className="w-full"
+                                disabled={verifying || otpCode.length !== 6}
                             >
-                                Return to login
+                                {verifying ? (
+                                    <span className="flex items-center justify-center">
+                                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                                        Verifying...
+                                    </span>
+                                ) : (
+                                    'Verify Code'
+                                )}
                             </Button>
+                        </form>
+
+                        <div className="mt-6 text-center space-y-3">
+                            <p className="text-sm text-gray-500">
+                                Didn&apos;t receive the code? Check your spam folder.
+                            </p>
+                            <button
+                                onClick={handleResend}
+                                disabled={resendCooldown > 0 || loading}
+                                className={`text-sm font-medium transition-colors ${
+                                    resendCooldown > 0
+                                        ? 'text-gray-400 cursor-not-allowed'
+                                        : 'text-green-600 hover:text-green-500 cursor-pointer'
+                                }`}
+                            >
+                                {loading ? (
+                                    <><i className="fas fa-spinner fa-spin mr-1"></i> Sending...</>
+                                ) : resendCooldown > 0 ? (
+                                    `Resend code in ${resendCooldown}s`
+                                ) : (
+                                    <><i className="fas fa-redo mr-1"></i> Resend code</>
+                                )}
+                            </button>
+
+                            <div className="border-t border-gray-200 pt-3">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/login')}
+                                    className="text-sm font-medium text-gray-600 hover:text-gray-500"
+                                >
+                                    Back to login
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
