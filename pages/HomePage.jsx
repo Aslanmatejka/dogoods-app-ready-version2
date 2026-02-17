@@ -172,7 +172,7 @@ function HomePage() {
                                     <p className="text-xl mb-12 text-white drop-shadow-md">
                                         Join our movement to combat food waste and hunger through community-driven food sharing.
                                     </p>
-                                    <div className="flex gap-6 justify-center items-center max-w-4xl mx-auto">
+                                    {/* <div className="flex gap-6 justify-center items-center max-w-4xl mx-auto">
                                         <button 
                                             onClick={() => handleNavigation('/find')}
                                             aria-label="Find food in your area"
@@ -181,15 +181,15 @@ function HomePage() {
                                             <i className="fas fa-search mr-3"></i>
                                             Find Food
                                         </button>
-                                        {/* <button 
+                                        <button 
                                             onClick={() => handleNavigation('/share')}
                                             aria-label="Share food with the community"
                                             className="flex-1 px-12 py-8 text-2xl md:text-3xl font-bold bg-[#171366] text-white rounded-2xl shadow-2xl hover:opacity-90 hover:scale-105 transition-all duration-300 transform"
                                         >
                                             <i className="fas fa-share-alt mr-3"></i>
                                             Share Food
-                                        </button> */}
-                                    </div>
+                                        </button>
+                                    </div> */}
                                 </div>
                             </div>
                         </section>

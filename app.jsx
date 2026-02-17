@@ -77,11 +77,16 @@ function AppContent() {
     const ProtectedRoute = ({ children }) => {
         const { isAuthenticated, loading } = useAuthContext();
         const navigate = useNavigate();
+        const currentLocation = useLocation();
+        
         React.useEffect(() => {
             if (!loading && !isAuthenticated) {
-                navigate('/login');
+                // Save the current location to redirect back after login
+                const redirectPath = currentLocation.pathname + currentLocation.search;
+                navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
             }
-        }, [isAuthenticated, loading, navigate]);
+        }, [isAuthenticated, loading, navigate, currentLocation]);
+        
         if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto mb-4"></div><p className="text-gray-600">Loading...</p></div></div>;
         return isAuthenticated ? children : null;
     };

@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../utils/hooks/useSupabase";
+import { useAuthContext } from "../utils/AuthContext";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import React from "react";
@@ -8,6 +9,7 @@ function LoginPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { signIn, loading } = useAuth();
+    const { isAuthenticated, loading: authLoading } = useAuthContext();
     const [formData, setFormData] = React.useState({
         email: '',
         password: '',
@@ -17,6 +19,14 @@ function LoginPage() {
     const [error, setError] = React.useState(null);
     const [successMessage, setSuccessMessage] = React.useState(null);
     const [showPassword, setShowPassword] = React.useState(false);
+
+    // Redirect if already authenticated
+    React.useEffect(() => {
+        if (!authLoading && isAuthenticated) {
+            const redirectPath = searchParams.get('redirect') || '/dashboard';
+            navigate(redirectPath, { replace: true });
+        }
+    }, [isAuthenticated, authLoading, navigate, searchParams]);
 
     React.useEffect(() => {
         // Scroll to top when page loads
@@ -82,9 +92,12 @@ function LoginPage() {
             
             await signIn(email, password);
             
+            // Check for redirect parameter
+            const redirectPath = searchParams.get('redirect') || '/';
+            
             // Use setTimeout to avoid DOM manipulation during render
             setTimeout(() => {
-                navigate('/');
+                navigate(redirectPath);
             }, 0);
         } catch (error) {
             console.error('Login error:', error);

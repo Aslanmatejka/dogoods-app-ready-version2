@@ -24,80 +24,77 @@ function UserDashboard() {
     const { listings: userListings, loading: listingsLoading, error: listingsError } = useFoodListings({ user_id: authUser?.id });
     const { notifications, loading: notificationsLoading, error: notificationsError } = useNotifications(authUser?.id);
 
-    const [userStats, setUserStats] = React.useState({
-        donations: 0,
-        foodSaved: 0,
-        peopleHelped: 0
-    });
-    const [statsLoading, setStatsLoading] = React.useState(true);
+    const [foodClaims, setFoodClaims] = React.useState([]);
+    const [claimsLoading, setClaimsLoading] = React.useState(true);
+    const [updatingClaim, setUpdatingClaim] = React.useState(null);
 
-    const loading = listingsLoading || notificationsLoading || statsLoading;
+    const loading = listingsLoading || notificationsLoading || claimsLoading;
     const error = listingsError || notificationsError;
     const user = authUser;
 
     React.useEffect(() => {
         if (authUser?.id) {
-            fetchUserStats();
+            fetchFoodClaims();
         }
     }, [authUser?.id]);
 
-    const fetchUserStats = async () => {
+    const fetchFoodClaims = async () => {
         try {
-            setStatsLoading(true);
-
-            const { data: donatedListings, error: donationsError } = await supabase
-                .from('food_listings')
-                .select('quantity, quantity_unit')
-                .eq('user_id', authUser.id)
-                .eq('status', 'completed');
-
-            if (donationsError) throw donationsError;
+            setClaimsLoading(true);
 
             const { data: claims, error: claimsError } = await supabase
                 .from('food_claims')
-                .select('members_count, food_id')
+                .select(`
+                    *,
+                    food_listings (
+                        id,
+                        title,
+                        description,
+                        image_url,
+                        quantity,
+                        unit,
+                        category,
+                        pickup_location
+                    )
+                `)
                 .eq('claimer_id', authUser.id)
-                .eq('status', 'approved');
+                .order('created_at', { ascending: false });
 
             if (claimsError) throw claimsError;
 
-            let totalFoodSaved = 0;
-            if (donatedListings && donatedListings.length > 0) {
-                totalFoodSaved = donatedListings.reduce((sum, item) => {
-                    const qty = parseFloat(item.quantity) || 0;
-                    return sum + qty;
-                }, 0);
-            }
-
-            let totalPeopleHelped = 0;
-            if (claims && claims.length > 0) {
-                totalPeopleHelped = claims.reduce((sum, claim) => {
-                    return sum + (parseInt(claim.members_count) || 0);
-                }, 0);
-            }
-
-            const completedDonations = (donatedListings?.length || 0) + (claims?.length || 0);
-
-            setUserStats({
-                donations: completedDonations,
-                foodSaved: Math.round(totalFoodSaved),
-                peopleHelped: totalPeopleHelped
-            });
+            setFoodClaims(claims || []);
         } catch (err) {
-            console.error('Error fetching user stats:', err);
+            console.error('Error fetching food claims:', err);
         } finally {
-            setStatsLoading(false);
+            setClaimsLoading(false);
         }
     };
 
-    const stats = React.useMemo(() => {
-        return {
-            listings: userListings?.filter(l => l.status === 'available').length || 0,
-            donations: userStats.donations,
-            foodSaved: userStats.foodSaved,
-            peopleHelped: userStats.peopleHelped
-        };
-    }, [userListings, userStats]);
+    const handleMarkPickedUp = async (claimId) => {
+        try {
+            setUpdatingClaim(claimId);
+
+            const { error: updateError } = await supabase
+                .from('food_claims')
+                .update({ status: 'completed' })
+                .eq('id', claimId);
+
+            if (updateError) throw updateError;
+
+            // Update local state
+            setFoodClaims(prev => 
+                prev.map(claim => 
+                    claim.id === claimId 
+                        ? { ...claim, status: 'completed' }
+                        : claim
+                )
+            );
+        } catch (err) {
+            console.error('Error updating claim status:', err);
+        } finally {
+            setUpdatingClaim(null);
+        }
+    };
     const recentActivity = React.useMemo(() => {
         if (!userListings) return [];
         
@@ -225,26 +222,116 @@ function UserDashboard() {
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" role="region" aria-label="Activity Statistics">
-                {[
-                    { label: 'Active Listings', value: stats.listings, icon: 'fa-list', color: 'bg-blue-100', iconColor: 'text-blue-600' },
-                    { label: 'Completed Donations', value: stats.donations, icon: 'fa-check-circle', color: 'bg-[#2CABE3]/20', iconColor: 'text-[#2CABE3]' },
-                    { label: 'Food Donated', value: `${stats.foodSaved} lbs`, icon: 'fa-apple-whole', color: 'bg-orange-100', iconColor: 'text-orange-600' },
-                    { label: 'People Helped', value: stats.peopleHelped, icon: 'fa-users', color: 'bg-purple-100', iconColor: 'text-purple-600' }
-                ].map((stat, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow-sm p-6" role="article">
-                        <div className="flex items-center">
-                            <div className={`w-12 h-12 rounded-full ${stat.color} flex items-center justify-center`}>
-                                <i className={`fas ${stat.icon} ${stat.iconColor} text-xl`} aria-hidden="true"></i>
-                            </div>
-                            <div className="ml-4">
-                                <p className="text-sm text-gray-500">{stat.label}</p>
-                                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                            </div>
-                        </div>
+            {/* Food Receipts Section */}
+            <div className="mb-8" role="region" aria-label="Food Claim Receipts">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Food Receipts</h2>
+                
+                {claimsLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse bg-gray-200 rounded-lg h-64"></div>
+                        ))}
                     </div>
-                ))}
+                ) : foodClaims.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {foodClaims.map((claim) => (
+                            <div 
+                                key={claim.id} 
+                                className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                                role="article"
+                            >
+                                {/* Food Image */}
+                                {claim.food_listings?.image_url && (
+                                    <div className="h-48 overflow-hidden">
+                                        <img 
+                                            src={claim.food_listings.image_url} 
+                                            alt={claim.food_listings.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )}
+                                
+                                {/* Receipt Details */}
+                                <div className="p-4">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                        {claim.food_listings?.title || 'Food Item'}
+                                    </h3>
+                                    
+                                    {claim.food_listings?.category && (
+                                        <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded mb-2">
+                                            {claim.food_listings.category}
+                                        </span>
+                                    )}
+                                    
+                                    {claim.food_listings?.quantity && (
+                                        <p className="text-sm text-gray-600 mb-2">
+                                            <i className="fas fa-weight-scale mr-2" aria-hidden="true"></i>
+                                            Quantity: {claim.food_listings.quantity} {claim.food_listings.unit || ''}
+                                        </p>
+                                    )}
+                                    
+                                    {claim.food_listings?.pickup_location && (
+                                        <p className="text-sm text-gray-600 mb-2">
+                                            <i className="fas fa-map-marker-alt mr-2" aria-hidden="true"></i>
+                                            {claim.food_listings.pickup_location}
+                                        </p>
+                                    )}
+                                    
+                                    <p className="text-xs text-gray-400 mb-4">
+                                        Claimed: {formatDate(claim.created_at)}
+                                    </p>
+                                    
+                                    {/* Status Button */}
+                                    {claim.status === 'completed' ? (
+                                        <button
+                                            disabled
+                                            className="w-full py-2 px-4 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed"
+                                            aria-label="Food pickup completed"
+                                        >
+                                            <i className="fas fa-check-circle mr-2" aria-hidden="true"></i>
+                                            Complete
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleMarkPickedUp(claim.id)}
+                                            disabled={updatingClaim === claim.id}
+                                            className="w-full py-2 px-4 bg-[#2CABE3] text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                                            aria-label="Mark as picked up"
+                                        >
+                                            {updatingClaim === claim.id ? (
+                                                <>
+                                                    <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+                                                    Updating...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <i className="fas fa-hand-holding-heart mr-2" aria-hidden="true"></i>
+                                                    Picked Up
+                                                </>
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                        <i className="fas fa-receipt text-gray-400 text-5xl mb-4" aria-hidden="true"></i>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No Food Claims Yet</h3>
+                        <p className="text-gray-600 mb-6">
+                            Start claiming food from your community to see your receipts here.
+                        </p>
+                        <Button
+                            variant="primary"
+                            onClick={() => navigate('/find')}
+                            aria-label="Find available food"
+                        >
+                            <i className="fas fa-search mr-2" aria-hidden="true"></i>
+                            Find Food
+                        </Button>
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

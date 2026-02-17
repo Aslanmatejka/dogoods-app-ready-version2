@@ -97,7 +97,7 @@ export default function ClaimFoodForm() {
             const { data: claimData, error: claimError } = await supabase
                 .from('food_claims')
                 .insert({
-                    food_listing_id: food.id,
+                    food_id: food.id,
                     claimer_id: user.id,
                     status: 'pending',
                     pickup_deadline: pickupDeadline,
