@@ -444,11 +444,17 @@ class AuthService {
   // Password reset functionality
   async resetPassword(email) {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      console.log('Requesting password reset for:', email);
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase resetPasswordForEmail error:', error);
+        throw error;
+      }
+      
+      console.log('Password reset email sent successfully:', data);
       return { success: true }
     } catch (error) {
       console.error('Password reset error:', error)

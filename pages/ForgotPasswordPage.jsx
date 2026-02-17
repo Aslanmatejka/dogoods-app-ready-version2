@@ -50,7 +50,18 @@ function ForgotPasswordPage() {
             setResendCooldown(60);
         } catch (error) {
             console.error('Password reset error:', error);
-            setError('Failed to send reset email. Please try again.');
+            console.error('Error details:', error.message, error.status, error);
+            
+            // Show more specific error messages
+            if (error.message?.includes('rate limit')) {
+                setError('Too many attempts. Please wait a few minutes before trying again.');
+            } else if (error.message?.includes('not found') || error.message?.includes('User')) {
+                setError('If this email is registered, you will receive a password reset code.');
+            } else if (error.message?.includes('Email')) {
+                setError('Email service unavailable. Please contact support.');
+            } else {
+                setError(`Failed to send reset email: ${error.message || 'Please try again.'}`);
+            }
         } finally {
             setLoading(false);
         }
