@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
@@ -19,50 +19,79 @@ function ResetPasswordPage() {
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
     const [verifyingToken, setVerifyingToken] = React.useState(true);
     const [validToken, setValidToken] = React.useState(false);
+    const resolvedRef = useRef(false);
 
     useEffect(() => {
-        // Check for token in URL hash (Supabase auth redirect)
-        const checkToken = async () => {
-            try {
-                // Check if there's a hash with access_token
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                const accessToken = hashParams.get('access_token');
-                const type = hashParams.get('type');
+        let isMounted = true;
 
-                if (type === 'recovery' && accessToken) {
-                    // Valid password reset token
-                    setValidToken(true);
-                    setVerifyingToken(false);
-                    return;
-                }
-
-                // Also check query params (alternative method)
-                const token = searchParams.get('token');
-                if (token) {
-                    setValidToken(true);
-                    setVerifyingToken(false);
-                    return;
-                }
-
-                // Check if user already has a session from email link
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-                if (session && !sessionError) {
-                    setValidToken(true);
-                } else {
-                    setError('Invalid or expired reset link. Please request a new password reset.');
-                    setValidToken(false);
-                }
-            } catch (err) {
-                console.error('Token verification error:', err);
-                setError('Failed to verify reset link. Please try again.');
-                setValidToken(false);
-            } finally {
-                setVerifyingToken(false);
-            }
+        const resolve = (valid, errorMsg = null) => {
+            if (resolvedRef.current || !isMounted) return;
+            resolvedRef.current = true;
+            console.log(`🔑 Reset page resolved: valid=${valid}`, errorMsg || '');
+            setValidToken(valid);
+            setVerifyingToken(false);
+            if (errorMsg) setError(errorMsg);
         };
 
-        checkToken();
+        // Check if URL has recovery indicators BEFORE Supabase consumes them
+        const hash = window.location.hash || '';
+        const hasRecoveryHash = hash.includes('type=recovery') || hash.includes('access_token');
+        const hasCode = searchParams.get('code');
+        const hasToken = searchParams.get('token');
+        const hasRecoveryParams = hasRecoveryHash || hasCode || hasToken;
+
+        console.log('🔑 Reset page: checking URL params', { hasRecoveryHash, hasCode, hasToken });
+
+        // Listen for Supabase auth events (detectSessionInUrl will fire these)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('🔑 Reset page auth event:', event);
+            if (event === 'PASSWORD_RECOVERY') {
+                resolve(true);
+            } else if (event === 'SIGNED_IN' && session) {
+                // Supabase may fire SIGNED_IN for recovery flows
+                resolve(true);
+            } else if (event === 'TOKEN_REFRESHED' && session) {
+                resolve(true);
+            }
+        });
+
+        if (hasRecoveryParams) {
+            // Recovery params detected - Supabase's detectSessionInUrl will process them.
+            // Wait for the auth event, with a fallback session check after delay.
+            const fallbackTimeout = setTimeout(async () => {
+                if (resolvedRef.current) return;
+                console.log('🔑 Reset page: fallback session check...');
+                try {
+                    // Race getSession against a 5s timeout
+                    const sessionPromise = supabase.auth.getSession();
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Session check timed out')), 5000)
+                    );
+                    const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+                    if (session) {
+                        resolve(true);
+                    } else {
+                        resolve(false, 'Reset link verification timed out. Please request a new link.');
+                    }
+                } catch {
+                    resolve(false, 'Reset link may have expired. Please request a new password reset.');
+                }
+            }, 3000);
+
+            return () => {
+                isMounted = false;
+                subscription.unsubscribe();
+                clearTimeout(fallbackTimeout);
+            };
+        } else {
+            // No recovery params in URL at all - invalid direct navigation
+            resolve(false, 'Invalid or expired reset link. Please request a new password reset.');
+
+            return () => {
+                isMounted = false;
+                subscription.unsubscribe();
+            };
+        }
     }, [searchParams]);
 
     const validatePassword = (password) => {

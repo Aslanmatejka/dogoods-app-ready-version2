@@ -63,7 +63,14 @@ class AuthService {
 
       // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
+        console.log('🔐 Auth event:', event)
+        if (event === 'PASSWORD_RECOVERY' && session) {
+          // User clicked a password reset link - set user but don't redirect
+          console.log('🔐 Password recovery session established')
+          await this.setUser(session.user)
+        } else if (event === 'SIGNED_IN' && session) {
+          await this.setUser(session.user)
+        } else if (event === 'TOKEN_REFRESHED' && session) {
           await this.setUser(session.user)
         } else if (event === 'SIGNED_OUT') {
           this.clearUser()
