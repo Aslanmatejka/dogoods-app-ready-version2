@@ -114,11 +114,11 @@ function SignupPageContent() {
             }
 
             if (user) {
-                // Show success message and redirect
-                // Use setTimeout to avoid DOM manipulation during render
-                setTimeout(() => {
-                    navigate('/profile');
-                }, 0);
+                // Redirect to email confirmation page
+                navigate('/email-confirmation', { 
+                    state: { email: formData.email.toLowerCase().trim() },
+                    replace: true 
+                });
             }
         } catch (error) {
             console.error('Signup error:', error);

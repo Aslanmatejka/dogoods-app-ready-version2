@@ -30,6 +30,12 @@ function LoginPage() {
             setSuccessMessage('Password reset successful! You can now log in with your new password.');
             // Clear the message from URL
             window.history.replaceState({}, '', '/login');
+        } else if (message === 'email-confirmed') {
+            setSuccessMessage('Email confirmed successfully! You can now sign in to your account.');
+            window.history.replaceState({}, '', '/login');
+        } else if (message === 'signup-success') {
+            setSuccessMessage('Account created! Please check your email to confirm your account before signing in.');
+            window.history.replaceState({}, '', '/login');
         }
     }, [searchParams]);
 

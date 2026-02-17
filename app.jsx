@@ -19,6 +19,7 @@ import NearMePage from './pages/NearMePage';
 import Blog from './pages/Blog';
 import Success from './pages/Success';
 import SignupPage from './pages/SignupPage';
+import EmailConfirmationPage from './pages/EmailConfirmationPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SponsorsPage from './pages/SponsorsPage';
@@ -92,6 +93,7 @@ function AppContent() {
                 <Route path="/community/:id" element={<CommunityDetailPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/email-confirmation" element={<EmailConfirmationPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/impact-story" element={<ImpactStory />} />
