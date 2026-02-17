@@ -12,9 +12,11 @@ export const useAuthContext = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Initialize state from authService's localStorage-restored values
+  // This prevents a flash where isAuthenticated=false before init() completes
+  const [user, setUser] = useState(authService.getCurrentUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isUserAuthenticated());
+  const [isAdmin, setIsAdmin] = useState(authService.isUserAdmin());
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
@@ -23,11 +25,11 @@ export const AuthProvider = ({ children }) => {
         
         const initAuth = async () => {
             try {
-                // Wait for auth service to initialize
+                // Wait for auth service to initialize (idempotent - only runs once)
                 await authService.init();
                 
                 if (isMounted) {
-                    // Set initial state
+                    // Set state from validated Supabase session
                     setUser(authService.getCurrentUser());
                     setIsAuthenticated(authService.isUserAuthenticated());
                     setIsAdmin(authService.isUserAdmin());

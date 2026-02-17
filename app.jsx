@@ -47,6 +47,26 @@ import { GoodsProvider } from './utils/stores/goodsStore.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
+// ProtectedRoute defined outside AppContent to prevent remounts on every render
+const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated, loading, initialized } = useAuthContext();
+    const navigate = useNavigate();
+    const currentLocation = useLocation();
+    
+    React.useEffect(() => {
+        // Only redirect after auth has fully initialized AND loading is done
+        if (!loading && initialized && !isAuthenticated) {
+            // Save the current location to redirect back after login
+            const redirectPath = currentLocation.pathname + currentLocation.search;
+            navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`, { replace: true });
+        }
+    }, [isAuthenticated, loading, initialized, navigate, currentLocation.pathname, currentLocation.search]);
+    
+    // Show spinner while auth is loading or not yet initialized
+    if (loading || !initialized) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto mb-4"></div><p className="text-gray-600">Loading...</p></div></div>;
+    return isAuthenticated ? children : null;
+};
+
 function AppContent() {
     const location = useLocation();
     
@@ -73,23 +93,6 @@ function AppContent() {
         
         return () => clearTimeout(scrollTimeout);
     }, [location.pathname, location.search, location.hash]);
-
-    const ProtectedRoute = ({ children }) => {
-        const { isAuthenticated, loading } = useAuthContext();
-        const navigate = useNavigate();
-        const currentLocation = useLocation();
-        
-        React.useEffect(() => {
-            if (!loading && !isAuthenticated) {
-                // Save the current location to redirect back after login
-                const redirectPath = currentLocation.pathname + currentLocation.search;
-                navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
-            }
-        }, [isAuthenticated, loading, navigate, currentLocation]);
-        
-        if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto mb-4"></div><p className="text-gray-600">Loading...</p></div></div>;
-        return isAuthenticated ? children : null;
-    };
 
     return (
         <MainLayout>

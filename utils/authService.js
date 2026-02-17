@@ -33,15 +33,17 @@ class AuthService {
     this.isAuthenticated = false
     this.isAdmin = false
     this.listeners = []
+    this._initPromise = null
+    this._initialized = false
 
-    // Restore from localStorage if available
+    // Restore from localStorage if available (synchronous, immediate)
     const storedUser = localStorage.getItem('currentUser')
     const storedAuth = localStorage.getItem('userAuthenticated')
     if (storedUser && storedAuth === 'true') {
       try {
         this.currentUser = JSON.parse(storedUser)
         this.isAuthenticated = true
-        this.isAdmin = this.currentUser.role === 'admin'
+        this.isAdmin = this.currentUser.role === 'admin' || this.currentUser.is_admin === true
       } catch (e) {
         this.currentUser = null
         this.isAuthenticated = false
@@ -49,22 +51,43 @@ class AuthService {
       }
     }
 
-    // Initialize auth state from Supabase
-    this.init()
+    // NOTE: Do NOT call this.init() here. Let AuthContext call it once.
   }
 
   async init() {
+    // Idempotent: only run once, return the same promise for subsequent calls
+    if (this._initPromise) {
+      return this._initPromise
+    }
+
+    this._initPromise = this._doInit()
+    return this._initPromise
+  }
+
+  async _doInit() {
     try {
-      // Get initial session
+      // Get initial session from Supabase (reads from localStorage/memory)
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         await this.setUser(session.user)
+      } else {
+        // No valid Supabase session - clear stale localStorage state
+        if (this.isAuthenticated) {
+          console.log('🔐 No Supabase session found, clearing stale local state')
+          this.clearUser()
+        }
       }
 
-      // Listen for auth changes
+      // Listen for auth changes (registered exactly once)
       supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('🔐 Auth event:', event)
-        if (event === 'PASSWORD_RECOVERY' && session) {
+        if (event === 'INITIAL_SESSION') {
+          // Supabase v2 fires this on listener registration - session already handled above
+          console.log('🔐 Initial session event received')
+          if (session && !this.isAuthenticated) {
+            await this.setUser(session.user)
+          }
+        } else if (event === 'PASSWORD_RECOVERY' && session) {
           // User clicked a password reset link - set user but don't redirect
           console.log('🔐 Password recovery session established')
           await this.setUser(session.user)
@@ -76,9 +99,12 @@ class AuthService {
           this.clearUser()
         }
       })
+
+      this._initialized = true
     } catch (error) {
       console.error('Auth initialization error:', error)
       reportError(error)
+      this._initialized = true // Mark as initialized even on error to unblock UI
     }
   }
 
