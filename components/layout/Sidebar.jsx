@@ -7,7 +7,7 @@ function Sidebar({
     onClose,
     menuItems = [
         { icon: 'fa-home', label: 'Home', path: '/' },
-        { icon: 'fa-share-alt', label: 'Share Food', path: '/share' },
+        // { icon: 'fa-share-alt', label: 'Share Food', path: '/share' }, // TEMPORARILY DISABLED
         { icon: 'fa-search', label: 'Find Food', path: '/find' },
         { icon: 'fa-users', label: 'Community', path: '/community' },
         { icon: 'fa-user', label: 'Profile', path: '/profile' }

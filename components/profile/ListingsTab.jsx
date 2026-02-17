@@ -174,6 +174,7 @@ function ListingsTab({
                 >
                     <i className="fas fa-box-open text-gray-400 text-4xl mb-4" aria-hidden="true"></i>
                     <p className="text-gray-600">No listings found</p>
+                    {/* TEMPORARILY DISABLED
                     <Button
                         variant="primary"
                         className="mt-4"
@@ -182,6 +183,7 @@ function ListingsTab({
                     >
                         Create Listing
                     </Button>
+                    */}
                 </div>
             )}
         </div>

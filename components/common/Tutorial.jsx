@@ -9,6 +9,7 @@ const TUTORIAL_STEPS = [
         content: 'Let\'s take a quick tour to help you get started with sharing and finding food in your community.',
         placement: 'center'
     },
+    /* TEMPORARILY DISABLED
     {
         id: 'share-food',
         target: '[href="/share"]',
@@ -16,6 +17,7 @@ const TUTORIAL_STEPS = [
         content: 'Have extra food? Click here to share it with families and organizations in need. All donations are reviewed for safety.',
         placement: 'bottom'
     },
+    */
     {
         id: 'find-food',
         target: '[href="/find"]',

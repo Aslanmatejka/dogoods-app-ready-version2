@@ -47,6 +47,7 @@ function UserStore({
             <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-900">My Store</h2>
+                    {/* TEMPORARILY DISABLED
                     <Button
                         variant="primary"
                         onClick={handleNewListing}
@@ -55,6 +56,7 @@ function UserStore({
                         <i className="fas fa-plus" aria-hidden="true"></i>
                         New Listing
                     </Button>
+                    */}
                 </div>
 
                 <div className="border-b mb-6">
