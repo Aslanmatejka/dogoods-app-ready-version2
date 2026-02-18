@@ -68,13 +68,16 @@ class AuthService {
     try {
       console.log('🔐 [authService] _doInit starting. localStorage isAuthenticated:', this.isAuthenticated)
       // Get initial session from Supabase (reads from localStorage/memory)
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('🔐 [authService] getSession result:', session ? 'session found' : 'NO session')
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      console.log('🔐 [authService] getSession result:', session ? 'session found for ' + session.user?.email : 'NO session', sessionError ? 'ERROR: ' + sessionError.message : '')
       if (session) {
         await this.setUser(session.user)
         console.log('🔐 [authService] setUser completed. isAuthenticated:', this.isAuthenticated)
+      } else if (sessionError) {
+        // Session retrieval error (network, etc.) - keep localStorage state, don't clear
+        console.warn('🔐 [authService] getSession error, keeping localStorage state:', sessionError.message)
       } else {
-        // No valid Supabase session - clear stale localStorage state
+        // No valid Supabase session and no error - clear stale localStorage state
         if (this.isAuthenticated) {
           console.log('🔐 [authService] No Supabase session found, clearing stale local state')
           this.clearUser()

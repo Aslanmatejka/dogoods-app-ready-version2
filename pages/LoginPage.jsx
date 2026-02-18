@@ -24,6 +24,7 @@ function LoginPage() {
     React.useEffect(() => {
         if (!authLoading && isAuthenticated) {
             const redirectPath = searchParams.get('redirect') || '/dashboard';
+            console.log('🔑 [LoginPage] Already authenticated, redirecting to:', redirectPath);
             navigate(redirectPath, { replace: true });
         }
     }, [isAuthenticated, authLoading, navigate, searchParams]);
@@ -93,7 +94,7 @@ function LoginPage() {
             await signIn(email, password);
             
             // Check for redirect parameter
-            const redirectPath = searchParams.get('redirect') || '/';
+            const redirectPath = searchParams.get('redirect') || '/dashboard';
             
             // Use setTimeout to avoid DOM manipulation during render
             setTimeout(() => {
