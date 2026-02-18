@@ -10,6 +10,11 @@ import { useAuthContext } from '../../utils/AuthContext';
 function AdminRoute({ children }) {
   const { isAuthenticated, isAdmin, loading, initialized } = useAuthContext();
 
+  // If localStorage says admin, show page immediately (even during init)
+  if (isAuthenticated && isAdmin) {
+    return children;
+  }
+
   // Show loading state while checking authentication
   if (loading || !initialized) {
     return (
@@ -29,7 +34,6 @@ function AdminRoute({ children }) {
     return <Navigate to="/" replace />;
   }
 
-  // Render children if user is authenticated and is an admin
   return children;
 }
 

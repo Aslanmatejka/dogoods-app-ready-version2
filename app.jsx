@@ -54,7 +54,13 @@ const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading, initialized } = useAuthContext();
     const currentLocation = useLocation();
     
-    // Show spinner while auth is loading or not yet initialized
+    // If localStorage says authenticated, show page immediately (even during init)
+    // This prevents the flash/redirect on page refresh
+    if (isAuthenticated) {
+        return children;
+    }
+    
+    // Not authenticated per localStorage - wait for init to confirm
     if (loading || !initialized) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -66,13 +72,9 @@ const ProtectedRoute = ({ children }) => {
         );
     }
     
-    // Auth fully loaded - redirect if not authenticated
-    if (!isAuthenticated) {
-        const redirectPath = currentLocation.pathname + currentLocation.search;
-        return <Navigate to={`/login?redirect=${encodeURIComponent(redirectPath)}`} replace />;
-    }
-    
-    return children;
+    // Init complete and still not authenticated - redirect to login
+    const redirectPath = currentLocation.pathname + currentLocation.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirectPath)}`} replace />;
 };
 
 function AppContent() {
