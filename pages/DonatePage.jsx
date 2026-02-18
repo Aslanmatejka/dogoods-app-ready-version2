@@ -17,7 +17,6 @@ function DonatePage() {
                 <iframe
                     src="https://donorbox.org/embed/school-donations-2"
                     name="donorbox"
-                    allowpaymentrequest="allowpaymentrequest"
                     seamless="seamless"
                     frameBorder="0"
                     scrolling="no"
