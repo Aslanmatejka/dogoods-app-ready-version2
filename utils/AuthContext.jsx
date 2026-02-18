@@ -25,16 +25,10 @@ export const AuthProvider = ({ children }) => {
         
         const initAuth = async () => {
             try {
-                console.log('🔐 [AuthContext] initAuth starting. Pre-init state:', {
-                    isAuthenticated: authService.isUserAuthenticated(),
-                    user: authService.getCurrentUser()?.email
-                });
                 // Wait for auth service to initialize (idempotent - only runs once)
                 await authService.init();
                 
                 if (isMounted) {
-                    const newAuth = authService.isUserAuthenticated();
-                    console.log('🔐 [AuthContext] initAuth complete. isAuthenticated:', newAuth);
                     // Set state from validated Supabase session
                     setUser(authService.getCurrentUser());
                     setIsAuthenticated(newAuth);

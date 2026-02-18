@@ -66,47 +66,43 @@ class AuthService {
 
   async _doInit() {
     try {
-      console.log('🔐 [authService] _doInit starting. localStorage isAuthenticated:', this.isAuthenticated)
-      // Get initial session from Supabase (reads from localStorage/memory)
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      console.log('🔐 [authService] getSession result:', session ? 'session found for ' + session.user?.email : 'NO session', sessionError ? 'ERROR: ' + sessionError.message : '')
-      if (session) {
-        await this.setUser(session.user)
-        console.log('🔐 [authService] setUser completed. isAuthenticated:', this.isAuthenticated)
-      } else if (sessionError) {
-        // Session retrieval error (network, etc.) - keep localStorage state, don't clear
-        console.warn('🔐 [authService] getSession error, keeping localStorage state:', sessionError.message)
-      } else {
-        // No valid Supabase session and no error - clear stale localStorage state
-        if (this.isAuthenticated) {
-          console.log('🔐 [authService] No Supabase session found, clearing stale local state')
-          this.clearUser()
-        }
-      }
-
-      // Listen for auth changes (registered exactly once)
-      supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔐 Auth event:', event)
-        if (event === 'INITIAL_SESSION') {
-          // Supabase v2 fires this on listener registration - session already handled above
-          console.log('🔐 Initial session event received')
-          if (session && !this.isAuthenticated) {
-            await this.setUser(session.user)
+      // Use onAuthStateChange with INITIAL_SESSION as the primary mechanism
+      // This is the recommended Supabase v2 pattern and avoids race conditions
+      // that can occur when calling getSession() separately
+      return new Promise((resolve) => {
+        let resolved = false
+        const finish = () => {
+          if (!resolved) {
+            resolved = true
+            this._initialized = true
+            resolve()
           }
-        } else if (event === 'PASSWORD_RECOVERY' && session) {
-          // User clicked a password reset link - set user but don't redirect
-          console.log('🔐 Password recovery session established')
-          await this.setUser(session.user)
-        } else if (event === 'SIGNED_IN' && session) {
-          await this.setUser(session.user)
-        } else if (event === 'TOKEN_REFRESHED' && session) {
-          await this.setUser(session.user)
-        } else if (event === 'SIGNED_OUT') {
-          this.clearUser()
         }
-      })
 
-      this._initialized = true
+        supabase.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'INITIAL_SESSION') {
+            // Supabase fires this exactly once when the listener is registered
+            if (session) {
+              await this.setUser(session.user)
+            }
+            // If no session from Supabase, keep localStorage state as-is.
+            // The user stays on the current page. Only explicit SIGNED_OUT clears auth.
+            // This prevents page refresh from redirecting away.
+            finish()
+          } else if (event === 'SIGNED_IN' && session) {
+            await this.setUser(session.user)
+          } else if (event === 'TOKEN_REFRESHED' && session) {
+            await this.setUser(session.user)
+          } else if (event === 'PASSWORD_RECOVERY' && session) {
+            await this.setUser(session.user)
+          } else if (event === 'SIGNED_OUT') {
+            this.clearUser()
+          }
+        })
+
+        // Safety timeout: don't block the UI forever if INITIAL_SESSION never fires
+        setTimeout(finish, 5000)
+      })
     } catch (error) {
       console.error('Auth initialization error:', error)
       reportError(error)

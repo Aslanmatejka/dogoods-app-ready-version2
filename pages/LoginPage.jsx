@@ -24,7 +24,6 @@ function LoginPage() {
     React.useEffect(() => {
         if (!authLoading && isAuthenticated) {
             const redirectPath = searchParams.get('redirect') || '/dashboard';
-            console.log('🔑 [LoginPage] Already authenticated, redirecting to:', redirectPath);
             navigate(redirectPath, { replace: true });
         }
     }, [isAuthenticated, authLoading, navigate, searchParams]);

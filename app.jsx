@@ -54,8 +54,6 @@ const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading, initialized } = useAuthContext();
     const currentLocation = useLocation();
     
-    console.log('🛡️ [ProtectedRoute]', currentLocation.pathname, { loading, initialized, isAuthenticated });
-    
     // Show spinner while auth is loading or not yet initialized
     if (loading || !initialized) {
         return (
