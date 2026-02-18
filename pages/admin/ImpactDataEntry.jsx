@@ -431,7 +431,7 @@ function ImpactDataEntry() {
     };
 
     // Uncontrolled input component - no state, no re-renders
-    const UncontrolledCell = ({ defaultValue, onBlur, type = 'text', inputRef }) => {
+    const UncontrolledCell = ({ defaultValue, onBlur, type = 'text', inputRef, className }) => {
         return (
             <input
                 ref={inputRef}
@@ -441,7 +441,7 @@ function ImpactDataEntry() {
                     const value = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
                     onBlur(value);
                 }}
-                className="w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
+                className={className || "w-full min-w-[200px] px-3 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"}
             />
         );
     };
@@ -731,10 +731,10 @@ function ImpactDataEntry() {
                                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[280px]">
                                             Community
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider min-w-[100px]">
                                             Families Helped
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider min-w-[100px]">
                                             School Staff Helped
                                         </th>
                                         <th className="px-3 py-3 text-left text-xs font-medium text-orange-600 uppercase tracking-wider min-w-[220px]">
@@ -777,6 +777,7 @@ function ImpactDataEntry() {
                                                 defaultValue=""
                                                 inputRef={el => communityRowRefs.current.families_helped = el}
                                                 onBlur={() => { }}
+                                                className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             />
                                         </td>
                                         <td className="px-3 py-2">
@@ -785,6 +786,7 @@ function ImpactDataEntry() {
                                                 defaultValue=""
                                                 inputRef={el => communityRowRefs.current.school_staff_helped = el}
                                                 onBlur={() => { }}
+                                                className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             />
                                         </td>
                                         <td className="px-3 py-2">
@@ -841,6 +843,7 @@ function ImpactDataEntry() {
                                                     type="number"
                                                     defaultValue={row.families_helped || 0}
                                                     onBlur={(val) => handleUpdateRow(row.id, 'families_helped', val)}
+                                                    className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                                 />
                                             </td>
                                             <td className="px-3 py-2">
@@ -848,6 +851,7 @@ function ImpactDataEntry() {
                                                     type="number"
                                                     defaultValue={row.school_staff_helped || 0}
                                                     onBlur={(val) => handleUpdateRow(row.id, 'school_staff_helped', val)}
+                                                    className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                                 />
                                             </td>
                                             <td className="px-3 py-2">
