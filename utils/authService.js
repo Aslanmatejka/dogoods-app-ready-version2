@@ -66,47 +66,41 @@ class AuthService {
 
   async _doInit() {
     try {
-      // Use onAuthStateChange with INITIAL_SESSION as the primary mechanism
-      // This is the recommended Supabase v2 pattern and avoids race conditions
-      // that can occur when calling getSession() separately
-      return new Promise((resolve) => {
-        let resolved = false
-        const finish = () => {
-          if (!resolved) {
-            resolved = true
-            this._initialized = true
-            resolve()
-          }
+      // Step 1: Try to get the current session from Supabase
+      // Supabase stores sessions in localStorage internally, so this is fast
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+      if (session) {
+        // Valid Supabase session found - sync our state with it
+        await this.setUser(session.user)
+      } else if (sessionError) {
+        // Network error or other issue - keep localStorage state so user stays on page
+        console.warn('getSession error, keeping local state:', sessionError.message)
+      }
+      // If no session and no error: keep localStorage state as-is.
+      // User stays on current page. Auth only clears on explicit SIGNED_OUT.
+
+      // Step 2: Listen for future auth changes (login, logout, token refresh)
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'INITIAL_SESSION') {
+          // Already handled above via getSession - skip
+          return
+        } else if (event === 'SIGNED_IN' && session) {
+          await this.setUser(session.user)
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          await this.setUser(session.user)
+        } else if (event === 'PASSWORD_RECOVERY' && session) {
+          await this.setUser(session.user)
+        } else if (event === 'SIGNED_OUT') {
+          this.clearUser()
         }
-
-        supabase.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'INITIAL_SESSION') {
-            // Supabase fires this exactly once when the listener is registered
-            if (session) {
-              await this.setUser(session.user)
-            }
-            // If no session from Supabase, keep localStorage state as-is.
-            // The user stays on the current page. Only explicit SIGNED_OUT clears auth.
-            // This prevents page refresh from redirecting away.
-            finish()
-          } else if (event === 'SIGNED_IN' && session) {
-            await this.setUser(session.user)
-          } else if (event === 'TOKEN_REFRESHED' && session) {
-            await this.setUser(session.user)
-          } else if (event === 'PASSWORD_RECOVERY' && session) {
-            await this.setUser(session.user)
-          } else if (event === 'SIGNED_OUT') {
-            this.clearUser()
-          }
-        })
-
-        // Safety timeout: don't block the UI forever if INITIAL_SESSION never fires
-        setTimeout(finish, 5000)
       })
+
+      this._initialized = true
     } catch (error) {
       console.error('Auth initialization error:', error)
       reportError(error)
-      this._initialized = true // Mark as initialized even on error to unblock UI
+      this._initialized = true
     }
   }
 

@@ -14,52 +14,52 @@ export const useAuthContext = () => {
 export const AuthProvider = ({ children }) => {
   // Initialize state from authService's localStorage-restored values
   // This prevents a flash where isAuthenticated=false before init() completes
-  const [user, setUser] = useState(authService.getCurrentUser());
-  const [isAuthenticated, setIsAuthenticated] = useState(authService.isUserAuthenticated());
-  const [isAdmin, setIsAdmin] = useState(authService.isUserAdmin());
+  const [user, setUser] = useState(() => authService.getCurrentUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isUserAuthenticated());
+  const [isAdmin, setIsAdmin] = useState(() => authService.isUserAdmin());
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
-      useEffect(() => {
-        let isMounted = true;
-        
-        const initAuth = async () => {
-            try {
-                // Wait for auth service to initialize (idempotent - only runs once)
-                await authService.init();
-                
-                if (isMounted) {
-                    // Set state from validated Supabase session
-                    setUser(authService.getCurrentUser());
-                    setIsAuthenticated(newAuth);
-                    setIsAdmin(authService.isUserAdmin());
-                    setInitialized(true);
-                }
-            } catch (error) {
-                console.error('Auth initialization error:', error);
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
-            }
-        };
+  useEffect(() => {
+    let isMounted = true;
 
-        initAuth();
+    const initAuth = async () => {
+      try {
+        // Wait for auth service to initialize (idempotent - only runs once)
+        await authService.init();
 
-        // Listen for auth state changes
-        const unsubscribe = authService.addListener(({ user, isAuthenticated, isAdmin }) => {
-            if (isMounted) {
-                setUser(user);
-                setIsAuthenticated(isAuthenticated);
-                setIsAdmin(isAdmin);
-            }
-        });
+        if (isMounted) {
+          // Sync React state with authService after init completes
+          setUser(authService.getCurrentUser());
+          setIsAuthenticated(authService.isUserAuthenticated());
+          setIsAdmin(authService.isUserAdmin());
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        if (isMounted) {
+          setInitialized(true);
+          setLoading(false);
+        }
+      }
+    };
 
-        return () => {
-            isMounted = false;
-            unsubscribe();
-        };
-    }, []);
+    initAuth();
+
+    // Listen for auth state changes (login, logout, token refresh)
+    const unsubscribe = authService.addListener(({ user, isAuthenticated, isAdmin }) => {
+      if (isMounted) {
+        setUser(user);
+        setIsAuthenticated(isAuthenticated);
+        setIsAdmin(isAdmin);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
 
     const value = {
     user,
