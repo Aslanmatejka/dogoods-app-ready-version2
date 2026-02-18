@@ -13,21 +13,21 @@ function DonatePage() {
                 </p>
             </div>
 
-            <div className="rounded-2xl overflow-hidden shadow-lg border border-cyan-100 bg-white">
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-cyan-100 bg-white" style={{ minHeight: '900px' }}>
                 <iframe
                     src="https://donorbox.org/embed/school-donations-2"
                     name="donorbox"
                     seamless="seamless"
                     frameBorder="0"
-                    scrolling="no"
-                    height="900px"
+                    scrolling="yes"
+                    height="1200px"
                     width="100%"
                     style={{
                         maxWidth: '500px',
                         minWidth: '250px',
-                        maxHeight: 'none !important',
                         display: 'block',
                         margin: '0 auto',
+                        border: 'none',
                     }}
                     allow="payment"
                     title="Donate to All Good Living Foundation"
