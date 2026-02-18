@@ -28,6 +28,7 @@ import StoriesPage from './pages/StoriesPage';
 import DonationSchedules from './pages/DonationSchedules';
 import FAQs from './pages/FAQs';
 import ContactPage from './pages/ContactPage';
+import DonatePage from './pages/DonatePage';
 import CommunityDetailPage from './pages/CommunityDetailPage';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import ContentModeration from './pages/admin/ContentModeration.jsx';
@@ -118,6 +119,7 @@ function AppContent() {
                 <Route path="/sponsors" element={<SponsorsPage />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/donate" element={<DonatePage />} />
                 <Route path="/find" element={<ProtectedRoute><FindFoodPage /></ProtectedRoute>} />
                 <Route path="/near-me" element={<ProtectedRoute><NearMePage /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
