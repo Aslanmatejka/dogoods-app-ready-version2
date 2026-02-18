@@ -12,7 +12,7 @@ function Header({
         { 
             label: 'Support Us', 
             dropdown: [
-                { label: 'Donate', path: 'https://allgoodlivingfoundation.org/donate', external: true },
+                { label: 'Donate', path: '/donate' },
                 { label: 'Volunteer', path: 'https://allgoodlivingfoundation.org/volunteer-form', external: true }
             ]
         },
