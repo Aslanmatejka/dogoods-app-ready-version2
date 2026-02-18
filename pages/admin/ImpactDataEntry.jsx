@@ -15,7 +15,7 @@ function ImpactDataEntry() {
     const [communities, setCommunities] = React.useState([]);
     const [organizations, setOrganizations] = React.useState([]);
     const [showArchived, setShowArchived] = React.useState(false);
-    const [dateFilter, setDateFilter] = React.useState('recent'); // 'recent', 'current-month', 'last-3-months', 'all'
+    const [dateFilter, setDateFilter] = React.useState('current-week'); // 'current-week', 'current-month', 'all'
 
     // Refs for organization impact entries
     const orgRowRefs = React.useRef({
@@ -221,18 +221,16 @@ function ImpactDataEntry() {
                 const rowDate = new Date(row.date);
                 
                 switch (dateFilter) {
+                    case 'current-week': {
+                        const startOfWeek = new Date(now);
+                        startOfWeek.setDate(now.getDate() - now.getDay());
+                        startOfWeek.setHours(0, 0, 0, 0);
+                        return rowDate >= startOfWeek;
+                    }
                     case 'current-month':
                         return rowDate.getFullYear() === currentYear && rowDate.getMonth() === currentMonth;
-                    case 'last-3-months':
-                        const threeMonthsAgo = new Date(now);
-                        threeMonthsAgo.setMonth(currentMonth - 3);
-                        return rowDate >= threeMonthsAgo;
-                    case 'recent':
                     default:
-                        // Show last 2 months by default
-                        const twoMonthsAgo = new Date(now);
-                        twoMonthsAgo.setMonth(currentMonth - 2);
-                        return rowDate >= twoMonthsAgo;
+                        return true;
                 }
             });
         }
@@ -517,6 +515,16 @@ function ImpactDataEntry() {
                         </div>
                         <div className="flex gap-2 flex-wrap">
                             <button
+                                onClick={() => setDateFilter('current-week')}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilter === 'current-week'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-blue-100'
+                                }`}
+                            >
+                                Current Week
+                            </button>
+                            <button
                                 onClick={() => setDateFilter('current-month')}
                                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                     dateFilter === 'current-month'
@@ -525,26 +533,6 @@ function ImpactDataEntry() {
                                 }`}
                             >
                                 Current Month
-                            </button>
-                            <button
-                                onClick={() => setDateFilter('recent')}
-                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                    dateFilter === 'recent'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-700 hover:bg-blue-100'
-                                }`}
-                            >
-                                Last 2 Months
-                            </button>
-                            <button
-                                onClick={() => setDateFilter('last-3-months')}
-                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                    dateFilter === 'last-3-months'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-700 hover:bg-blue-100'
-                                }`}
-                            >
-                                Last 3 Months
                             </button>
                             <button
                                 onClick={() => setDateFilter('all')}
