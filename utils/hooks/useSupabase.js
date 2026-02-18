@@ -4,9 +4,11 @@ import dataService from '../dataService.js'
 
 // Authentication hook
 export const useAuth = () => {
-  const [user, setUser] = useState(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
+  // Initialize from authService's localStorage-restored values to prevent
+  // brief false state that causes hard-redirect bugs in consuming components
+  const [user, setUser] = useState(() => authService.getCurrentUser())
+  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isUserAuthenticated())
+  const [isAdmin, setIsAdmin] = useState(() => authService.isUserAdmin())
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

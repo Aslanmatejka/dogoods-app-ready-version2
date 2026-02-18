@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import ClaimFoodForm from './pages/ClaimFoodForm.jsx';
 import HomePage from './pages/HomePage';
 import HowItWorks from './pages/HowItWorks';
@@ -48,23 +48,32 @@ import AdminRoute from './components/admin/AdminRoute.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary';
 
 // ProtectedRoute defined outside AppContent to prevent remounts on every render
+// Uses declarative <Navigate> instead of useEffect for synchronous, predictable redirects
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading, initialized } = useAuthContext();
-    const navigate = useNavigate();
     const currentLocation = useLocation();
     
-    React.useEffect(() => {
-        // Only redirect after auth has fully initialized AND loading is done
-        if (!loading && initialized && !isAuthenticated) {
-            // Save the current location to redirect back after login
-            const redirectPath = currentLocation.pathname + currentLocation.search;
-            navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`, { replace: true });
-        }
-    }, [isAuthenticated, loading, initialized, navigate, currentLocation.pathname, currentLocation.search]);
+    console.log('🛡️ [ProtectedRoute]', currentLocation.pathname, { loading, initialized, isAuthenticated });
     
     // Show spinner while auth is loading or not yet initialized
-    if (loading || !initialized) return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto mb-4"></div><p className="text-gray-600">Loading...</p></div></div>;
-    return isAuthenticated ? children : null;
+    if (loading || !initialized) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+    
+    // Auth fully loaded - redirect if not authenticated
+    if (!isAuthenticated) {
+        const redirectPath = currentLocation.pathname + currentLocation.search;
+        return <Navigate to={`/login?redirect=${encodeURIComponent(redirectPath)}`} replace />;
+    }
+    
+    return children;
 };
 
 function AppContent() {

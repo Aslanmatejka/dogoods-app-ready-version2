@@ -8,10 +8,10 @@ import { useAuthContext } from '../../utils/AuthContext';
  * 2. User is not an admin
  */
 function AdminRoute({ children }) {
-  const { isAuthenticated, isAdmin, loading } = useAuthContext();
+  const { isAuthenticated, isAdmin, loading, initialized } = useAuthContext();
 
   // Show loading state while checking authentication
-  if (loading) {
+  if (loading || !initialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2CABE3]"></div>

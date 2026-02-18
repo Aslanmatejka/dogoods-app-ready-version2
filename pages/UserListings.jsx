@@ -23,13 +23,8 @@ function UserListings() {
     const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(null);
     const [successMessage, setSuccessMessage] = React.useState(null);
 
-    React.useEffect(() => {
-        // Only redirect if auth is done loading and user is not authenticated
-        if (!authLoading && !isAuthenticated) {
-            window.location.href = '/login';
-            return;
-        }
-    }, [isAuthenticated, authLoading]);
+    // Auth redirect is handled by ProtectedRoute wrapper in app.jsx
+    // No need for manual redirect here
 
     const handleSubmit = async (formData) => {
         try {

@@ -8,12 +8,8 @@ function Notifications() {
     const { user: authUser, isAuthenticated } = useAuth();
     const { notifications, loading, error, markAsRead, unreadCount } = useNotifications(authUser?.id);
 
-    React.useEffect(() => {
-        if (!isAuthenticated) {
-            window.location.href = '/login';
-            return;
-        }
-    }, [isAuthenticated]);
+    // Auth redirect is handled by ProtectedRoute wrapper in app.jsx
+    // No need for manual redirect here
 
     const handleMarkAsRead = async (notificationId) => {
         try {
