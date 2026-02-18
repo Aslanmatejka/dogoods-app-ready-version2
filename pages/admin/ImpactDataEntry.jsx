@@ -10,6 +10,7 @@ function ImpactDataEntry() {
     const { user } = useAuthContext();
     const [data, setData] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+    const [refreshing, setRefreshing] = React.useState(false);
     const [activeTab, setActiveTab] = React.useState('organizations');
     const [communities, setCommunities] = React.useState([]);
     const [organizations, setOrganizations] = React.useState([]);
@@ -77,21 +78,41 @@ function ImpactDataEntry() {
         }
     };
 
-    const fetchData = async () => {
+    const fetchData = async (isRefresh = false) => {
         try {
-            setLoading(true);
+            if (isRefresh) {
+                setRefreshing(true);
+            } else {
+                setLoading(true);
+            }
+
+            // Add a timeout to prevent infinite loading
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             const { data: impactData, error } = await supabase
                 .from('impact_data')
                 .select('*')
-                .order('date', { ascending: false });
+                .order('date', { ascending: false })
+                .abortSignal(controller.signal);
+
+            clearTimeout(timeoutId);
 
             if (error) throw error;
             setData(impactData || []);
         } catch (error) {
-            console.error('Error fetching impact data:', error);
-            setData([]);
+            if (error.name === 'AbortError') {
+                console.error('Fetch timed out after 15 seconds');
+            } else {
+                console.error('Error fetching impact data:', error);
+            }
+            // Keep existing data on refresh failure, clear on initial load failure
+            if (!isRefresh) {
+                setData([]);
+            }
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -261,7 +282,7 @@ function ImpactDataEntry() {
             if (orgRowRefs.current.food_donated) orgRowRefs.current.food_donated.value = '';
             if (orgRowRefs.current.notes) orgRowRefs.current.notes.value = '';
 
-            await fetchData();
+            await fetchData(true);
             await syncMetricsToTables();
             alert('✅ Organization entry added and metrics synced!');
         } catch (error) {
@@ -323,7 +344,7 @@ function ImpactDataEntry() {
             if (communityRowRefs.current.food_given_lb) communityRowRefs.current.food_given_lb.value = '';
             if (communityRowRefs.current.notes) communityRowRefs.current.notes.value = '';
 
-            await fetchData();
+            await fetchData(true);
             await syncMetricsToTables();
             alert('✅ Community entry added and metrics synced!');
         } catch (error) {
@@ -379,7 +400,7 @@ function ImpactDataEntry() {
                 .eq('id', id);
 
             if (error) throw error;
-            await fetchData();
+            await fetchData(true);
             await syncMetricsToTables();
             alert('Entry deleted and metrics synced!');
         } catch (error) {
@@ -471,10 +492,11 @@ function ImpactDataEntry() {
                         </Button>
                         <Button
                             variant="secondary"
-                            onClick={fetchData}
+                            onClick={() => fetchData(true)}
+                            disabled={refreshing}
                         >
-                            <i className="fas fa-sync-alt mr-2"></i>
-                            Refresh
+                            <i className={`fas fa-sync-alt mr-2 ${refreshing ? 'animate-spin' : ''}`}></i>
+                            {refreshing ? 'Refreshing...' : 'Refresh'}
                         </Button>
                         <Button
                             variant="primary"
