@@ -33,7 +33,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 function FindFoodPage({ initialCategory }) {
     const navigate = useNavigate();
     const routerLocation = useRouterLocation();
-    const { isAuthenticated } = useAuthContext();
+    const { isAuthenticated, user } = useAuthContext();
     
     const { listings: foods, loading: foodsLoading, error: foodsError, fetchListings } = useFoodListings({ status: 'approved' });
     const { search, results: searchResults, loading: searchLoading } = useSearch();
@@ -87,6 +87,13 @@ function FindFoodPage({ initialCategory }) {
             setFilters(prev => ({ ...prev, community: communityParam }));
         }
     }, [fetchListings, routerLocation.search]);
+
+    // Auto-filter by user's community if they have one assigned
+    useEffect(() => {
+        if (user?.community_id && !filters.community) {
+            setFilters(prev => ({ ...prev, community: String(user.community_id) }));
+        }
+    }, [user?.community_id]);
 
     // Event handlers
     const handleSearch = async () => {
@@ -206,7 +213,7 @@ function FindFoodPage({ initialCategory }) {
         }
 
         if (filters.community) {
-            result = result.filter(food => food.community_id === filters.community || food.community === filters.community);
+            result = result.filter(food => String(food.community_id) === String(filters.community) || food.community === filters.community);
         }
 
         if (filters.type !== 'all') {

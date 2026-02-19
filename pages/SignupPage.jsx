@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../utils/hooks/useSupabase";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import Button from "../components/common/Button";
+import supabase from "../utils/supabaseClient";
 
 function SignupPageContent() {
     const navigate = useNavigate();
@@ -53,6 +54,8 @@ function SignupPageContent() {
         
         if (!formData.approvalNumber.trim()) {
             newErrors.approvalNumber = 'Approval number is required';
+        } else if (!/^[A-Za-z]{3}\d{6}$/.test(formData.approvalNumber.trim())) {
+            newErrors.approvalNumber = 'Approval number must be 3 letters followed by 6 digits (e.g. RBE123456)';
         }
         
         // Validate phone if SMS opt-in is checked
@@ -90,13 +93,32 @@ function SignupPageContent() {
         }
 
         try {
+            // Validate the approval code against the database
+            const codeValue = formData.approvalNumber.trim().toUpperCase();
+            const { data: codeRecord, error: codeError } = await supabase
+                .from('approval_codes')
+                .select('*')
+                .eq('code', codeValue)
+                .single();
+
+            if (codeError || !codeRecord) {
+                setErrors({ approvalNumber: 'Approval number is invalid. Please double check that it was entered correctly. If that doesn\'t work, contact your school community closet representative to get a new approval number.' });
+                return;
+            }
+
+            if (codeRecord.is_claimed) {
+                setErrors({ approvalNumber: 'This approval number has already been used. Please contact your school community closet representative to get a new approval number.' });
+                return;
+            }
+
             const userData = {
                 email: formData.email.toLowerCase().trim(),
                 password: formData.password,
                 options: {
                     data: {
                         name: formData.name.trim(),
-                        approval_number: formData.approvalNumber.trim(),
+                        approval_number: codeValue,
+                        community_id: codeRecord.community_id,
                         phone: formData.phone.trim() || null,
                         sms_opt_in: formData.smsOptIn,
                         sms_opt_in_date: formData.smsOptIn ? new Date().toISOString() : null,
@@ -114,6 +136,16 @@ function SignupPageContent() {
             }
 
             if (user) {
+                // Mark the approval code as claimed
+                await supabase
+                    .from('approval_codes')
+                    .update({
+                        is_claimed: true,
+                        claimed_by: user.id,
+                        claimed_at: new Date().toISOString()
+                    })
+                    .eq('code', codeValue);
+
                 // Redirect to email confirmation page
                 navigate('/email-confirmation', { 
                     state: { email: formData.email.toLowerCase().trim() },
@@ -213,7 +245,7 @@ function SignupPageContent() {
                                 value={formData.approvalNumber}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.approvalNumber ? 'border-red-500' : 'border-gray-300'}`}
-                                placeholder="Enter your approval number"
+                                placeholder="e.g. RBE123456"
                                 aria-required="true"
                                 aria-invalid={!!errors.approvalNumber}
                                 aria-describedby="approval-number-description approval-number-error"

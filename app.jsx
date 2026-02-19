@@ -43,6 +43,7 @@ import ImpactDataEntry from './pages/admin/ImpactDataEntry.jsx';
 import AdminMessages from './pages/admin/AdminMessages.jsx';
 import UserFeedback from './pages/admin/UserFeedback.jsx';
 import VerificationManagement from './pages/admin/VerificationManagement.jsx';
+import ApprovalCodeManagement from './pages/admin/ApprovalCodeManagement.jsx';
 import { AuthProvider, useAuthContext } from './utils/AuthContext';
 import { GoodsProvider } from './utils/stores/goodsStore.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
@@ -148,6 +149,7 @@ function AppContent() {
                 <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
                 <Route path="/admin/feedback" element={<AdminRoute><UserFeedback /></AdminRoute>} />
                 <Route path="/admin/verifications" element={<AdminRoute><VerificationManagement /></AdminRoute>} />
+                <Route path="/admin/approval-codes" element={<AdminRoute><ApprovalCodeManagement /></AdminRoute>} />
                 <Route path="*" element={<div>Page Not Found</div>} />
             </Routes>
         </MainLayout>

@@ -138,6 +138,7 @@ class AuthService {
               email: user.email,
               name: user.user_metadata?.name || user.email,
               approval_number: user.user_metadata?.approval_number || null,
+              community_id: user.user_metadata?.community_id || null,
               phone: user.user_metadata?.phone || null,
               sms_opt_in: user.user_metadata?.sms_opt_in || false,
               sms_opt_in_date: user.user_metadata?.sms_opt_in_date || null,
