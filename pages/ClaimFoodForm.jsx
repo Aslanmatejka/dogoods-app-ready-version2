@@ -93,13 +93,13 @@ export default function ClaimFoodForm() {
         try {
             setClaiming(true);
 
-            // Create claim in database
+            // Create claim in database (auto-approved)
             const { data: claimData, error: claimError } = await supabase
                 .from('food_claims')
                 .insert({
                     food_id: food.id,
                     claimer_id: user.id,
-                    status: 'pending',
+                    status: 'approved',
                     pickup_deadline: pickupDeadline,
                 })
                 .select()

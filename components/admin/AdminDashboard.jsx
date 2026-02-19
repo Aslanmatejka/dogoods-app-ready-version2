@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import dataService from '../../utils/dataService';
-import AdminClaimDashboard from './AdminClaimDashboard';
 import supabase from '../../utils/supabaseClient';
 import { useAuthContext } from '../../utils/AuthContext';
 import { debugAuthState } from '../../utils/authDebug';
@@ -10,7 +9,6 @@ function AdminDashboard() {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionStatus, setActionStatus] = useState({});
-  const [activeTab, setActiveTab] = useState('pending');
   const { isAuthenticated, isAdmin } = useAuthContext();
 
   // Debug auth state on component mount
@@ -21,9 +19,7 @@ function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'pending') {
-      fetchPendingFoods();
-    }
+    fetchPendingFoods();
 
     // Real-time subscription for food listings
     const subscription = supabase
@@ -37,9 +33,7 @@ function AdminDashboard() {
         },
         (payload) => {
           console.log('Food listing changed:', payload);
-          if (activeTab === 'pending') {
-            fetchPendingFoods();
-          }
+          fetchPendingFoods();
         }
       )
       .subscribe();
@@ -47,7 +41,7 @@ function AdminDashboard() {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [activeTab]);
+  }, []);
 
   async function fetchPendingFoods() {
     setLoading(true);
@@ -75,21 +69,11 @@ function AdminDashboard() {
   return (
     <AdminLayout active="dashboard">
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="mb-6 flex gap-4">
-        <button
-          className={`px-4 py-2 rounded ${activeTab === 'pending' ? 'bg-[#2CABE3] text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('pending')}
-        >Pending Foods</button>
-        <button
-          className={`px-4 py-2 rounded ${activeTab === 'claimed' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          onClick={() => setActiveTab('claimed')}
-        >Claimed Foods</button>
-      </div>
-      {activeTab === 'pending' ? (
-        loading ? (
-          <div>Loading...</div>
-        ) : (
+      <h1 className="text-2xl font-bold mb-6">Admin Dashboard - Pending Shared Foods</h1>
+      <p className="text-gray-600 mb-6">Review and approve food donations shared by community members. Claims are automatically approved.</p>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {foods.map(food => (
               <div key={food.id} className="bg-white shadow rounded p-4 flex flex-col items-center">
@@ -124,9 +108,7 @@ function AdminDashboard() {
             ))}
           </div>
         )
-      ) : (
-        <AdminClaimDashboard />
-      )}
+      }
     </div>
     </AdminLayout>
   );
