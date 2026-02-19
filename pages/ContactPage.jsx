@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import supabase from '../utils/supabaseClient';
 
@@ -138,15 +139,13 @@ function ContactPage() {
 
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-4">
-                        <a
-                            href="https://www.allgoodlivingfoundation.org/donate"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            to="/donate"
                             className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 text-center"
                         >
                             <i className="fas fa-heart mr-2"></i>
                             Donate
-                        </a>
+                        </Link>
                         <a
                             href="https://allgoodlivingfoundation.org/volunteer-form"
                             target="_blank"

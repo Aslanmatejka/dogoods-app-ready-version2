@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
 import Avatar from "../components/common/Avatar";
@@ -8,15 +9,13 @@ import dataService from '../utils/dataService';
 
 export const DonateVolunteerButtons = ({ className = "" }) => (
     <div className={`flex flex-col md:flex-row gap-4 ${className}`}>
-        <a
-            href="https://allgoodlivingfoundation.org/donate"
-            target="_blank"
-            rel="noopener noreferrer"
+        <Link
+            to="/donate"
             className="inline-block px-6 py-2 bg-[#2CABE3] text-white rounded-lg font-semibold shadow hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#2CABE3]"
             aria-label="Donate to All Good Living Foundation"
         >
             Donate
-        </a>
+        </Link>
         <a
             href="https://allgoodlivingfoundation.org/volunteer-form"
             target="_blank"

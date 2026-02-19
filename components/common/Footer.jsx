@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { reportError } from '../../utils/helpers';
 
@@ -91,15 +92,13 @@ function Footer({
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="https://allgoodlivingfoundation.org/donate/"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <Link
+                                        to="/donate"
                                         className="text-gray-700 hover:text-gray-900 transition-colors duration-200 flex items-center group"
                                     >
                                         <i className="fas fa-hand-holding-heart text-gray-600 group-hover:text-gray-900 mr-3" aria-hidden="true"></i>
                                         <span>Donate</span>
-                                    </a>
+                                    </Link>
                                 </li>
                                 <li>
                                     <a

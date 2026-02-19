@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import supabase from '../utils/supabaseClient';
 import { reportError } from '../utils/helpers';
 import { useAuthContext } from '../utils/AuthContext';
@@ -744,9 +744,7 @@ function ImpactStory() {
                             >
                                 {getContent('newsStats', "Thanks to our network of 150+ partners, we've prevented over 2 million pounds of food waste while providing nutritious meals to families who need them most.")}
                             </p>
-                            <a href="https://allgoodlivingfoundation.org/donate/" 
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <Link to="/donate" 
                                 className="inline-block bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                                 <span 
                                     className="editable"
@@ -756,7 +754,7 @@ function ImpactStory() {
                                 >
                                     {getContent('newsButtonText', 'Support Our Mission')}
                                 </span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -903,9 +901,7 @@ function ImpactStory() {
                             </span>
                         </a>
                         */}
-                        <a href="https://allgoodlivingfoundation.org/donate/" 
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link to="/donate" 
                             className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             <span 
                                 className="editable"
@@ -915,7 +911,7 @@ function ImpactStory() {
                             >
                                 {getContent('ctaButton2Text', 'Support Our Mission')}
                             </span>
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </section>
