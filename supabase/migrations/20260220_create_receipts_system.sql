@@ -15,6 +15,7 @@ pickup_address TEXT, -- Full address
 pickup_window TEXT, -- e.g., "XYZ (fill with same info listed on claim food page)"
 
 -- Timestamps
+
 claimed_at TIMESTAMPTZ DEFAULT NOW(),
     pickup_by TIMESTAMPTZ NOT NULL, -- Auto-calculated: Friday 5PM Pacific after claimed_at
     picked_up_at TIMESTAMPTZ, -- When user clicked "Pick Up" button
