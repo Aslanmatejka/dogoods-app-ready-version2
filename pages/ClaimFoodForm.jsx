@@ -93,12 +93,52 @@ export default function ClaimFoodForm() {
         try {
             setClaiming(true);
 
-            // Create claim in database (auto-approved)
+            // Check if user has a pending receipt for today (to aggregate claims)
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const { data: existingReceipts, error: receiptCheckError } = await supabase
+                .from('receipts')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('status', 'pending')
+                .gte('claimed_at', startOfDay.toISOString())
+                .limit(1);
+
+            if (receiptCheckError) throw receiptCheckError;
+
+            let receiptId;
+
+            // If no pending receipt for today, create a new one
+            if (!existingReceipts || existingReceipts.length === 0) {
+                const pickupWindow = "Tuesday 2:00 PM - 3:30 PM, Thursday 2:00 PM - 3:30 PM, Friday 7:00 AM - 8:00 AM & 2:00 PM - 3:30 PM";
+                
+                const { data: newReceipt, error: receiptError } = await supabase
+                    .from('receipts')
+                    .insert({
+                        user_id: user.id,
+                        status: 'pending',
+                        pickup_location: community?.name || food.location || 'Community Location',
+                        pickup_address: community?.location || 'Address not available',
+                        pickup_window: pickupWindow
+                    })
+                    .select()
+                    .single();
+
+                if (receiptError) throw receiptError;
+                receiptId = newReceipt.id;
+            } else {
+                // Use existing pending receipt
+                receiptId = existingReceipts[0].id;
+            }
+
+            // Create claim in database (auto-approved) and link to receipt
             const { data: claimData, error: claimError } = await supabase
                 .from('food_claims')
                 .insert({
                     food_id: food.id,
                     claimer_id: user.id,
+                    receipt_id: receiptId,
                     status: 'approved',
                     pickup_deadline: pickupDeadline,
                 })
@@ -143,7 +183,7 @@ export default function ClaimFoodForm() {
                 console.error('SMS notification error:', smsError);
             }
 
-            toast.success('Food claimed successfully!');
+            toast.success('Item added to your receipt! View it on your dashboard.');
             navigate('/dashboard');
         } catch (error) {
             console.error('Error claiming food:', error);

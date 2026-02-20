@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
 import Avatar from "../components/common/Avatar";
 import Card from "../components/common/Card";
+import Receipt from "../components/common/Receipt";
 import { useAuth, useFoodListings, useNotifications } from "../utils/hooks/useSupabase";
 import supabase from "../utils/supabaseClient";
 
@@ -24,75 +25,70 @@ function UserDashboard() {
     const { listings: userListings, loading: listingsLoading, error: listingsError } = useFoodListings({ user_id: authUser?.id });
     const { notifications, loading: notificationsLoading, error: notificationsError } = useNotifications(authUser?.id);
 
-    const [foodClaims, setFoodClaims] = React.useState([]);
-    const [claimsLoading, setClaimsLoading] = React.useState(true);
-    const [updatingClaim, setUpdatingClaim] = React.useState(null);
+    const [receipts, setReceipts] = React.useState([]);
+    const [receiptsLoading, setReceiptsLoading] = React.useState(true);
 
-    const loading = listingsLoading || notificationsLoading || claimsLoading;
+    const loading = listingsLoading || notificationsLoading || receiptsLoading;
     const error = listingsError || notificationsError;
     const user = authUser;
 
     React.useEffect(() => {
         if (authUser?.id) {
-            fetchFoodClaims();
+            fetchReceipts();
         }
     }, [authUser?.id]);
 
-    const fetchFoodClaims = async () => {
+    const fetchReceipts = async () => {
         try {
-            setClaimsLoading(true);
+            setReceiptsLoading(true);
 
-            const { data: claims, error: claimsError } = await supabase
-                .from('food_claims')
-                .select(`
-                    *,
-                    food_listings (
-                        id,
-                        title,
-                        description,
-                        image_url,
-                        quantity,
-                        unit,
-                        category,
-                        pickup_location
-                    )
-                `)
-                .eq('claimer_id', authUser.id)
-                .order('created_at', { ascending: false });
+            // Fetch all receipts for the user
+            const { data: userReceipts, error: receiptsError } = await supabase
+                .from('receipts')
+                .select('*')
+                .eq('user_id', authUser.id)
+                .order('claimed_at', { ascending: false });
 
-            if (claimsError) throw claimsError;
+            if (receiptsError) throw receiptsError;
 
-            setFoodClaims(claims || []);
-        } catch (err) {
-            console.error('Error fetching food claims:', err);
-        } finally {
-            setClaimsLoading(false);
-        }
-    };
+            // For each receipt, fetch the associated food claims and items
+            const receiptsWithItems = await Promise.all(
+                (userReceipts || []).map(async (receipt) => {
+                    const { data: claims, error: claimsError } = await supabase
+                        .from('food_claims')
+                        .select(`
+                            *,
+                            food_listings (
+                                id,
+                                title,
+                                description,
+                                quantity,
+                                unit
+                            )
+                        `)
+                        .eq('receipt_id', receipt.id);
 
-    const handleMarkPickedUp = async (claimId) => {
-        try {
-            setUpdatingClaim(claimId);
+                    if (claimsError) {
+                        console.error('Error fetching claims for receipt:', claimsError);
+                        return { ...receipt, items: [] };
+                    }
 
-            const { error: updateError } = await supabase
-                .from('food_claims')
-                .update({ status: 'completed' })
-                .eq('id', claimId);
+                    // Transform claims into receipt items format
+                    const items = (claims || []).map(claim => ({
+                        food_id: claim.food_id,
+                        food_name: claim.food_listings?.title || 'Unknown Item',
+                        quantity: `${claim.food_listings?.quantity || ''} ${claim.food_listings?.unit || ''}`.trim() || 'N/A'
+                    }));
 
-            if (updateError) throw updateError;
-
-            // Update local state
-            setFoodClaims(prev => 
-                prev.map(claim => 
-                    claim.id === claimId 
-                        ? { ...claim, status: 'completed' }
-                        : claim
-                )
+                    return { ...receipt, items };
+                })
             );
+
+            setReceipts(receiptsWithItems);
         } catch (err) {
-            console.error('Error updating claim status:', err);
+            console.error('Error fetching receipts:', err);
         } finally {
-            setUpdatingClaim(null);
+            setReceiptsLoading(false);
         }
     };
     const recentActivity = React.useMemo(() => {
@@ -226,101 +222,29 @@ function UserDashboard() {
             <div className="mb-8" role="region" aria-label="Food Claim Receipts">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Food Receipts</h2>
                 
-                {claimsLoading ? (
+                {receiptsLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="animate-pulse bg-gray-200 rounded-lg h-64"></div>
+                            <div key={i} className="animate-pulse bg-gray-200 rounded-lg h-96"></div>
                         ))}
                     </div>
-                ) : foodClaims.length > 0 ? (
+                ) : receipts.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {foodClaims.map((claim) => (
-                            <div 
-                                key={claim.id} 
-                                className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-                                role="article"
-                            >
-                                {/* Food Image */}
-                                {claim.food_listings?.image_url && (
-                                    <div className="h-48 overflow-hidden">
-                                        <img 
-                                            src={claim.food_listings.image_url} 
-                                            alt={claim.food_listings.title}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
-                                
-                                {/* Receipt Details */}
-                                <div className="p-4">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                        {claim.food_listings?.title || 'Food Item'}
-                                    </h3>
-                                    
-                                    {claim.food_listings?.category && (
-                                        <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded mb-2">
-                                            {claim.food_listings.category}
-                                        </span>
-                                    )}
-                                    
-                                    {claim.food_listings?.quantity && (
-                                        <p className="text-sm text-gray-600 mb-2">
-                                            <i className="fas fa-weight-scale mr-2" aria-hidden="true"></i>
-                                            Quantity: {claim.food_listings.quantity} {claim.food_listings.unit || ''}
-                                        </p>
-                                    )}
-                                    
-                                    {claim.food_listings?.pickup_location && (
-                                        <p className="text-sm text-gray-600 mb-2">
-                                            <i className="fas fa-map-marker-alt mr-2" aria-hidden="true"></i>
-                                            {claim.food_listings.pickup_location}
-                                        </p>
-                                    )}
-                                    
-                                    <p className="text-xs text-gray-400 mb-4">
-                                        Claimed: {formatDate(claim.created_at)}
-                                    </p>
-                                    
-                                    {/* Status Button */}
-                                    {claim.status === 'completed' ? (
-                                        <button
-                                            disabled
-                                            className="w-full py-2 px-4 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed"
-                                            aria-label="Food pickup completed"
-                                        >
-                                            <i className="fas fa-check-circle mr-2" aria-hidden="true"></i>
-                                            Complete
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleMarkPickedUp(claim.id)}
-                                            disabled={updatingClaim === claim.id}
-                                            className="w-full py-2 px-4 bg-[#2CABE3] text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-                                            aria-label="Mark as picked up"
-                                        >
-                                            {updatingClaim === claim.id ? (
-                                                <>
-                                                    <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
-                                                    Updating...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <i className="fas fa-hand-holding-heart mr-2" aria-hidden="true"></i>
-                                                    Picked Up
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+                        {receipts.map((receipt) => (
+                            <Receipt 
+                                key={receipt.id}
+                                receipt={receipt}
+                                items={receipt.items || []}
+                                onUpdate={fetchReceipts}
+                            />
                         ))}
                     </div>
                 ) : (
                     <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                         <i className="fas fa-receipt text-gray-400 text-5xl mb-4" aria-hidden="true"></i>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No Food Claims Yet</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No Receipts Yet</h3>
                         <p className="text-gray-600 mb-6">
-                            Start claiming food from your community to see your receipts here.
+                            Start claiming food from your community to see your receipts here. Multiple items claimed on the same day will be grouped into one receipt.
                         </p>
                         <Button
                             variant="primary"
