@@ -43,30 +43,29 @@ CREATE INDEX IF NOT EXISTS idx_food_claims_receipt_id ON food_claims (receipt_id
 CREATE OR REPLACE FUNCTION calculate_pickup_deadline(claim_time TIMESTAMPTZ)
 RETURNS TIMESTAMPTZ AS $$
 DECLARE
-    claim_pacific TIMESTAMPTZ;
+    claim_pacific TIMESTAMP;
     days_until_friday INT;
-    next_friday TIMESTAMPTZ;
+    next_friday_pacific TIMESTAMP;
 BEGIN
-    -- Convert to Pacific Time
+    -- Convert to Pacific Time (no time zone)
     claim_pacific := claim_time AT TIME ZONE 'America/Los_Angeles';
     
     -- Calculate days until next Friday (0=Sunday, 5=Friday)
-    -- If claimed on Friday after 5PM, deadline is next Friday
     days_until_friday := (12 - EXTRACT(DOW FROM claim_pacific)::INT) % 7;
     
     -- If it's Friday before 5PM, deadline is today at 5PM
     IF EXTRACT(DOW FROM claim_pacific) = 5 AND EXTRACT(HOUR FROM claim_pacific) < 17 THEN
-        next_friday := date_trunc('day', claim_pacific) + INTERVAL '17 hours';
+        next_friday_pacific := date_trunc('day', claim_pacific) + INTERVAL '17 hours';
     ELSE
         -- Otherwise, deadline is next Friday at 5PM
         IF days_until_friday = 0 THEN
             days_until_friday := 7;
         END IF;
-        next_friday := date_trunc('day', claim_pacific) + (days_until_friday || ' days')::INTERVAL + INTERVAL '17 hours';
+        next_friday_pacific := date_trunc('day', claim_pacific) + (days_until_friday || ' days')::INTERVAL + INTERVAL '17 hours';
     END IF;
     
-    -- Convert back to UTC for storage
-    RETURN next_friday AT TIME ZONE 'America/Los_Angeles';
+    -- Convert back to UTC for storage by treating it as a Pacific time
+    RETURN timezone('America/Los_Angeles', next_friday_pacific);
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
