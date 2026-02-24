@@ -542,12 +542,12 @@ function ImpactStory() {
                         <a href="#featured" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Featured
                         </a>
-                        <a href="#news" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+                        <Link to="/news" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             News
-                        </a>
-                        <a href="#stories" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
-                            Stories
-                        </a>
+                        </Link>
+                        <Link to="/testimonials" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+                            Testimonials
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -605,6 +605,127 @@ function ImpactStory() {
                             </button>
                             */}
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Impact By The Numbers Section - NEW */}
+            <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">Our Impact in Numbers</h2>
+                    <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-16">
+                        Every number represents real people, real meals, and real change in our communities.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div className="bg-white rounded-2xl p-8 shadow-lg text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-bold text-[#2CABE3] mb-2">2M+</div>
+                            <div className="text-gray-600 font-semibold">Pounds of Food Rescued</div>
+                        </div>
+                        <div className="bg-white rounded-2xl p-8 shadow-lg text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-bold text-[#2CABE3] mb-2">150+</div>
+                            <div className="text-gray-600 font-semibold">Community Partners</div>
+                        </div>
+                        <div className="bg-white rounded-2xl p-8 shadow-lg text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-bold text-[#2CABE3] mb-2">10K+</div>
+                            <div className="text-gray-600 font-semibold">Families Served</div>
+                        </div>
+                        <div className="bg-white rounded-2xl p-8 shadow-lg text-center transform hover:scale-105 transition-all">
+                            <div className="text-5xl font-bold text-[#2CABE3] mb-2">1,200</div>
+                            <div className="text-gray-600 font-semibold">Tons CO2 Reduced</div>
+                        </div>
+                    </div>
+
+                    <div className="mt-16 bg-white rounded-2xl p-8 shadow-lg">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Weekly Impact Breakdown</h3>
+                        <div className="grid md:grid-cols-3 gap-6">
+                            <div className="text-center border-r border-gray-200 last:border-0">
+                                <div className="text-3xl font-bold text-green-600 mb-2">38,461</div>
+                                <div className="text-gray-600">Pounds Rescued per Week</div>
+                            </div>
+                            <div className="text-center border-r border-gray-200 last:border-0">
+                                <div className="text-3xl font-bold text-green-600 mb-2">8,547</div>
+                                <div className="text-gray-600">Meals Provided Weekly</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-green-600 mb-2">192</div>
+                                <div className="text-gray-600">Families Helped Each Week</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Community Partner Spotlight Section - NEW */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">Partner Spotlights</h2>
+                    <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-16">
+                        Meet the organizations making this mission possible through their dedication and commitment.
+                    </p>
+
+                    <div className="grid md:grid-cols-2 gap-12">
+                        <div className="bg-gray-50 rounded-2xl p-8">
+                            <div className="flex items-start mb-6">
+                                <div className="bg-[#2CABE3] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mr-4">
+                                    🏢
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-900">Alameda County Food Bank</h3>
+                                    <p className="text-gray-600">Serving communities since 1985</p>
+                                </div>
+                            </div>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                Through our partnership with DoGoods, we&apos;ve been able to triple our fresh food distribution capacity. 
+                                The AI-powered routing means we can now serve rural communities that were previously out of reach.
+                            </p>
+                            <div className="bg-white rounded-lg p-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-[#2CABE3]">15K+</div>
+                                        <div className="text-sm text-gray-600">Monthly Meals Distributed</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-[#2CABE3]">45</div>
+                                        <div className="text-sm text-gray-600">Distribution Sites</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-2xl p-8">
+                            <div className="flex items-start mb-6">
+                                <div className="bg-[#2CABE3] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mr-4">
+                                    🍕
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-900">Bay Area Restaurant Alliance</h3>
+                                    <p className="text-gray-600">200+ member restaurants</p>
+                                </div>
+                            </div>
+                            <p className="text-gray-700 leading-relaxed mb-4">
+                                DoGoods transformed how we handle surplus food. Instead of guilt and waste, we now have impact and purpose. 
+                                Every evening, we know our unserved food is feeding families in our neighborhood.
+                            </p>
+                            <div className="bg-white rounded-lg p-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-[#2CABE3]">800K+</div>
+                                        <div className="text-sm text-gray-600">Pounds Donated</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-[#2CABE3]">200+</div>
+                                        <div className="text-sm text-gray-600">Member Restaurants</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-12 text-center">
+                        <Link to="/sponsors" className="inline-block bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
+                            See All Our Partners →
+                        </Link>
                     </div>
                 </div>
             </section>
