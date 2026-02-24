@@ -9,8 +9,6 @@ function AdminSidebar({ active, onNavigate }) {
             { id: 'users', label: 'User Management', icon: 'fa-users', path: '/admin/users' },
             { id: 'communities', label: 'Communities', icon: 'fa-building', path: '/admin/communities' },
             { id: 'approval-codes', label: 'Approval Codes', icon: 'fa-key', path: '/admin/approval-codes' },
-            { id: 'content', label: 'Content Moderation', icon: 'fa-shield-alt', path: '/admin/content' },
-            { id: 'posts', label: 'Posts & Blog', icon: 'fa-newspaper', path: '/admin/posts' },
             { id: 'messages', label: 'Messages', icon: 'fa-comments', path: '/admin/messages' },
             { id: 'feedback', label: 'User Feedback', icon: 'fa-comment-dots', path: '/admin/feedback' },
             { id: 'safety', label: 'Safety & Trust', icon: 'fa-shield-check', path: '/admin/safety' },

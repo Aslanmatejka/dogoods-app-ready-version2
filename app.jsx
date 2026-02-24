@@ -31,12 +31,10 @@ import ContactPage from './pages/ContactPage';
 import DonatePage from './pages/DonatePage';
 import CommunityDetailPage from './pages/CommunityDetailPage';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
-import ContentModeration from './pages/admin/ContentModeration.jsx';
 import { TutorialProvider } from './utils/TutorialContext.jsx';
 import DistributionAttendees from './pages/admin/DistributionAttendees.jsx';
 import FoodDistributionManagement from './pages/admin/FoodDistributionManagement.jsx';
 import UserManagement from './pages/admin/UserManagement.jsx';
-import AdminContentManagement from './pages/admin/AdminContentManagement.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
 import ImpactDataEntry from './pages/admin/ImpactDataEntry.jsx';
@@ -138,8 +136,6 @@ function AppContent() {
                 <Route path="/listings" element={<ProtectedRoute><UserListings /></ProtectedRoute>} />
                 <Route path="/donations" element={<ProtectedRoute><DonationSchedules /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/posts" element={<AdminRoute><AdminContentManagement /></AdminRoute>} />
-                <Route path="/admin/content" element={<AdminRoute><ContentModeration /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
                 <Route path="/admin/distribution" element={<AdminRoute><FoodDistributionManagement /></AdminRoute>} />
                 <Route path="/admin/attendees" element={<AdminRoute><DistributionAttendees /></AdminRoute>} />
