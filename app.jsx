@@ -26,6 +26,7 @@ import SponsorsPage from './pages/SponsorsPage';
 import ImpactStory from './pages/ImpactStory';
 import TestimonialsPage from './pages/TestimonialsPage';
 import NewsPage from './pages/NewsPage';
+import FeaturedPage from './pages/FeaturedPage';
 import DonationSchedules from './pages/DonationSchedules';
 import FAQs from './pages/FAQs';
 import ContactPage from './pages/ContactPage';
@@ -39,6 +40,7 @@ import UserManagement from './pages/admin/UserManagement.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminReports from './pages/admin/AdminReports.jsx';
 import ImpactDataEntry from './pages/admin/ImpactDataEntry.jsx';
+import ImpactContentManagement from './pages/admin/ImpactContentManagement.jsx';
 import AdminMessages from './pages/admin/AdminMessages.jsx';
 import UserFeedback from './pages/admin/UserFeedback.jsx';
 import VerificationManagement from './pages/admin/VerificationManagement.jsx';
@@ -115,7 +117,9 @@ function AppContent() {
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/impact-story" element={<ImpactStory />} />
-                <Route path="/stories" element={<StoriesPage />} />
+                <Route path="/news" element={<NewsPage />} />
+                <Route path="/featured" element={<FeaturedPage />} />
+                <Route path="/testimonials" element={<TestimonialsPage />} />
                 <Route path="/sponsors" element={<SponsorsPage />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/contact" element={<ContactPage />} />
@@ -143,6 +147,7 @@ function AppContent() {
                 <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
                 <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
                 <Route path="/admin/impact" element={<AdminRoute><ImpactDataEntry /></AdminRoute>} />
+                <Route path="/admin/impact-content" element={<AdminRoute><ImpactContentManagement /></AdminRoute>} />
                 <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
                 <Route path="/admin/feedback" element={<AdminRoute><UserFeedback /></AdminRoute>} />
                 <Route path="/admin/verifications" element={<AdminRoute><VerificationManagement /></AdminRoute>} />

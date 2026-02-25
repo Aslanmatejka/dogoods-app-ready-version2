@@ -15,6 +15,7 @@ function AdminSidebar({ active, onNavigate }) {
             { id: 'distribution', label: 'Food Distribution', icon: 'fa-box-open', path: '/admin/distribution' },
             { id: 'attendees', label: 'Distribution Attendees', icon: 'fa-users-cog', path: '/admin/attendees' },
             { id: 'impact', label: 'Impact Data Entry', icon: 'fa-table', path: '/admin/impact' },
+            { id: 'impact-content', label: 'Impact Content', icon: 'fa-heart', path: '/admin/impact-content' },
             { id: 'reports', label: 'Reports & Analytics', icon: 'fa-chart-bar', path: '/admin/reports' },
             { id: 'settings', label: 'Settings', icon: 'fa-cog', path: '/admin/settings' }
         ];
