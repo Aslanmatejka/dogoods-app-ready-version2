@@ -34,12 +34,12 @@ function ContactPage() {
             const { error } = await supabase
                 .from('user_feedback')
                 .insert({
-                    name: formData.name,
-                    email: formData.email,
-                    category: formData.reason,
+                    feedback_type: formData.reason,
+                    subject: `Contact from ${formData.name}`,
+                    user_email: formData.email,
                     message: formData.message,
-                    type: 'contact_form',
-                    created_at: new Date().toISOString()
+                    status: 'new',
+                    priority: 'medium'
                 });
 
             if (error) throw error;

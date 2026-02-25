@@ -143,7 +143,7 @@ function ImpactStory() {
                         <img
                             src={selectedStory.image_url}
                             alt={selectedStory.title}
-                            className="w-full h-72 md:h-96 object-cover rounded-2xl shadow-lg mb-8"
+                            className="w-full max-h-[28rem] object-contain rounded-2xl shadow-lg mb-8 bg-gray-100"
                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
                         />
                     )}
@@ -248,6 +248,9 @@ function ImpactStory() {
                         </Link>
                         <Link to="/testimonials" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Testimonials
+                        </Link>
+                        <Link to="/recipes" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+                            Recipes
                         </Link>
                     </div>
                 </div>

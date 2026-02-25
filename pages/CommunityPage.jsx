@@ -271,10 +271,10 @@ function CommunityPage() {
             <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">Connect on Social Media</h2>
                 <div className="flex gap-4">
-                    <a href="https://facebook.com/allgoodlivingfoundation" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-blue-600 hover:underline">
+                    <a href="https://www.facebook.com/allgoodlivingfoundation" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-blue-600 hover:underline">
                         <i className="fab fa-facebook text-2xl"></i> Facebook
                     </a>
-                    <a href="https://instagram.com/allgoodlivingfoundation" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-pink-600 hover:underline">
+                    <a href="https://www.instagram.com/aglfoundation" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-pink-600 hover:underline">
                         <i className="fab fa-instagram text-2xl"></i> Instagram
                     </a>
                 </div>

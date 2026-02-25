@@ -35,7 +35,7 @@ function Footer({
                         {/* Social Links */}
                         <div className="flex space-x-3">
                             <a
-                                href="https://instagram.com/allgoodlivingfoundation"
+                                href="https://www.instagram.com/aglfoundation"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-[#2CABE3] hover:opacity-90 flex items-center justify-center transition-all duration-200"
@@ -44,7 +44,7 @@ function Footer({
                                 <i className="fab fa-instagram text-white text-lg" aria-hidden="true"></i>
                             </a>
                             <a
-                                href="https://facebook.com/allgoodlivingfoundation"
+                                href="https://www.facebook.com/allgoodlivingfoundation"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 rounded-full bg-[#2CABE3] hover:opacity-90 flex items-center justify-center transition-all duration-200"

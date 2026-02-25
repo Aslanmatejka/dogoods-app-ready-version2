@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import supabase from "../utils/supabaseClient";
 import cheeseBoard from "./sponsoredby/cheese_board.png";
 import community from "./sponsoredby/community.png";
@@ -218,12 +219,12 @@ function SponsorsPage() {
             Interested in supporting our mission to reduce food waste and strengthen communities?
             We'd love to partner with you!
           </p>
-          <a
-            href="mailto:sponsors@dogoods.org"
+          <Link
+            to="/contact"
             className="inline-block bg-[#2CABE3] text-white px-8 py-3 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
           >
             Contact Us About Sponsorship
-          </a>
+          </Link>
         </div>
       </div>
     </div>

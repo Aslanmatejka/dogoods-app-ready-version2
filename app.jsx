@@ -27,6 +27,7 @@ import ImpactStory from './pages/ImpactStory';
 import TestimonialsPage from './pages/TestimonialsPage';
 import NewsPage from './pages/NewsPage';
 import FeaturedPage from './pages/FeaturedPage';
+import RecipesPage from './pages/RecipesPage';
 import DonationSchedules from './pages/DonationSchedules';
 import FAQs from './pages/FAQs';
 import ContactPage from './pages/ContactPage';
@@ -120,6 +121,7 @@ function AppContent() {
                 <Route path="/news" element={<NewsPage />} />
                 <Route path="/featured" element={<FeaturedPage />} />
                 <Route path="/testimonials" element={<TestimonialsPage />} />
+                <Route path="/recipes" element={<RecipesPage />} />
                 <Route path="/sponsors" element={<SponsorsPage />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/contact" element={<ContactPage />} />

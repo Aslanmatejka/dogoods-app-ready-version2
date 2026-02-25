@@ -6,6 +6,7 @@ function ImpactContentManagement() {
     const [activeTab, setActiveTab] = useState('testimonials');
     const [stories, setStories] = useState([]);
     const [gallery, setGallery] = useState([]);
+    const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingItem, setEditingItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -72,7 +73,8 @@ function ImpactContentManagement() {
         'testimonials': 'Testimonials',
         'blog': 'Blog',
         'news': 'News/Updates',
-        'gallery': 'Gallery'
+        'gallery': 'Gallery',
+        'recipes': 'Recipes'
     };
 
     // Helper: is this a story-type tab?
@@ -91,14 +93,17 @@ function ImpactContentManagement() {
     const loadAllData = async () => {
         setLoading(true);
         try {
-            const [storiesRes, galleryRes] = await Promise.all([
+            const [storiesRes, galleryRes, recipesRes] = await Promise.all([
                 supabase.from('impact_stories').select('*').order('display_order'),
-                supabase.from('impact_gallery').select('*').order('display_order')
+                supabase.from('impact_gallery').select('*').order('display_order'),
+                supabase.from('impact_recipes').select('*').order('display_order')
             ]);
             if (storiesRes.error) throw storiesRes.error;
             if (galleryRes.error) throw galleryRes.error;
+            if (recipesRes.error) throw recipesRes.error;
             setStories(storiesRes.data || []);
             setGallery(galleryRes.data || []);
+            setRecipes(recipesRes.data || []);
         } catch (error) {
             console.error('Error loading data:', error);
             toast.error('Failed to load data');
@@ -148,6 +153,10 @@ function ImpactContentManagement() {
         }
         if (activeTab === 'gallery' && !editingItem?.image_url?.trim()) {
             toast.error('Image URL is required for gallery items');
+            return;
+        }
+        if (activeTab === 'recipes' && !editingItem?.youtube_url?.trim()) {
+            toast.error('YouTube URL is required for recipes');
             return;
         }
 
@@ -214,6 +223,7 @@ function ImpactContentManagement() {
 
     const getTableName = () => {
         if (isStoryTab(activeTab)) return 'impact_stories';
+        if (activeTab === 'recipes') return 'impact_recipes';
         return 'impact_gallery';
     };
 
@@ -222,6 +232,9 @@ function ImpactContentManagement() {
             const filtered = getFilteredStories(activeTab);
             if (filtered.length === 0) return 1;
             return Math.max(...filtered.map(s => s.display_order || 0)) + 1;
+        } else if (activeTab === 'recipes') {
+            if (recipes.length === 0) return 1;
+            return Math.max(...recipes.map(r => r.display_order || 0)) + 1;
         } else {
             if (gallery.length === 0) return 1;
             return Math.max(...gallery.map(g => g.display_order || 0)) + 1;
@@ -242,6 +255,15 @@ function ImpactContentManagement() {
                 base.image_url = '';
             }
             return base;
+        } else if (activeTab === 'recipes') {
+            return {
+                title: '',
+                description: '',
+                youtube_url: '',
+                thumbnail_url: '',
+                display_order: nextOrder,
+                is_active: true
+            };
         } else {
             return {
                 title: '',
@@ -438,17 +460,96 @@ function ImpactContentManagement() {
         </div>
     );
 
+    // Helper to extract YouTube video ID
+    const getYouTubeId = (url) => {
+        if (!url) return null;
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^?&/#]+)/);
+        return match ? match[1] : null;
+    };
+
+    const renderRecipeForm = () => (
+        <div className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                    type="text"
+                    value={editingItem?.title || ''}
+                    onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    placeholder="e.g. Easy Community Garden Salad"
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                    value={editingItem?.description || ''}
+                    onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    placeholder="A short description of this recipe..."
+                />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">YouTube URL *</label>
+                <input
+                    type="text"
+                    value={editingItem?.youtube_url || ''}
+                    onChange={(e) => setEditingItem({ ...editingItem, youtube_url: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                />
+                {editingItem?.youtube_url && getYouTubeId(editingItem.youtube_url) && (
+                    <div className="mt-3">
+                        <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                        <div className="aspect-video w-full max-w-sm rounded-lg overflow-hidden border">
+                            <iframe
+                                src={`https://www.youtube.com/embed/${getYouTubeId(editingItem.youtube_url)}`}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                title="YouTube preview"
+                            />
+                        </div>
+                    </div>
+                )}
+                {editingItem?.youtube_url && !getYouTubeId(editingItem.youtube_url) && (
+                    <p className="text-xs text-red-500 mt-1">⚠️ Could not parse YouTube URL. Use a standard youtube.com/watch?v= or youtu.be/ link.</p>
+                )}
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Custom Thumbnail URL (optional)</label>
+                <input
+                    type="text"
+                    value={editingItem?.thumbnail_url || ''}
+                    onChange={(e) => setEditingItem({ ...editingItem, thumbnail_url: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                    placeholder="Leave blank to use YouTube thumbnail"
+                />
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+                <input
+                    type="checkbox"
+                    checked={editingItem?.is_active || false}
+                    onChange={(e) => setEditingItem({ ...editingItem, is_active: e.target.checked })}
+                    className="mr-1"
+                />
+                <label className="text-sm font-medium text-gray-700">Active</label>
+            </div>
+        </div>
+    );
+
     return (
         <div className="-mx-6 md:-mx-10 -my-6 md:-my-10 min-h-screen bg-gray-50">
             <div className="bg-white border-b px-6 py-6">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Impact Content Management</h1>
-                <p className="text-gray-500 text-sm">Create and manage testimonials, blog posts, news, and gallery items</p>
+                <p className="text-gray-500 text-sm">Create and manage testimonials, blog posts, news, gallery, and recipes</p>
             </div>
 
             {/* Tabs */}
             <div className="bg-white border-b px-6 flex flex-wrap gap-1 sticky top-16 z-30">
-                {['testimonials', 'blog', 'news', 'gallery'].map((tab) => {
+                {['testimonials', 'blog', 'news', 'gallery', 'recipes'].map((tab) => {
                     const count = tab === 'gallery' ? gallery.length
+                        : tab === 'recipes' ? recipes.length
                         : getFilteredStories(tab).length;
                     return (
                         <button
@@ -550,6 +651,50 @@ function ImpactContentManagement() {
                         </div>
                     ))}
 
+                    {activeTab === 'recipes' && recipes.map((item) => (
+                        <div key={item.id} className="bg-white p-6 rounded-lg shadow border flex gap-4">
+                            {getYouTubeId(item.youtube_url) && (
+                                <img
+                                    src={item.thumbnail_url || `https://img.youtube.com/vi/${getYouTubeId(item.youtube_url)}/mqdefault.jpg`}
+                                    alt={item.title}
+                                    className="w-40 h-24 object-cover rounded-lg"
+                                />
+                            )}
+                            <div className="flex-1">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">▶ YouTube</span>
+                                            {!item.is_active && <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">Hidden</span>}
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-1">{item.title}</h3>
+                                        {item.description && <p className="text-gray-600 text-sm line-clamp-2">{item.description}</p>}
+                                    </div>
+                                    <div className="flex gap-2 ml-4">
+                                        <button
+                                            onClick={() => toggleActive(item.id, item.is_active, 'impact_recipes')}
+                                            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+                                        >
+                                            {item.is_active ? 'Hide' : 'Show'}
+                                        </button>
+                                        <button
+                                            onClick={() => handleEdit(item)}
+                                            className="px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded text-sm text-blue-700"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(item.id, 'impact_recipes')}
+                                            className="px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm text-red-700"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
                 </div>
             )}
             </div>{/* end px-6 py-6 content wrapper */}
@@ -581,6 +726,7 @@ function ImpactContentManagement() {
                         <div className="overflow-y-auto flex-1 px-6 py-5">
                             {isStoryTab(activeTab) && renderStoryForm()}
                             {activeTab === 'gallery' && renderGalleryForm()}
+                            {activeTab === 'recipes' && renderRecipeForm()}
                         </div>
                         
                         {/* Modal Footer */}
