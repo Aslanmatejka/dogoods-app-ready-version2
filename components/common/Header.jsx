@@ -17,6 +17,7 @@ function Header({
             ]
         },
         { label: 'Impact Story', path: '/impact-story' },
+        { label: 'Recipes', path: '/recipes' },
         { label: 'Sponsors', path: '/sponsors' },
         { label: 'Contact', path: '/contact' }
     ]
