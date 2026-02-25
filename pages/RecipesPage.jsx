@@ -78,13 +78,6 @@ function RecipesPage() {
             {/* Hero */}
             <section className="bg-gradient-to-br from-red-50 to-orange-100 py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <button
-                        onClick={() => navigate('/impact-story')}
-                        className="mb-6 text-gray-700 hover:text-red-600 transition-colors flex items-center gap-2 font-semibold"
-                    >
-                        <span>&larr;</span>
-                        <span>Back to Impact Story</span>
-                    </button>
                     <div className="text-center">
                         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
                             🍳 Community Recipes
