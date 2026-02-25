@@ -108,7 +108,6 @@ function ImpactStory() {
     const featuredStories = stories
         .filter(s => s.type === 'featured')
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    const testimonials = stories.filter(s => s.type === 'testimonial');
 
     if (loading) {
         return (
@@ -310,33 +309,6 @@ function ImpactStory() {
                     )}
                 </div>
             </section>
-
-            {/* ── Testimonial Stories ── */}
-            {testimonials.length > 0 && (
-                <section id="stories" className="py-20 bg-gray-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Testimonials</h2>
-                        <p className="text-gray-500 mb-8">Hear from the people we serve</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                            {testimonials.map((story) => (
-                                <div key={story.id} className="bg-white rounded-2xl shadow-lg p-8">
-                                    <div className="text-4xl text-[#2CABE3] mb-4">&ldquo;</div>
-                                    <p className="text-gray-600 leading-relaxed text-lg italic mb-6">{story.quote}</p>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{story.title}</h3>
-                                    <p className="text-gray-500">
-                                        <strong>&mdash; {story.attribution}{story.organization && `, ${story.organization}`}</strong>
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="text-center mt-10">
-                            <Link to="/testimonials" className="text-blue-600 hover:text-blue-800 font-semibold">
-                                View All Testimonials &rarr;
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-            )}
 
             {/* ── Gallery Section ── */}
             {gallery.length > 0 && (
