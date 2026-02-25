@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import supabase from '../../utils/supabaseClient';
 import { toast } from 'react-toastify';
 
@@ -9,6 +9,56 @@ function ImpactContentManagement() {
     const [loading, setLoading] = useState(true);
     const [editingItem, setEditingItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef(null);
+
+    // Upload image to Supabase Storage
+    const handleImageUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error('Only JPEG, PNG, WebP, and GIF images are allowed');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image must be under 5MB');
+            return;
+        }
+
+        setUploading(true);
+        try {
+            // Generate unique file name
+            const ext = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+            const filePath = `${activeTab}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('impact-images')
+                .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw uploadError;
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('impact-images')
+                .getPublicUrl(filePath);
+
+            setEditingItem({ ...editingItem, image_url: publicUrl });
+            toast.success('Image uploaded successfully!');
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast.error('Failed to upload image: ' + (error.message || 'Unknown error'));
+        } finally {
+            setUploading(false);
+            // Reset file input so the same file can be re-selected
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     // Map tab to story type for the 3 story tabs
     const tabToStoryType = {
@@ -87,6 +137,20 @@ function ImpactContentManagement() {
     };
 
     const handleSave = async () => {
+        // Validate required fields
+        if (!editingItem?.title?.trim()) {
+            toast.error('Title is required');
+            return;
+        }
+        if (isStoryTab(activeTab) && !editingItem?.quote?.trim()) {
+            toast.error('Quote/Content is required');
+            return;
+        }
+        if (activeTab === 'gallery' && !editingItem?.image_url?.trim()) {
+            toast.error('Image URL is required for gallery items');
+            return;
+        }
+
         try {
             const table = getTableName();
             // eslint-disable-next-line no-unused-vars
@@ -103,9 +167,13 @@ function ImpactContentManagement() {
             } else {
                 // Create new
                 const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    toast.error('You must be logged in to create content');
+                    return;
+                }
                 const { error } = await supabase
                     .from(table)
-                    .insert([{ ...itemData, created_by: user?.id }]);
+                    .insert([{ ...itemData, created_by: user.id }]);
                 if (error) throw error;
                 toast.success('Item created successfully');
             }
@@ -115,7 +183,7 @@ function ImpactContentManagement() {
             loadAllData();
         } catch (error) {
             console.error('Error saving:', error);
-            toast.error('Failed to save item');
+            toast.error('Failed to save: ' + (error.message || 'Unknown error'));
         }
     };
 
@@ -206,13 +274,60 @@ function ImpactContentManagement() {
             </div>
             {activeTab !== 'testimonials' && (
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                
+                {/* Upload button */}
+                <div className="flex items-center gap-3 mb-3">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    >
+                        {uploading ? (
+                            <>
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                Uploading...
+                            </>
+                        ) : (
+                            <>📷 Upload Image</>
+                        )}
+                    </button>
+                    <span className="text-xs text-gray-500">Max 5MB — JPEG, PNG, WebP, GIF</span>
+                </div>
+
+                {/* Or paste URL */}
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-400">— or paste a direct image URL —</span>
+                </div>
                 <input
                     type="text"
                     value={editingItem?.image_url || ''}
                     onChange={(e) => setEditingItem({ ...editingItem, image_url: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                    placeholder="https://images.unsplash.com/photo-..."
                 />
+
+                {/* Preview */}
+                {editingItem?.image_url && (
+                    <div className="mt-3">
+                        <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                        <img
+                            src={editingItem.image_url}
+                            alt="Preview"
+                            className="w-40 h-28 object-cover rounded border"
+                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                        />
+                        <p className="text-xs text-red-500 mt-1" style={{ display: 'none' }}>⚠️ Image failed to load — use the Upload button instead.</p>
+                    </div>
+                )}
             </div>
             )}
             <div className="grid grid-cols-2 gap-4">
@@ -279,13 +394,60 @@ function ImpactContentManagement() {
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                
+                {/* Upload button */}
+                <div className="flex items-center gap-3 mb-3">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    >
+                        {uploading ? (
+                            <>
+                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                Uploading...
+                            </>
+                        ) : (
+                            <>📷 Upload Image</>
+                        )}
+                    </button>
+                    <span className="text-xs text-gray-500">Max 5MB — JPEG, PNG, WebP, GIF</span>
+                </div>
+
+                {/* Or paste URL */}
+                <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-gray-400">— or paste a direct image URL —</span>
+                </div>
                 <input
                     type="text"
                     value={editingItem?.image_url || ''}
                     onChange={(e) => setEditingItem({ ...editingItem, image_url: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                    placeholder="https://images.unsplash.com/photo-..."
                 />
+
+                {/* Preview */}
+                {editingItem?.image_url && (
+                    <div className="mt-3">
+                        <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                        <img
+                            src={editingItem.image_url}
+                            alt="Preview"
+                            className="w-40 h-28 object-cover rounded border"
+                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                        />
+                        <p className="text-xs text-red-500 mt-1" style={{ display: 'none' }}>⚠️ Image failed to load — use the Upload button instead.</p>
+                    </div>
+                )}
             </div>
             <div className="grid grid-cols-3 gap-4">
                 <div>

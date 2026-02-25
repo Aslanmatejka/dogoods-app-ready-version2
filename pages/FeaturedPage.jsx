@@ -175,6 +175,7 @@ function FeaturedPage() {
                                                 src={story.image_url}
                                                 alt={story.title}
                                                 className="rounded-2xl shadow-2xl w-full h-auto"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
                                             />
                                         </div>
                                     )}
