@@ -91,8 +91,8 @@ function ImpactContentManagement() {
         loadAllData();
     }, []);
 
-    const loadAllData = async () => {
-        setLoading(true);
+    const loadAllData = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const [storiesRes, galleryRes, recipesRes] = await Promise.all([
                 supabase.from('impact_stories').select('*').order('display_order'),
@@ -118,9 +118,6 @@ function ImpactContentManagement() {
         setEditingItem(newItem);
         setShowModal(true);
         
-        // Debug: Check auth state
-        const { data: { user }, error } = await supabase.auth.getUser();
-        console.log('[ImpactCMS] Auth check on modal open - User:', user?.id, user?.email, 'Error:', error);
     };
 
     const handleEdit = (item) => {
@@ -160,7 +157,7 @@ function ImpactContentManagement() {
         try {
             await supabaseRest(table, 'DELETE', null, `id=eq.${id}`);
             toast.success('Item deleted successfully');
-            loadAllData();
+            loadAllData(true);
         } catch (error) {
             console.error('Error deleting:', error);
             toast.error('Failed to delete item');
@@ -219,7 +216,7 @@ function ImpactContentManagement() {
             
             setShowModal(false);
             setEditingItem(null);
-            loadAllData();
+            loadAllData(true);
         } catch (error) {
             console.error('[ImpactCMS] Error saving - Full error:', error);
             console.error('[ImpactCMS] Error message:', error.message);
@@ -236,7 +233,7 @@ function ImpactContentManagement() {
         try {
             await supabaseRest(table, 'PATCH', { is_active: !isActive }, `id=eq.${id}`);
             toast.success(isActive ? 'Item hidden' : 'Item activated');
-            loadAllData();
+            loadAllData(true);
         } catch (error) {
             console.error('Error toggling active:', error);
             toast.error('Failed to update status');
