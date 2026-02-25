@@ -208,38 +208,37 @@ function ImpactContentManagement() {
         return 'impact_gallery';
     };
 
+    const getNextDisplayOrder = () => {
+        if (isStoryTab(activeTab)) {
+            const filtered = getFilteredStories(activeTab);
+            if (filtered.length === 0) return 1;
+            return Math.max(...filtered.map(s => s.display_order || 0)) + 1;
+        } else {
+            if (gallery.length === 0) return 1;
+            return Math.max(...gallery.map(g => g.display_order || 0)) + 1;
+        }
+    };
+
     const getEmptyItem = () => {
+        const nextOrder = getNextDisplayOrder();
         if (isStoryTab(activeTab)) {
             const base = {
                 type: tabToStoryType[activeTab],
                 title: '',
                 quote: '',
-                attribution: '',
-                organization: '',
-                display_order: 0,
+                display_order: nextOrder,
                 is_active: true
             };
-            // Only include image_url for non-testimonial story types
             if (activeTab !== 'testimonials') {
                 base.image_url = '';
             }
             return base;
-        } else if (activeTab === 'gallery') {
-            return {
-                title: '',
-                description: '',
-                image_url: '',
-                category: '',
-                display_order: 0,
-                is_active: true
-            };
         } else {
             return {
                 title: '',
                 description: '',
                 image_url: '',
-                category: '',
-                display_order: 0,
+                display_order: nextOrder,
                 is_active: true
             };
         }
@@ -330,45 +329,14 @@ function ImpactContentManagement() {
                 )}
             </div>
             )}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Attribution</label>
-                    <input
-                        type="text"
-                        value={editingItem?.attribution || ''}
-                        onChange={(e) => setEditingItem({ ...editingItem, attribution: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
-                    <input
-                        type="text"
-                        value={editingItem?.organization || ''}
-                        onChange={(e) => setEditingItem({ ...editingItem, organization: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                    />
-                </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
-                    <input
-                        type="number"
-                        value={editingItem?.display_order || 0}
-                        onChange={(e) => setEditingItem({ ...editingItem, display_order: parseInt(e.target.value) })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                    />
-                </div>
-                <div className="flex items-center pt-6">
-                    <input
-                        type="checkbox"
-                        checked={editingItem?.is_active || false}
-                        onChange={(e) => setEditingItem({ ...editingItem, is_active: e.target.checked })}
-                        className="mr-2"
-                    />
-                    <label className="text-sm font-medium text-gray-700">Active</label>
-                </div>
+            <div className="flex items-center gap-2 pt-2">
+                <input
+                    type="checkbox"
+                    checked={editingItem?.is_active || false}
+                    onChange={(e) => setEditingItem({ ...editingItem, is_active: e.target.checked })}
+                    className="mr-1"
+                />
+                <label className="text-sm font-medium text-gray-700">Active</label>
             </div>
         </div>
     );
@@ -449,34 +417,14 @@ function ImpactContentManagement() {
                     </div>
                 )}
             </div>
-            <div className="grid grid-cols-3 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <input
-                        type="text"
-                        value={editingItem?.category || ''}
-                        onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
-                    <input
-                        type="number"
-                        value={editingItem?.display_order || 0}
-                        onChange={(e) => setEditingItem({ ...editingItem, display_order: parseInt(e.target.value) })}
-                        className="w-full px-3 py-2 border rounded-lg"
-                    />
-                </div>
-                <div className="flex items-center pt-6">
-                    <input
-                        type="checkbox"
-                        checked={editingItem?.is_active || false}
-                        onChange={(e) => setEditingItem({ ...editingItem, is_active: e.target.checked })}
-                        className="mr-2"
-                    />
-                    <label className="text-sm font-medium text-gray-700">Active</label>
-                </div>
+            <div className="flex items-center gap-2 pt-2">
+                <input
+                    type="checkbox"
+                    checked={editingItem?.is_active || false}
+                    onChange={(e) => setEditingItem({ ...editingItem, is_active: e.target.checked })}
+                    className="mr-1"
+                />
+                <label className="text-sm font-medium text-gray-700">Active</label>
             </div>
         </div>
     );
@@ -531,7 +479,6 @@ function ImpactContentManagement() {
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">{story.title}</h3>
                                     <p className="text-gray-600 mb-2 line-clamp-2">{story.quote}</p>
-                                    <p className="text-sm text-gray-500">— {story.attribution}, {story.organization}</p>
                                 </div>
                                 <div className="flex gap-2 ml-4">
                                     <button
@@ -564,7 +511,6 @@ function ImpactContentManagement() {
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            {item.category && <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">{item.category}</span>}
                                             {!item.is_active && <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">Hidden</span>}
                                         </div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
