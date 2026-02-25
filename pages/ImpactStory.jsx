@@ -249,9 +249,6 @@ function ImpactStory() {
                         <Link to="/testimonials" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Testimonials
                         </Link>
-                        <Link to="/recipes" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
-                            Recipes
-                        </Link>
                     </div>
                 </div>
             </section>
