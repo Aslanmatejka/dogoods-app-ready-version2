@@ -195,16 +195,37 @@ function ImpactContentManagement() {
                 console.log('[ImpactCMS] Creating new item - skipping auth (created_by is nullable)');
                 const insertPayload = { ...itemData };
                 console.log('[ImpactCMS] Insert payload:', insertPayload);
-                console.log('[ImpactCMS] Calling supabase.from().insert()');
-                const { data, error } = await supabase
+                console.log('[ImpactCMS] Calling supabase.from().insert() with 10s timeout');
+                
+                // Wrap insert with timeout to detect hanging
+                const insertPromise = supabase
                     .from(table)
                     .insert([insertPayload]);
-                console.log('[ImpactCMS] Insert result:', { data, error });
-                if (error) {
-                    console.error('[ImpactCMS] Insert error details:', JSON.stringify(error, null, 2));
-                    throw error;
+                
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Insert operation timed out after 10 seconds')), 10000)
+                );
+                
+                try {
+                    const { data, error } = await Promise.race([insertPromise, timeoutPromise]);
+                    console.log('[ImpactCMS] Insert result:', { data, error });
+                    if (error) {
+                        console.error('[ImpactCMS] Insert error details:', JSON.stringify(error, null, 2));
+                        throw error;
+                    }
+                    toast.success('Item created successfully');
+                } catch (timeoutError) {
+                    if (timeoutError.message.includes('timed out')) {
+                        console.error('[ImpactCMS] Insert timed out - checking if data was actually inserted');
+                        // Try to verify if data was inserted despite timeout
+                        toast.warning('Save operation timed out. Refreshing to check if it saved...');
+                        loadAllData();
+                        setShowModal(false);
+                        setEditingItem(null);
+                        return;
+                    }
+                    throw timeoutError;
                 }
-                toast.success('Item created successfully');
             }
             
             setShowModal(false);

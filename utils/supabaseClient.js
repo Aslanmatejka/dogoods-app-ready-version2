@@ -25,6 +25,14 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     params: {
       eventsPerSecond: 10
     }
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'dogoods-app'
+    }
+  },
+  db: {
+    schema: 'public'
   }
 })
 
