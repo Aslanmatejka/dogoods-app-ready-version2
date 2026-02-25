@@ -94,17 +94,34 @@ function ImpactContentManagement() {
     const loadAllData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+            const sessionData = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
+            const accessToken = sessionData?.access_token || supabaseKey;
+            const headers = {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${accessToken}`,
+            };
+
             const [storiesRes, galleryRes, recipesRes] = await Promise.all([
-                supabase.from('impact_stories').select('*').order('display_order'),
-                supabase.from('impact_gallery').select('*').order('display_order'),
-                supabase.from('impact_recipes').select('*').order('display_order')
+                fetch(`${supabaseUrl}/rest/v1/impact_stories?order=display_order`, { headers }),
+                fetch(`${supabaseUrl}/rest/v1/impact_gallery?order=display_order`, { headers }),
+                fetch(`${supabaseUrl}/rest/v1/impact_recipes?order=display_order`, { headers })
             ]);
-            if (storiesRes.error) throw storiesRes.error;
-            if (galleryRes.error) throw galleryRes.error;
-            if (recipesRes.error) throw recipesRes.error;
-            setStories(storiesRes.data || []);
-            setGallery(galleryRes.data || []);
-            setRecipes(recipesRes.data || []);
+
+            if (!storiesRes.ok) throw new Error('Failed to load stories');
+            if (!galleryRes.ok) throw new Error('Failed to load gallery');
+            if (!recipesRes.ok) throw new Error('Failed to load recipes');
+
+            const [storiesData, galleryData, recipesData] = await Promise.all([
+                storiesRes.json(),
+                galleryRes.json(),
+                recipesRes.json()
+            ]);
+
+            setStories(storiesData || []);
+            setGallery(galleryData || []);
+            setRecipes(recipesData || []);
         } catch (error) {
             console.error('Error loading data:', error);
             toast.error('Failed to load data');
