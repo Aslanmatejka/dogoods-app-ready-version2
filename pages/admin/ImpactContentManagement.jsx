@@ -186,8 +186,7 @@ function ImpactContentManagement() {
                 const { data, error } = await supabase
                     .from(table)
                     .update({ ...itemData, updated_at: new Date().toISOString() })
-                    .eq('id', id)
-                    .select();
+                    .eq('id', id);
                 console.log('[ImpactCMS] Update result:', { data, error });
                 if (error) throw error;
                 toast.success('Item updated successfully');
@@ -199,8 +198,7 @@ function ImpactContentManagement() {
                 console.log('[ImpactCMS] Calling supabase.from().insert()');
                 const { data, error } = await supabase
                     .from(table)
-                    .insert([insertPayload])
-                    .select();
+                    .insert([insertPayload]);
                 console.log('[ImpactCMS] Insert result:', { data, error });
                 if (error) {
                     console.error('[ImpactCMS] Insert error details:', JSON.stringify(error, null, 2));
