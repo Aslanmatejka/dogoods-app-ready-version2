@@ -128,16 +128,37 @@ function ImpactContentManagement() {
         setShowModal(true);
     };
 
+    // Helper for direct REST API calls (bypasses hanging Supabase JS client)
+    const supabaseRest = async (table, method, body = null, filter = '') => {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const sessionData = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
+        const accessToken = sessionData?.access_token || supabaseKey;
+
+        const url = `${supabaseUrl}/rest/v1/${table}${filter ? '?' + filter : ''}`;
+        const headers = {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${accessToken}`,
+            'Prefer': 'return=minimal'
+        };
+
+        const opts = { method, headers };
+        if (body) opts.body = JSON.stringify(body);
+
+        const response = await fetch(url, opts);
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`${method} ${table} failed: ${response.status} - ${errText}`);
+        }
+        return response;
+    };
+
     const handleDelete = async (id, table) => {
         if (!confirm('Are you sure you want to delete this item?')) return;
         
         try {
-            const { error } = await supabase
-                .from(table)
-                .delete()
-                .eq('id', id);
-            
-            if (error) throw error;
+            await supabaseRest(table, 'DELETE', null, `id=eq.${id}`);
             toast.success('Item deleted successfully');
             loadAllData();
         } catch (error) {
@@ -182,50 +203,18 @@ function ImpactContentManagement() {
             console.log('[ImpactCMS] Saving to table:', table, 'id:', id, 'data:', itemData);
 
             if (id) {
-                // Update existing
-                const { data, error } = await supabase
-                    .from(table)
-                    .update({ ...itemData, updated_at: new Date().toISOString() })
-                    .eq('id', id);
-                console.log('[ImpactCMS] Update result:', { data, error });
-                if (error) throw error;
+                // Update existing via REST API
+                console.log('[ImpactCMS] Updating item via REST API');
+                const updateData = { ...itemData, updated_at: new Date().toISOString() };
+                await supabaseRest(table, 'PATCH', updateData, `id=eq.${id}`);
+                console.log('[ImpactCMS] Update successful');
                 toast.success('Item updated successfully');
             } else {
-                // Create new - created_by is nullable, skip auth call that's hanging
-                console.log('[ImpactCMS] Creating new item - skipping auth (created_by is nullable)');
-                const insertPayload = { ...itemData };
-                console.log('[ImpactCMS] Insert payload:', insertPayload);
-                console.log('[ImpactCMS] Calling supabase.from().insert() with 10s timeout');
-                
-                // Wrap insert with timeout to detect hanging
-                const insertPromise = supabase
-                    .from(table)
-                    .insert([insertPayload]);
-                
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Insert operation timed out after 10 seconds')), 10000)
-                );
-                
-                try {
-                    const { data, error } = await Promise.race([insertPromise, timeoutPromise]);
-                    console.log('[ImpactCMS] Insert result:', { data, error });
-                    if (error) {
-                        console.error('[ImpactCMS] Insert error details:', JSON.stringify(error, null, 2));
-                        throw error;
-                    }
-                    toast.success('Item created successfully');
-                } catch (timeoutError) {
-                    if (timeoutError.message.includes('timed out')) {
-                        console.error('[ImpactCMS] Insert timed out - checking if data was actually inserted');
-                        // Try to verify if data was inserted despite timeout
-                        toast.warning('Save operation timed out. Refreshing to check if it saved...');
-                        loadAllData();
-                        setShowModal(false);
-                        setEditingItem(null);
-                        return;
-                    }
-                    throw timeoutError;
-                }
+                // Create new via REST API
+                console.log('[ImpactCMS] Creating new item via REST API');
+                await supabaseRest(table, 'POST', itemData);
+                console.log('[ImpactCMS] Insert successful');
+                toast.success('Item created successfully');
             }
             
             setShowModal(false);
@@ -245,12 +234,7 @@ function ImpactContentManagement() {
 
     const toggleActive = async (id, isActive, table) => {
         try {
-            const { error } = await supabase
-                .from(table)
-                .update({ is_active: !isActive })
-                .eq('id', id);
-            
-            if (error) throw error;
+            await supabaseRest(table, 'PATCH', { is_active: !isActive }, `id=eq.${id}`);
             toast.success(isActive ? 'Item hidden' : 'Item activated');
             loadAllData();
         } catch (error) {
