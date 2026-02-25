@@ -112,10 +112,14 @@ function ImpactContentManagement() {
         }
     };
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         const newItem = getEmptyItem();
         setEditingItem(newItem);
         setShowModal(true);
+        
+        // Debug: Check auth state
+        const { data: { user }, error } = await supabase.auth.getUser();
+        console.log('[ImpactCMS] Auth check on modal open - User:', user?.id, user?.email, 'Error:', error);
     };
 
     const handleEdit = (item) => {
@@ -142,6 +146,8 @@ function ImpactContentManagement() {
     };
 
     const handleSave = async () => {
+        console.log('[ImpactCMS] handleSave called - activeTab:', activeTab, 'editingItem:', editingItem);
+        
         // Validate required fields
         if (!editingItem?.title?.trim()) {
             toast.error('Title is required');
@@ -156,6 +162,7 @@ function ImpactContentManagement() {
             return;
         }
         if (activeTab === 'recipes' && !editingItem?.youtube_url?.trim()) {
+            console.log('[ImpactCMS] Validation failed - youtube_url missing');
             toast.error('YouTube URL is required for recipes');
             return;
         }
@@ -192,7 +199,10 @@ function ImpactContentManagement() {
                     .insert([insertPayload])
                     .select();
                 console.log('[ImpactCMS] Insert result:', { data, error });
-                if (error) throw error;
+                if (error) {
+                    console.error('[ImpactCMS] Insert error details:', JSON.stringify(error, null, 2));
+                    throw error;
+                }
                 toast.success('Item created successfully');
             }
             
@@ -200,7 +210,11 @@ function ImpactContentManagement() {
             setEditingItem(null);
             loadAllData();
         } catch (error) {
-            console.error('[ImpactCMS] Error saving:', error);
+            console.error('[ImpactCMS] Error saving - Full error:', error);
+            console.error('[ImpactCMS] Error message:', error.message);
+            console.error('[ImpactCMS] Error code:', error.code);
+            console.error('[ImpactCMS] Error details:', error.details);
+            console.error('[ImpactCMS] Error hint:', error.hint);
             toast.error('Failed to save: ' + (error.message || error.code || 'Unknown error'));
         }
     };
