@@ -148,7 +148,7 @@ function ImpactContentManagement() {
 
     const handleSave = async () => {
         if (saving) {
-            console.log('[ImpactCMS] Save already in progress, ignoring click');
+            console.log('[ImpactCMS] Already saving, ignoring click');
             return;
         }
         
@@ -193,14 +193,21 @@ function ImpactContentManagement() {
                 toast.success('Item updated successfully');
             } else {
                 // Create new
-                const { data: { user } } = await supabase.auth.getUser();
-                console.log('[ImpactCMS] Current user:', user?.id, user?.email);
+                console.log('[ImpactCMS] Creating new item - calling auth.getUser()');
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                console.log('[ImpactCMS] Auth result - user:', user?.id, user?.email, 'error:', authError);
+                if (authError) {
+                    console.error('[ImpactCMS] Auth error:', authError);
+                    toast.error('Authentication error: ' + authError.message);
+                    return;
+                }
                 if (!user) {
                     toast.error('You must be logged in to create content');
                     return;
                 }
                 const insertPayload = { ...itemData, created_by: user.id };
                 console.log('[ImpactCMS] Insert payload:', insertPayload);
+                console.log('[ImpactCMS] Calling supabase.from().insert()');
                 const { data, error } = await supabase
                     .from(table)
                     .insert([insertPayload])
@@ -483,34 +490,29 @@ function ImpactContentManagement() {
         </div>
     );
 
-    // Helper to extract YouTube video ID or URL from various formats
+    // Helper to extract YouTube video ID
     const getYouTubeId = (url) => {
         if (!url) return null;
-        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^?&#/]+)/);
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^?&/#]+)/);
         return match ? match[1] : null;
     };
 
-    // Helper to extract clean YouTube URL from iframe or other formats
-    const extractYouTubeUrl = (input) => {
+    // Helper to extract clean YouTube URL from various formats (embed code, shortened URL, etc.)
+    const cleanYouTubeUrl = (input) => {
         if (!input) return '';
         
-        // Check if it's an iframe embed code
-        const iframeMatch = input.match(/src=["']([^"']*youtube[^"']*)["']/);
+        // If it's an iframe embed code, extract the src URL
+        const iframeMatch = input.match(/src=["']([^"']+)["']/);
         if (iframeMatch) {
-            const embedUrl = iframeMatch[1];
-            // Extract video ID from embed URL
-            const idMatch = embedUrl.match(/\/embed\/([^?&#]+)/);
-            if (idMatch) {
-                return `https://www.youtube.com/watch?v=${idMatch[1]}`;
-            }
+            input = iframeMatch[1];
         }
         
-        // If it's already a clean URL, return as-is
-        if (input.includes('youtube.com/watch') || input.includes('youtu.be/')) {
-            return input;
-        }
+        // Extract video ID
+        const videoId = getYouTubeId(input);
+        if (!videoId) return input; // Return as-is if we can't parse it
         
-        return input;
+        // Return clean watch URL
+        return `https://www.youtube.com/watch?v=${videoId}`;
     };
 
     const renderRecipeForm = () => (
@@ -540,19 +542,16 @@ function ImpactContentManagement() {
                 <input
                     type="text"
                     value={editingItem?.youtube_url || ''}
-                    onChange={(e) => {
-                        const cleanUrl = extractYouTubeUrl(e.target.value);
-                        setEditingItem({ ...editingItem, youtube_url: cleanUrl });
-                    }}
+                    onChange={(e) => setEditingItem({ ...editingItem, youtube_url: e.target.value })}
                     onBlur={(e) => {
-                        // Clean up on blur in case paste didn't trigger onChange properly
-                        const cleanUrl = extractYouTubeUrl(e.target.value);
-                        if (cleanUrl !== e.target.value) {
-                            setEditingItem({ ...editingItem, youtube_url: cleanUrl });
+                        // Clean up the URL when user finishes typing
+                        const cleaned = cleanYouTubeUrl(e.target.value);
+                        if (cleaned !== e.target.value) {
+                            setEditingItem({ ...editingItem, youtube_url: cleaned });
                         }
                     }}
                     className="w-full px-3 py-2 border rounded-lg"
-                    placeholder="Paste YouTube URL or embed code"
+                    placeholder="https://www.youtube.com/watch?v=... or paste embed code"
                 />
                 {editingItem?.youtube_url && getYouTubeId(editingItem.youtube_url) && (
                     <div className="mt-3">
