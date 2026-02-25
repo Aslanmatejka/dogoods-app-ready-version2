@@ -482,14 +482,14 @@ function ImpactContentManagement() {
     );
 
     return (
-        <div className="p-6">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Impact Content Management</h1>
-                <p className="text-gray-600">Create and manage testimonials, blog posts, news, and gallery items</p>
+        <div className="-mx-6 md:-mx-10 -my-6 md:-my-10 min-h-screen bg-gray-50">
+            <div className="bg-white border-b px-6 py-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Impact Content Management</h1>
+                <p className="text-gray-500 text-sm">Create and manage testimonials, blog posts, news, and gallery items</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap gap-1 mb-6 border-b">
+            <div className="bg-white border-b px-6 flex flex-wrap gap-1 sticky top-16 z-30">
                 {['testimonials', 'blog', 'news', 'gallery'].map((tab) => {
                     const count = tab === 'gallery' ? gallery.length
                         : getFilteredStories(tab).length;
@@ -497,7 +497,7 @@ function ImpactContentManagement() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-3 font-semibold text-sm ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-800'}`}
+                            className={`px-4 py-3 font-semibold text-sm transition-colors ${activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-800'}`}
                         >
                             {tabLabels[tab]} ({count})
                         </button>
@@ -505,10 +505,11 @@ function ImpactContentManagement() {
                 })}
             </div>
 
+            <div className="px-6 py-6">
             {/* Action Button */}
             <button
                 onClick={handleCreate}
-                className="mb-6 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                className="mb-6 bg-green-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-green-700 transition-colors text-sm"
             >
                 + Create New {tabLabels[activeTab]} Item
             </button>
@@ -596,34 +597,47 @@ function ImpactContentManagement() {
 
                 </div>
             )}
+            </div>{/* end px-6 py-6 content wrapper */}
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4 pt-20">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                            {editingItem?.id ? 'Edit' : 'Create'} {tabLabels[activeTab]}
-                        </h2>
-                        
-                        {isStoryTab(activeTab) && renderStoryForm()}
-                        {activeTab === 'gallery' && renderGalleryForm()}
-                        
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                onClick={() => {
-                                    setShowModal(false);
-                                    setEditingItem(null);
-                                }}
-                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
-                            >
-                                Save
-                            </button>
+                <div className="fixed inset-0 bg-black/50 z-[100] overflow-y-auto">
+                    <div className="min-h-full flex items-start justify-center px-4 py-8 pt-24">
+                        <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl">
+                            {/* Modal Header - sticky */}
+                            <div className="sticky top-0 bg-white rounded-t-xl border-b px-6 py-4 flex items-center justify-between z-10">
+                                <h2 className="text-xl font-bold text-gray-900">
+                                    {editingItem?.id ? 'Edit' : 'Create'} {tabLabels[activeTab]}
+                                </h2>
+                                <button
+                                    onClick={() => { setShowModal(false); setEditingItem(null); }}
+                                    className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            
+                            {/* Modal Body */}
+                            <div className="px-6 py-5">
+                                {isStoryTab(activeTab) && renderStoryForm()}
+                                {activeTab === 'gallery' && renderGalleryForm()}
+                            </div>
+                            
+                            {/* Modal Footer - sticky */}
+                            <div className="sticky bottom-0 bg-white rounded-b-xl border-t px-6 py-4 flex justify-end gap-3">
+                                <button
+                                    onClick={() => { setShowModal(false); setEditingItem(null); }}
+                                    className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                >
+                                    Save
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
