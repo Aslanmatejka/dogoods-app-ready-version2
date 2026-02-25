@@ -9,7 +9,7 @@ function FeaturedPage() {
     const navigate = useNavigate();
     const [featured, setFeatured] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [modalImage, setModalImage] = useState(null);
+    const [selectedStory, setSelectedStory] = useState(null);
 
     useEffect(() => {
         loadFeatured();
@@ -38,14 +38,6 @@ function FeaturedPage() {
         }
     };
 
-    const handleImageClick = (image, title, description) => {
-        setModalImage({ image, title, description });
-    };
-
-    const closeModal = () => {
-        setModalImage(null);
-    };
-
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -54,76 +46,106 @@ function FeaturedPage() {
         );
     }
 
+    // ── Detail View ──
+    if (selectedStory) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                {/* Admin Manage Button */}
+                {isAdmin && (
+                    <button
+                        onClick={() => navigate('/admin/impact-content')}
+                        className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow-2xl hover:shadow-xl transition-all transform hover:scale-105"
+                    >
+                        ✏️ Manage Content
+                    </button>
+                )}
+
+                <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    {/* Back button */}
+                    <button
+                        onClick={() => setSelectedStory(null)}
+                        className="mb-8 text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2 font-semibold"
+                    >
+                        <span>←</span>
+                        <span>Back to Blog</span>
+                    </button>
+
+                    {/* Hero image */}
+                    {selectedStory.image_url && (
+                        <img
+                            src={selectedStory.image_url}
+                            alt={selectedStory.title}
+                            className="w-full h-72 md:h-96 object-cover rounded-2xl shadow-lg mb-8"
+                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
+                        />
+                    )}
+
+                    {/* Meta */}
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full uppercase tracking-wide">Blog</span>
+                        {selectedStory.created_at && (
+                            <span className="text-sm text-gray-400">
+                                {new Date(selectedStory.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Title */}
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{selectedStory.title}</h1>
+
+                    {/* Attribution */}
+                    {selectedStory.attribution && (
+                        <p className="text-gray-500 mb-8 text-lg">
+                            By <strong>{selectedStory.attribution}</strong>
+                            {selectedStory.organization && <span> &middot; {selectedStory.organization}</span>}
+                        </p>
+                    )}
+
+                    {/* Content */}
+                    {selectedStory.quote && (
+                        <div className="bg-gray-50 border-l-4 border-[#2CABE3] rounded-r-xl p-6 mb-8">
+                            <p className="text-lg text-gray-700 leading-relaxed italic">&ldquo;{selectedStory.quote}&rdquo;</p>
+                        </div>
+                    )}
+
+                    {selectedStory.description && (
+                        <p className="text-lg text-gray-600 leading-relaxed mb-8">{selectedStory.description}</p>
+                    )}
+
+                    {/* Stats */}
+                    {selectedStory.stats && (
+                        <div className="bg-green-50 rounded-xl p-5 mb-8">
+                            <p className="text-green-800 font-medium">📊 {selectedStory.stats}</p>
+                        </div>
+                    )}
+
+                    {/* Organization info */}
+                    {selectedStory.organization && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+                            <span>🏢 {selectedStory.organization}</span>
+                        </div>
+                    )}
+
+                    {/* Bottom nav */}
+                    <div className="border-t pt-8 flex justify-between items-center">
+                        <button
+                            onClick={() => setSelectedStory(null)}
+                            className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2"
+                        >
+                            ← All Blog Posts
+                        </button>
+                        <Link to="/impact-story" className="text-gray-500 hover:text-gray-700 font-medium">
+                            Impact Story →
+                        </Link>
+                    </div>
+                </article>
+            </div>
+        );
+    }
+
+    // ── Cards Grid View (default) ──
     return (
         <div className="min-h-screen bg-gray-50">
-            <style>{`
-                .clickable-image {
-                    cursor: pointer;
-                    transition: transform 0.3s ease;
-                    position: relative;
-                }
-                .clickable-image:hover {
-                    transform: scale(1.02);
-                }
-                .clickable-image::before {
-                    content: '🔍 Click to view details';
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(44, 171, 227, 0.95);
-                    color: white;
-                    padding: 12px 24px;
-                    border-radius: 12px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    pointer-events: none;
-                    z-index: 10;
-                }
-                .clickable-image:hover::before {
-                    opacity: 1;
-                }
-                .clickable-image img {
-                    transition: filter 0.3s ease;
-                }
-                .clickable-image:hover img {
-                    filter: brightness(0.9);
-                }
-            `}</style>
-
-            {/* Image Modal */}
-            {modalImage && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
-                    onClick={closeModal}
-                >
-                    <div
-                        className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button
-                            onClick={closeModal}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-2 shadow-lg z-10"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <img
-                            src={modalImage.image}
-                            alt={modalImage.title}
-                            className="w-full h-auto rounded-t-2xl"
-                        />
-                        <div className="p-8">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4">{modalImage.title}</h2>
-                            <p className="text-lg text-gray-700 leading-relaxed">{modalImage.description}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Admin Manage Button */}
             {isAdmin && (
                 <button
@@ -146,7 +168,7 @@ function FeaturedPage() {
                     </button>
                     <div className="text-center">
                         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                            Featured Stories
+                            Blog
                         </h1>
                         <p className="text-xl text-gray-700 max-w-3xl mx-auto">
                             Highlighting the most impactful stories from our community — milestones, achievements, and moments that inspire.
@@ -155,42 +177,39 @@ function FeaturedPage() {
                 </div>
             </section>
 
-            {/* Featured Stories */}
+            {/* Blog Cards Grid */}
             <section className="py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {featured.length === 0 ? (
                         <div className="text-center py-16">
-                            <p className="text-gray-500 text-lg">No featured stories yet. Check back soon!</p>
+                            <p className="text-gray-500 text-lg">No blog posts yet. Check back soon!</p>
                         </div>
                     ) : (
-                        <div className="space-y-16">
-                            {featured.map((story, index) => (
-                                <div key={story.id} className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
-                                    {story.image_url && (
-                                        <div
-                                            className={`clickable-image ${index % 2 === 1 ? 'md:order-2' : ''}`}
-                                            onClick={() => handleImageClick(story.image_url, story.title, story.quote || story.description)}
-                                        >
-                                            <img
-                                                src={story.image_url}
-                                                alt={story.title}
-                                                className="rounded-2xl shadow-2xl w-full h-auto"
-                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
-                                            />
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {featured.map((story) => (
+                                <div
+                                    key={story.id}
+                                    onClick={() => setSelectedStory(story)}
+                                    className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                                >
+                                    <div className="relative overflow-hidden">
+                                        <img
+                                            src={story.image_url || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
+                                            alt={story.title}
+                                            className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                                            <span className="text-white font-semibold text-sm bg-[#2CABE3]/90 px-4 py-2 rounded-full">Read More →</span>
                                         </div>
-                                    )}
-                                    <div className={index % 2 === 1 ? 'md:order-1' : ''}>
-                                        <h2 className="text-3xl font-bold text-gray-900 mb-4">{story.title}</h2>
-                                        <p className="text-lg text-gray-600 leading-relaxed mb-4">{story.quote || story.description}</p>
-                                        {story.attribution && (
-                                            <p className="text-gray-500">— {story.attribution}{story.organization && `, ${story.organization}`}</p>
+                                    </div>
+                                    <div className="p-5">
+                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{story.title}</h3>
+                                        {story.created_at && (
+                                            <p className="text-xs text-gray-400 mt-2">
+                                                {new Date(story.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                            </p>
                                         )}
-                                        {story.stats && (
-                                            <p className="text-gray-600 mt-4 font-medium">{story.stats}</p>
-                                        )}
-                                        <span className="text-sm text-gray-400 mt-4 block">
-                                            {new Date(story.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                        </span>
                                     </div>
                                 </div>
                             ))}
