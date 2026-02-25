@@ -547,12 +547,11 @@ function ImpactContentManagement() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 z-[100] overflow-y-auto">
-                    <div className="min-h-full flex items-start justify-center px-4 py-8 pt-24">
-                        <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl">
-                            {/* Modal Header - sticky */}
-                            <div className="sticky top-0 bg-white rounded-t-xl border-b px-6 py-4 flex items-center justify-between z-10">
-                                <h2 className="text-xl font-bold text-gray-900">
+                <div className="fixed inset-0 bg-black/50 z-[100] flex items-start justify-center pt-20 pb-4 px-4">
+                    <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl flex flex-col max-h-[calc(100vh-6rem)]">
+                        {/* Modal Header */}
+                        <div className="shrink-0 bg-white rounded-t-xl border-b px-6 py-4 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-gray-900">
                                     {editingItem?.id ? 'Edit' : 'Create'} {tabLabels[activeTab]}
                                 </h2>
                                 <button
@@ -563,27 +562,26 @@ function ImpactContentManagement() {
                                 </button>
                             </div>
                             
-                            {/* Modal Body */}
-                            <div className="px-6 py-5">
-                                {isStoryTab(activeTab) && renderStoryForm()}
-                                {activeTab === 'gallery' && renderGalleryForm()}
-                            </div>
-                            
-                            {/* Modal Footer - sticky */}
-                            <div className="sticky bottom-0 bg-white rounded-b-xl border-t px-6 py-4 flex justify-end gap-3">
-                                <button
-                                    onClick={() => { setShowModal(false); setEditingItem(null); }}
-                                    className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleSave}
-                                    className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                                >
-                                    Save
-                                </button>
-                            </div>
+                            {/* Modal Body - scrollable */}
+                        <div className="overflow-y-auto flex-1 px-6 py-5">
+                            {isStoryTab(activeTab) && renderStoryForm()}
+                            {activeTab === 'gallery' && renderGalleryForm()}
+                        </div>
+                        
+                        {/* Modal Footer */}
+                        <div className="shrink-0 bg-white rounded-b-xl border-t px-6 py-4 flex justify-end gap-3">
+                            <button
+                                onClick={() => { setShowModal(false); setEditingItem(null); }}
+                                className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                            >
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>
