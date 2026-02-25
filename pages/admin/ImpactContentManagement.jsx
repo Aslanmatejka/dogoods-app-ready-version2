@@ -156,24 +156,33 @@ function ImpactContentManagement() {
             // eslint-disable-next-line no-unused-vars
             const { id, created_at, updated_at, created_by, ...itemData } = editingItem;
             
+            console.log('[ImpactCMS] Saving to table:', table, 'id:', id, 'data:', itemData);
+
             if (id) {
                 // Update existing
-                const { error } = await supabase
+                const { data, error } = await supabase
                     .from(table)
                     .update({ ...itemData, updated_at: new Date().toISOString() })
-                    .eq('id', id);
+                    .eq('id', id)
+                    .select();
+                console.log('[ImpactCMS] Update result:', { data, error });
                 if (error) throw error;
                 toast.success('Item updated successfully');
             } else {
                 // Create new
                 const { data: { user } } = await supabase.auth.getUser();
+                console.log('[ImpactCMS] Current user:', user?.id, user?.email);
                 if (!user) {
                     toast.error('You must be logged in to create content');
                     return;
                 }
-                const { error } = await supabase
+                const insertPayload = { ...itemData, created_by: user.id };
+                console.log('[ImpactCMS] Insert payload:', insertPayload);
+                const { data, error } = await supabase
                     .from(table)
-                    .insert([{ ...itemData, created_by: user.id }]);
+                    .insert([insertPayload])
+                    .select();
+                console.log('[ImpactCMS] Insert result:', { data, error });
                 if (error) throw error;
                 toast.success('Item created successfully');
             }
@@ -182,8 +191,8 @@ function ImpactContentManagement() {
             setEditingItem(null);
             loadAllData();
         } catch (error) {
-            console.error('Error saving:', error);
-            toast.error('Failed to save: ' + (error.message || 'Unknown error'));
+            console.error('[ImpactCMS] Error saving:', error);
+            toast.error('Failed to save: ' + (error.message || error.code || 'Unknown error'));
         }
     };
 
@@ -547,8 +556,14 @@ function ImpactContentManagement() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 z-[100] flex items-start justify-center pt-20 pb-4 px-4">
-                    <div className="bg-white rounded-xl max-w-2xl w-full shadow-2xl flex flex-col max-h-[calc(100vh-6rem)]">
+                <div 
+                    className="fixed inset-0 bg-black/50 z-[100] flex items-start justify-center pt-20 pb-4 px-4"
+                    onClick={() => { setShowModal(false); setEditingItem(null); }}
+                >
+                    <div 
+                        className="bg-white rounded-xl max-w-2xl w-full shadow-2xl flex flex-col max-h-[calc(100vh-6rem)]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Modal Header */}
                         <div className="shrink-0 bg-white rounded-t-xl border-b px-6 py-4 flex items-center justify-between">
                             <h2 className="text-xl font-bold text-gray-900">

@@ -23,7 +23,7 @@ function NewsPage() {
                 .select('*')
                 .eq('type', 'news')
                 .eq('is_active', true)
-                .order('display_order');
+                .order('created_at', { ascending: false });
 
             if (error) {
                 console.error('Error loading news:', error);
@@ -93,6 +93,11 @@ function NewsPage() {
                 .clickable-image:hover img {
                     filter: brightness(0.9);
                 }
+                @keyframes riseUp {
+                    from { opacity: 0; transform: translateY(40px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .rise-up { opacity: 0; animation: riseUp 0.6s ease-out forwards; }
             `}</style>
 
             {/* Image Modal */}
@@ -165,30 +170,34 @@ function NewsPage() {
                             <p className="text-gray-500 text-lg">No news articles yet. Check back soon!</p>
                         </div>
                     ) : (
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {news.map((item) => (
-                                <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                        <div className="flex flex-col gap-8 max-w-4xl mx-auto">
+                            {news.map((item, index) => (
+                                <div
+                                    key={item.id}
+                                    className="rise-up bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col md:flex-row"
+                                    style={{ animationDelay: `${index * 0.12}s` }}
+                                >
                                     {item.image_url && (
                                         <div
-                                            className="clickable-image"
+                                            className="clickable-image md:w-80 shrink-0 !rounded-none md:!rounded-l-2xl"
                                             onClick={() => handleImageClick(item.image_url, item.title, item.quote || item.description)}
                                         >
                                             <img
                                                 src={item.image_url}
                                                 alt={item.title}
-                                                className="w-full h-48 object-cover"
+                                                className="w-full h-52 md:h-full object-cover"
                                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168d6c?q=80&w=800&auto=format&fit=crop'; }}
                                             />
                                         </div>
                                     )}
-                                    <div className="p-6">
-                                        <span className="text-sm text-gray-500">
+                                    <div className="p-6 flex flex-col justify-center">
+                                        <p className="text-xs text-gray-400 mb-2 uppercase tracking-wide font-medium">
                                             {new Date(item.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                        </span>
-                                        <h3 className="text-xl font-bold text-gray-900 mt-2 mb-3">{item.title}</h3>
-                                        <p className="text-gray-600 leading-relaxed">{item.quote || item.description}</p>
+                                        </p>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                                        <p className="text-gray-600 leading-relaxed line-clamp-3 text-sm">{item.quote || item.description}</p>
                                         {item.attribution && (
-                                            <p className="text-sm text-gray-500 mt-4">— {item.attribution}{item.organization && `, ${item.organization}`}</p>
+                                            <p className="text-sm text-gray-500 mt-3">— {item.attribution}{item.organization && `, ${item.organization}`}</p>
                                         )}
                                     </div>
                                 </div>

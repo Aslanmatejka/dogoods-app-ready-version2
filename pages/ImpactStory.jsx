@@ -105,7 +105,9 @@ function ImpactStory() {
         }
     };
 
-    const featuredStories = stories.filter(s => s.type === 'featured');
+    const featuredStories = stories
+        .filter(s => s.type === 'featured')
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     const testimonials = stories.filter(s => s.type === 'testimonial');
 
     if (loading) {
@@ -212,6 +214,11 @@ function ImpactStory() {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+                @keyframes riseUp {
+                    from { opacity: 0; transform: translateY(40px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .rise-up { opacity: 0; animation: riseUp 0.6s ease-out forwards; }
             `}</style>
 
             {/* Admin Edit Button */}
@@ -258,31 +265,36 @@ function ImpactStory() {
                             <p className="text-gray-400 text-lg">No blog posts yet. Check back soon!</p>
                         </div>
                     ) : (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {featuredStories.map((story) => (
+                        <div className="flex flex-col gap-8 max-w-4xl mx-auto">
+                            {featuredStories.map((story, index) => (
                                 <div
                                     key={story.id}
                                     onClick={() => setSelectedStory(story)}
-                                    className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                                    className="rise-up bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 flex flex-col md:flex-row"
+                                    style={{ animationDelay: `${index * 0.12}s` }}
                                 >
-                                    <div className="relative overflow-hidden">
+                                    <div className="relative overflow-hidden md:w-80 shrink-0">
                                         <img
                                             src={story.image_url || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
                                             alt={story.title}
-                                            className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            className="w-full h-52 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
                                             <span className="text-white font-semibold text-sm bg-[#2CABE3]/90 px-4 py-2 rounded-full">Read More &rarr;</span>
                                         </div>
                                     </div>
-                                    <div className="p-5">
-                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{story.title}</h3>
+                                    <div className="p-6 flex flex-col justify-center">
                                         {story.created_at && (
-                                            <p className="text-xs text-gray-400 mt-2">
+                                            <p className="text-xs text-gray-400 mb-2 uppercase tracking-wide font-medium">
                                                 {new Date(story.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                                             </p>
                                         )}
+                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">{story.title}</h3>
+                                        {story.quote && (
+                                            <p className="text-gray-500 line-clamp-3 text-sm leading-relaxed">{story.quote}</p>
+                                        )}
+                                        <span className="mt-4 text-[#2CABE3] font-semibold text-sm group-hover:underline">Read More &rarr;</span>
                                     </div>
                                 </div>
                             ))}
