@@ -9,6 +9,7 @@ function NewsPage() {
     const navigate = useNavigate();
     const [news, setNews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [modalImage, setModalImage] = useState(null);
 
     useEffect(() => {
         loadNews();
@@ -37,6 +38,14 @@ function NewsPage() {
         }
     };
 
+    const handleImageClick = (image, title, description) => {
+        setModalImage({ image, title, description });
+    };
+
+    const closeModal = () => {
+        setModalImage(null);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -47,6 +56,76 @@ function NewsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <style>{`
+                .clickable-image {
+                    cursor: pointer;
+                    transition: transform 0.3s ease;
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 1rem 1rem 0 0;
+                }
+                .clickable-image:hover {
+                    transform: scale(1.02);
+                }
+                .clickable-image::before {
+                    content: '🔍 Click to view';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(44, 171, 227, 0.95);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 12px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    pointer-events: none;
+                    z-index: 10;
+                }
+                .clickable-image:hover::before {
+                    opacity: 1;
+                }
+                .clickable-image img {
+                    transition: filter 0.3s ease;
+                }
+                .clickable-image:hover img {
+                    filter: brightness(0.9);
+                }
+            `}</style>
+
+            {/* Image Modal */}
+            {modalImage && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+                    onClick={closeModal}
+                >
+                    <div
+                        className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={closeModal}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-2 shadow-lg z-10"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <img
+                            src={modalImage.image}
+                            alt={modalImage.title}
+                            className="w-full h-auto rounded-t-2xl"
+                        />
+                        <div className="p-8">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">{modalImage.title}</h2>
+                            <p className="text-lg text-gray-700 leading-relaxed">{modalImage.description}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Admin Manage Button */}
             {isAdmin && (
                 <button
@@ -90,11 +169,17 @@ function NewsPage() {
                             {news.map((item) => (
                                 <div key={item.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                                     {item.image_url && (
-                                        <img
-                                            src={item.image_url}
-                                            alt={item.title}
-                                            className="w-full h-48 object-cover"
-                                        />
+                                        <div
+                                            className="clickable-image"
+                                            onClick={() => handleImageClick(item.image_url, item.title, item.quote || item.description)}
+                                        >
+                                            <img
+                                                src={item.image_url}
+                                                alt={item.title}
+                                                className="w-full h-48 object-cover"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1504711434969-e33886168d6c?q=80&w=800&auto=format&fit=crop'; }}
+                                            />
+                                        </div>
                                     )}
                                     <div className="p-6">
                                         <span className="text-sm text-gray-500">
