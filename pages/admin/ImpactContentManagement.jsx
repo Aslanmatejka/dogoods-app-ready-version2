@@ -193,19 +193,19 @@ function ImpactContentManagement() {
                 toast.success('Item updated successfully');
             } else {
                 // Create new
-                console.log('[ImpactCMS] Creating new item - calling auth.getUser()');
-                const { data: { user }, error: authError } = await supabase.auth.getUser();
-                console.log('[ImpactCMS] Auth result - user:', user?.id, user?.email, 'error:', authError);
-                if (authError) {
-                    console.error('[ImpactCMS] Auth error:', authError);
-                    toast.error('Authentication error: ' + authError.message);
+                console.log('[ImpactCMS] Creating new item - getting session');
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                console.log('[ImpactCMS] Session result - user:', session?.user?.id, session?.user?.email, 'error:', sessionError);
+                if (sessionError) {
+                    console.error('[ImpactCMS] Session error:', sessionError);
+                    toast.error('Authentication error: ' + sessionError.message);
                     return;
                 }
-                if (!user) {
+                if (!session?.user) {
                     toast.error('You must be logged in to create content');
                     return;
                 }
-                const insertPayload = { ...itemData, created_by: user.id };
+                const insertPayload = { ...itemData, created_by: session.user.id };
                 console.log('[ImpactCMS] Insert payload:', insertPayload);
                 console.log('[ImpactCMS] Calling supabase.from().insert()');
                 const { data, error } = await supabase
