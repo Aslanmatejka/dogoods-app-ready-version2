@@ -49,8 +49,8 @@ function ImpactStory() {
         }
     };
 
-    const handleImageClick = (image, title, description) => {
-        setModalImage({ image, title, description });
+    const handleImageClick = (item) => {
+        setModalImage(item);
     };
 
     const closeModal = () => {
@@ -145,7 +145,7 @@ function ImpactStory() {
                     transform: scale(1.02);
                 }
                 .clickable-image::before {
-                    content: '🔍 Click to view details';
+                    content: '� Click to read more';
                     position: absolute;
                     top: 50%;
                     left: 50%;
@@ -172,14 +172,14 @@ function ImpactStory() {
                 }
             `}</style>
 
-            {/* Image Modal */}
+            {/* Detail Modal */}
             {modalImage && (
                 <div 
                     className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
                     onClick={closeModal}
                 >
                     <div 
-                        className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+                        className="relative bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
@@ -190,14 +190,72 @@ function ImpactStory() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                        <img 
-                            src={modalImage.image} 
-                            alt={modalImage.title}
-                            className="w-full h-auto rounded-t-2xl"
-                        />
-                        <div className="p-8">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4">{modalImage.title}</h2>
-                            <p className="text-lg text-gray-700 leading-relaxed">{modalImage.description}</p>
+
+                        {/* Header with image thumbnail */}
+                        <div className="flex flex-col md:flex-row">
+                            {modalImage.image_url && (
+                                <div className="md:w-2/5 flex-shrink-0">
+                                    <img 
+                                        src={modalImage.image_url} 
+                                        alt={modalImage.title}
+                                        className="w-full h-64 md:h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none"
+                                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
+                                    />
+                                </div>
+                            )}
+                            <div className={`p-8 flex flex-col justify-center ${modalImage.image_url ? 'md:w-3/5' : 'w-full'}`}>
+                                {/* Category / Type badge */}
+                                {(modalImage.type || modalImage.category) && (
+                                    <span className="inline-block self-start px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-3 uppercase tracking-wide">
+                                        {modalImage.type === 'featured' ? 'Featured Story' : modalImage.type === 'testimonial' ? 'Testimonial' : modalImage.type === 'news' ? 'News' : modalImage.category || 'Gallery'}
+                                    </span>
+                                )}
+                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{modalImage.title}</h2>
+                                {modalImage.attribution && (
+                                    <p className="text-sm text-gray-500 mb-1">By <strong>{modalImage.attribution}</strong>{modalImage.organization && ` · ${modalImage.organization}`}</p>
+                                )}
+                                {modalImage.created_at && (
+                                    <p className="text-xs text-gray-400 mb-4">
+                                        {new Date(modalImage.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Full content body */}
+                        <div className="px-8 pb-8">
+                            <hr className="mb-6 border-gray-200" />
+                            {/* Quote / Main content */}
+                            {modalImage.quote && (
+                                <div className="mb-6">
+                                    <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#2CABE3]">
+                                        <p className="text-lg text-gray-700 leading-relaxed italic">&ldquo;{modalImage.quote}&rdquo;</p>
+                                    </div>
+                                </div>
+                            )}
+                            {/* Description (for gallery items) */}
+                            {modalImage.description && !modalImage.quote && (
+                                <p className="text-lg text-gray-700 leading-relaxed mb-6">{modalImage.description}</p>
+                            )}
+                            {/* Additional description if both exist */}
+                            {modalImage.description && modalImage.quote && (
+                                <p className="text-gray-600 leading-relaxed mb-6">{modalImage.description}</p>
+                            )}
+                            {/* Stats */}
+                            {modalImage.stats && (
+                                <div className="bg-green-50 rounded-xl p-4 mb-6">
+                                    <p className="text-green-800 font-medium">📊 {modalImage.stats}</p>
+                                </div>
+                            )}
+                            {/* Meta info row */}
+                            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                {modalImage.organization && (
+                                    <span className="flex items-center gap-1">🏢 {modalImage.organization}</span>
+                                )}
+                                {modalImage.category && (
+                                    <span className="flex items-center gap-1">🏷️ {modalImage.category}</span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -242,7 +300,7 @@ function ImpactStory() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                             <div 
                                 className="clickable-image"
-                                onClick={() => handleImageClick(story.image_url, story.title, story.quote || story.description)}
+                                onClick={() => handleImageClick(story)}
                             >
                                 <img 
                                     src={story.image_url}
@@ -292,7 +350,7 @@ function ImpactStory() {
                                 <div key={item.id}>
                                     <div 
                                         className="clickable-image"
-                                        onClick={() => handleImageClick(item.image_url, item.title, item.description)}
+                                        onClick={() => handleImageClick(item)}
                                     >
                                         <img 
                                             src={item.image_url}
