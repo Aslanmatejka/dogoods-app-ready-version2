@@ -9,9 +9,10 @@ function ImpactStory() {
     const navigate = useNavigate();
     const [stories, setStories] = useState([]);
     const [gallery, setGallery] = useState([]);
-    const [modalImage, setModalImage] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+    const [selectedStory, setSelectedStory] = useState(null);
+    const [expandedGalleryId, setExpandedGalleryId] = useState(null);
+
     // Newsletter form state
     const [newsletterSuccess, setNewsletterSuccess] = useState(false);
     const [newsletterError, setNewsletterError] = useState('');
@@ -25,22 +26,12 @@ function ImpactStory() {
     const loadContent = async () => {
         setLoading(true);
         try {
-            // Load testimonial stories
-            const { data: storiesData } = await supabase
-                .from('impact_stories')
-                .select('*')
-                .eq('is_active', true)
-                .order('display_order');
-            
-            //Load gallery items
-            const { data: galleryData } = await supabase
-                .from('impact_gallery')
-                .select('*')
-                .eq('is_active', true)
-                .order('display_order');
-            
-            setStories(storiesData || []);
-            setGallery(galleryData || []);
+            const [storiesRes, galleryRes] = await Promise.all([
+                supabase.from('impact_stories').select('*').eq('is_active', true).order('display_order'),
+                supabase.from('impact_gallery').select('*').eq('is_active', true).order('display_order')
+            ]);
+            setStories(storiesRes.data || []);
+            setGallery(galleryRes.data || []);
         } catch (error) {
             console.error('Error loading content:', error);
             reportError(error);
@@ -49,12 +40,8 @@ function ImpactStory() {
         }
     };
 
-    const handleImageClick = (item) => {
-        setModalImage(item);
-    };
-
-    const closeModal = () => {
-        setModalImage(null);
+    const toggleGalleryExpand = (id) => {
+        setExpandedGalleryId(expandedGalleryId === id ? null : id);
     };
 
     const handleNewsletterSubmit = async (e) => {
@@ -62,7 +49,7 @@ function ImpactStory() {
         setIsSubmitting(true);
         setNewsletterError('');
         setNewsletterSuccess(false);
-        
+
         const formData = new FormData(e.target);
         const data = {
             first_name: formData.get('firstName'),
@@ -94,19 +81,17 @@ function ImpactStory() {
                 } else {
                     await supabase
                         .from('newsletter_subscriptions')
-                        .update({ 
-                            is_active: true, 
+                        .update({
+                            is_active: true,
                             subscribed_at: new Date().toISOString(),
                             first_name: data.first_name,
                             last_name: data.last_name,
-                            consent: data.consent 
+                            consent: data.consent
                         })
                         .eq('email', data.email);
                 }
             } else {
-                await supabase
-                    .from('newsletter_subscriptions')
-                    .insert([data]);
+                await supabase.from('newsletter_subscriptions').insert([data]);
             }
 
             setNewsletterSuccess(true);
@@ -120,6 +105,9 @@ function ImpactStory() {
         }
     };
 
+    const featuredStories = stories.filter(s => s.type === 'featured');
+    const testimonials = stories.filter(s => s.type === 'testimonial');
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -128,6 +116,94 @@ function ImpactStory() {
         );
     }
 
+    // ── Blog Detail View ──
+    if (selectedStory) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                {isAdmin && (
+                    <button
+                        onClick={() => navigate('/admin/impact-content')}
+                        className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow-2xl hover:shadow-xl transition-all transform hover:scale-105"
+                    >
+                        &#9999;&#65039; Manage Content
+                    </button>
+                )}
+
+                <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <button
+                        onClick={() => setSelectedStory(null)}
+                        className="mb-8 text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2 font-semibold"
+                    >
+                        <span>&larr;</span>
+                        <span>Back to Impact Story</span>
+                    </button>
+
+                    {selectedStory.image_url && (
+                        <img
+                            src={selectedStory.image_url}
+                            alt={selectedStory.title}
+                            className="w-full h-72 md:h-96 object-cover rounded-2xl shadow-lg mb-8"
+                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
+                        />
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full uppercase tracking-wide">Blog</span>
+                        {selectedStory.created_at && (
+                            <span className="text-sm text-gray-400">
+                                {new Date(selectedStory.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </span>
+                        )}
+                    </div>
+
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{selectedStory.title}</h1>
+
+                    {selectedStory.attribution && (
+                        <p className="text-gray-500 mb-8 text-lg">
+                            By <strong>{selectedStory.attribution}</strong>
+                            {selectedStory.organization && <span> &middot; {selectedStory.organization}</span>}
+                        </p>
+                    )}
+
+                    {selectedStory.quote && (
+                        <div className="bg-gray-50 border-l-4 border-[#2CABE3] rounded-r-xl p-6 mb-8">
+                            <p className="text-lg text-gray-700 leading-relaxed italic">&ldquo;{selectedStory.quote}&rdquo;</p>
+                        </div>
+                    )}
+
+                    {selectedStory.description && (
+                        <p className="text-lg text-gray-600 leading-relaxed mb-8">{selectedStory.description}</p>
+                    )}
+
+                    {selectedStory.stats && (
+                        <div className="bg-green-50 rounded-xl p-5 mb-8">
+                            <p className="text-green-800 font-medium">&#128202; {selectedStory.stats}</p>
+                        </div>
+                    )}
+
+                    {selectedStory.organization && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+                            <span>&#127970; {selectedStory.organization}</span>
+                        </div>
+                    )}
+
+                    <div className="border-t pt-8 flex justify-between items-center">
+                        <button
+                            onClick={() => setSelectedStory(null)}
+                            className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2"
+                        >
+                            &larr; Back to Impact Story
+                        </button>
+                        <Link to="/news" className="text-gray-500 hover:text-gray-700 font-medium">
+                            News &rarr;
+                        </Link>
+                    </div>
+                </article>
+            </div>
+        );
+    }
+
+    // ── Main Page ──
     return (
         <div className="bg-gray-50 -mx-6 md:-mx-10 -my-6 md:-my-10">
             <style>{`
@@ -136,130 +212,7 @@ function ImpactStory() {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-                .clickable-image {
-                    cursor: pointer;
-                    transition: transform 0.3s ease;
-                    position: relative;
-                }
-                .clickable-image:hover {
-                    transform: scale(1.02);
-                }
-                .clickable-image::before {
-                    content: '� Click to read more';
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(44, 171, 227, 0.95);
-                    color: white;
-                    padding: 12px 24px;
-                    border-radius: 12px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    pointer-events: none;
-                    z-index: 10;
-                }
-                .clickable-image:hover::before {
-                    opacity: 1;
-                }
-                .clickable-image img {
-                    transition: filter 0.3s ease;
-                }
-                .clickable-image:hover img {
-                    filter: brightness(0.9);
-                }
             `}</style>
-
-            {/* Detail Modal */}
-            {modalImage && (
-                <div 
-                    className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
-                    onClick={closeModal}
-                >
-                    <div 
-                        className="relative bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <button
-                            onClick={closeModal}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-2 shadow-lg z-10"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
-                        {/* Header with image thumbnail */}
-                        <div className="flex flex-col md:flex-row">
-                            {modalImage.image_url && (
-                                <div className="md:w-2/5 flex-shrink-0">
-                                    <img 
-                                        src={modalImage.image_url} 
-                                        alt={modalImage.title}
-                                        className="w-full h-64 md:h-full object-cover rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none"
-                                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
-                                    />
-                                </div>
-                            )}
-                            <div className={`p-8 flex flex-col justify-center ${modalImage.image_url ? 'md:w-3/5' : 'w-full'}`}>
-                                {/* Category / Type badge */}
-                                {(modalImage.type || modalImage.category) && (
-                                    <span className="inline-block self-start px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full mb-3 uppercase tracking-wide">
-                                        {modalImage.type === 'featured' ? 'Featured Story' : modalImage.type === 'testimonial' ? 'Testimonial' : modalImage.type === 'news' ? 'News' : modalImage.category || 'Gallery'}
-                                    </span>
-                                )}
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{modalImage.title}</h2>
-                                {modalImage.attribution && (
-                                    <p className="text-sm text-gray-500 mb-1">By <strong>{modalImage.attribution}</strong>{modalImage.organization && ` · ${modalImage.organization}`}</p>
-                                )}
-                                {modalImage.created_at && (
-                                    <p className="text-xs text-gray-400 mb-4">
-                                        {new Date(modalImage.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Full content body */}
-                        <div className="px-8 pb-8">
-                            <hr className="mb-6 border-gray-200" />
-                            {/* Quote / Main content */}
-                            {modalImage.quote && (
-                                <div className="mb-6">
-                                    <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-[#2CABE3]">
-                                        <p className="text-lg text-gray-700 leading-relaxed italic">&ldquo;{modalImage.quote}&rdquo;</p>
-                                    </div>
-                                </div>
-                            )}
-                            {/* Description (for gallery items) */}
-                            {modalImage.description && !modalImage.quote && (
-                                <p className="text-lg text-gray-700 leading-relaxed mb-6">{modalImage.description}</p>
-                            )}
-                            {/* Additional description if both exist */}
-                            {modalImage.description && modalImage.quote && (
-                                <p className="text-gray-600 leading-relaxed mb-6">{modalImage.description}</p>
-                            )}
-                            {/* Stats */}
-                            {modalImage.stats && (
-                                <div className="bg-green-50 rounded-xl p-4 mb-6">
-                                    <p className="text-green-800 font-medium">📊 {modalImage.stats}</p>
-                                </div>
-                            )}
-                            {/* Meta info row */}
-                            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                                {modalImage.organization && (
-                                    <span className="flex items-center gap-1">🏢 {modalImage.organization}</span>
-                                )}
-                                {modalImage.category && (
-                                    <span className="flex items-center gap-1">🏷️ {modalImage.category}</span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Admin Edit Button */}
             {isAdmin && (
@@ -267,9 +220,10 @@ function ImpactStory() {
                     onClick={() => navigate('/admin/impact-content')}
                     className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow-2xl hover:shadow-xl transition-all transform hover:scale-105"
                 >
-                    ✏️ Manage Content
+                    &#9999;&#65039; Manage Content
                 </button>
             )}
+
             {/* Hero Section */}
             <section className="bg-[#D9E1F1] py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -279,9 +233,9 @@ function ImpactStory() {
                     <p className="text-xl text-gray-700 max-w-3xl mx-auto fade-in mb-8">
                         Transforming food waste into community nourishment through AI-powered logistics and compassionate connections
                     </p>
-                    <div className="flex justify-center gap-8 mt-8">
+                    <div className="flex justify-center gap-4 md:gap-8 mt-8 flex-wrap">
                         <Link to="/featured" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
-                            Featured
+                            Blog
                         </Link>
                         <Link to="/news" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             News
@@ -293,73 +247,123 @@ function ImpactStory() {
                 </div>
             </section>
 
-            {/* Featured Stories - First item type='featured' from database */}
-            {stories.filter(s => s.type === 'featured').slice(0, 1).map((story) => (
-                <section key={story.id} id="featured" className="py-16 bg-white">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                            <div 
-                                className="clickable-image"
-                                onClick={() => handleImageClick(story)}
-                            >
-                                <img 
-                                    src={story.image_url}
-                                    alt={story.title} 
-                                    className="rounded-2xl shadow-2xl w-full h-auto"
-                                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
-                                />
-                            </div>
-                            <div>
-                                <h1 className="text-4xl font-bold text-gray-900 mb-6">{story.title}</h1>
-                                <p className="text-lg text-gray-600 leading-relaxed mb-6">{story.quote || story.description}</p>
-                                {story.stats && (
-                                    <p className="text-gray-600 mb-6">{story.stats}</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            ))}
+            {/* ── Blog / Featured Cards (Default Section) ── */}
+            <section className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Blog</h2>
+                    <p className="text-gray-500 mb-8">Our latest stories, updates, and community highlights</p>
 
-            {/* Testimonial Stories */}
-            {stories.filter(s => s.type === 'testimonial').length > 0 && (
+                    {featuredStories.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-gray-400 text-lg">No blog posts yet. Check back soon!</p>
+                        </div>
+                    ) : (
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {featuredStories.map((story) => (
+                                <div
+                                    key={story.id}
+                                    onClick={() => setSelectedStory(story)}
+                                    className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                                >
+                                    <div className="relative overflow-hidden">
+                                        <img
+                                            src={story.image_url || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'}
+                                            alt={story.title}
+                                            className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop'; }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                                            <span className="text-white font-semibold text-sm bg-[#2CABE3]/90 px-4 py-2 rounded-full">Read More &rarr;</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-5">
+                                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">{story.title}</h3>
+                                        {story.created_at && (
+                                            <p className="text-xs text-gray-400 mt-2">
+                                                {new Date(story.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {featuredStories.length > 0 && (
+                        <div className="text-center mt-10">
+                            <Link to="/featured" className="inline-block bg-[#2CABE3] text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-md">
+                                View All Blog Posts &rarr;
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* ── Testimonial Stories ── */}
+            {testimonials.length > 0 && (
                 <section id="stories" className="py-20 bg-gray-50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Testimonials</h2>
+                        <p className="text-gray-500 mb-8">Hear from the people we serve</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                            {stories.filter(s => s.type === 'testimonial').map((story) => (
+                            {testimonials.map((story) => (
                                 <div key={story.id} className="bg-white rounded-2xl shadow-lg p-8">
                                     <div className="text-4xl text-[#2CABE3] mb-4">&ldquo;</div>
                                     <p className="text-gray-600 leading-relaxed text-lg italic mb-6">{story.quote}</p>
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">{story.title}</h3>
                                     <p className="text-gray-500">
-                                        <strong>— {story.attribution}{story.organization && `, ${story.organization}`}</strong>
+                                        <strong>&mdash; {story.attribution}{story.organization && `, ${story.organization}`}</strong>
                                     </p>
                                 </div>
                             ))}
                         </div>
+                        <div className="text-center mt-10">
+                            <Link to="/testimonials" className="text-blue-600 hover:text-blue-800 font-semibold">
+                                View All Testimonials &rarr;
+                            </Link>
+                        </div>
                     </div>
                 </section>
             )}
 
-            {/* Gallery Section */}
+            {/* ── Gallery Section ── */}
             {gallery.length > 0 && (
                 <section className="py-20 bg-white">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Gallery</h2>
+                        <p className="text-gray-500 mb-8">Moments from our community</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {gallery.map((item) => (
-                                <div key={item.id}>
-                                    <div 
-                                        className="clickable-image"
-                                        onClick={() => handleImageClick(item)}
+                                <div key={item.id} className="group">
+                                    <div
+                                        className="cursor-pointer relative overflow-hidden rounded-2xl"
+                                        onClick={() => toggleGalleryExpand(item.id)}
                                     >
-                                        <img 
+                                        <img
                                             src={item.image_url}
                                             alt={item.title}
-                                            className="rounded-2xl shadow-lg w-full h-64 object-cover mb-4" 
+                                            className="rounded-2xl shadow-lg w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 rounded-2xl">
+                                            <span className="text-white font-semibold text-sm bg-[#2CABE3]/90 px-4 py-2 rounded-full">
+                                                {expandedGalleryId === item.id ? 'Hide Details' : 'View Details'}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                                    <p className="text-gray-600">{item.description}</p>
+                                    <h3 className="text-xl font-bold text-gray-900 mt-4 mb-2">{item.title}</h3>
+                                    {expandedGalleryId === item.id && (
+                                        <div className="mt-2 bg-gray-50 rounded-xl p-4 border border-gray-200 animate-[fadeIn_0.3s_ease-out]">
+                                            {item.description && (
+                                                <p className="text-gray-600 leading-relaxed mb-3">{item.description}</p>
+                                            )}
+                                            {item.category && (
+                                                <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">{item.category}</span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {expandedGalleryId !== item.id && item.description && (
+                                        <p className="text-gray-600 line-clamp-2">{item.description}</p>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -367,12 +371,12 @@ function ImpactStory() {
                 </section>
             )}
 
-            {/* CTA Section */}
+            {/* ── CTA Section ── */}
             <section className="py-20 bg-gradient-to-br from-green-50 to-blue-50">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Be Part of Our Story</h2>
                     <p className="text-xl text-gray-600 mb-10">
-                        Every meal shared, every pound of food saved, every life touched—it all starts with you.
+                        Every meal shared, every pound of food saved, every life touched&mdash;it all starts with you.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link to="/signup" className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
@@ -385,7 +389,7 @@ function ImpactStory() {
                 </div>
             </section>
 
-            {/* Newsletter Section */}
+            {/* ── Newsletter Section ── */}
             <section className="py-20 bg-white">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-10">
@@ -397,7 +401,7 @@ function ImpactStory() {
                     <form onSubmit={handleNewsletterSubmit} className="bg-gray-50 rounded-2xl p-8 shadow-lg">
                         {newsletterSuccess && (
                             <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                                ✓ Successfully subscribed! Check your email for confirmation.
+                                &#10003; Successfully subscribed! Check your email for confirmation.
                             </div>
                         )}
                         {newsletterError && (
@@ -406,37 +410,15 @@ function ImpactStory() {
                             </div>
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <input
-                                type="text"
-                                name="firstName"
-                                placeholder="First Name *"
-                                required
-                                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <input
-                                type="text"
-                                name="lastName"
-                                placeholder="Last Name *"
-                                required
-                                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <input type="text" name="firstName" placeholder="First Name *" required className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                            <input type="text" name="lastName" placeholder="Last Name *" required className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                         </div>
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="Email Address *"
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
-                        />
+                        <input type="email" name="email" placeholder="Email Address *" required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4" />
                         <label className="flex items-start mb-4 text-sm text-gray-600">
                             <input type="checkbox" name="consent" required className="mt-1 mr-2" />
                             <span>I agree to receive updates and newsletters from DoGoods. You can unsubscribe at any time.</span>
                         </label>
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="w-full bg-[#2CABE3] text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-all disabled:opacity-50"
-                        >
+                        <button type="submit" disabled={isSubmitting} className="w-full bg-[#2CABE3] text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-all disabled:opacity-50">
                             {isSubmitting ? 'Subscribing...' : 'Subscribe to Newsletter'}
                         </button>
                     </form>
