@@ -11,6 +11,7 @@ function ImpactContentManagement() {
     const [editingItem, setEditingItem] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const fileInputRef = useRef(null);
 
     // Upload image to Supabase Storage
@@ -146,6 +147,11 @@ function ImpactContentManagement() {
     };
 
     const handleSave = async () => {
+        if (saving) {
+            console.log('[ImpactCMS] Save already in progress, ignoring click');
+            return;
+        }
+        
         console.log('[ImpactCMS] handleSave called - activeTab:', activeTab, 'editingItem:', editingItem);
         
         // Validate required fields
@@ -167,6 +173,7 @@ function ImpactContentManagement() {
             return;
         }
 
+        setSaving(true);
         try {
             const table = getTableName();
             // eslint-disable-next-line no-unused-vars
@@ -216,6 +223,8 @@ function ImpactContentManagement() {
             console.error('[ImpactCMS] Error details:', error.details);
             console.error('[ImpactCMS] Error hint:', error.hint);
             toast.error('Failed to save: ' + (error.message || error.code || 'Unknown error'));
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -474,11 +483,34 @@ function ImpactContentManagement() {
         </div>
     );
 
-    // Helper to extract YouTube video ID
+    // Helper to extract YouTube video ID or URL from various formats
     const getYouTubeId = (url) => {
         if (!url) return null;
-        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^?&/#]+)/);
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([^?&#/]+)/);
         return match ? match[1] : null;
+    };
+
+    // Helper to extract clean YouTube URL from iframe or other formats
+    const extractYouTubeUrl = (input) => {
+        if (!input) return '';
+        
+        // Check if it's an iframe embed code
+        const iframeMatch = input.match(/src=["']([^"']*youtube[^"']*)["']/);
+        if (iframeMatch) {
+            const embedUrl = iframeMatch[1];
+            // Extract video ID from embed URL
+            const idMatch = embedUrl.match(/\/embed\/([^?&#]+)/);
+            if (idMatch) {
+                return `https://www.youtube.com/watch?v=${idMatch[1]}`;
+            }
+        }
+        
+        // If it's already a clean URL, return as-is
+        if (input.includes('youtube.com/watch') || input.includes('youtu.be/')) {
+            return input;
+        }
+        
+        return input;
     };
 
     const renderRecipeForm = () => (
@@ -508,9 +540,19 @@ function ImpactContentManagement() {
                 <input
                     type="text"
                     value={editingItem?.youtube_url || ''}
-                    onChange={(e) => setEditingItem({ ...editingItem, youtube_url: e.target.value })}
+                    onChange={(e) => {
+                        const cleanUrl = extractYouTubeUrl(e.target.value);
+                        setEditingItem({ ...editingItem, youtube_url: cleanUrl });
+                    }}
+                    onBlur={(e) => {
+                        // Clean up on blur in case paste didn't trigger onChange properly
+                        const cleanUrl = extractYouTubeUrl(e.target.value);
+                        if (cleanUrl !== e.target.value) {
+                            setEditingItem({ ...editingItem, youtube_url: cleanUrl });
+                        }
+                    }}
                     className="w-full px-3 py-2 border rounded-lg"
-                    placeholder="https://www.youtube.com/watch?v=..."
+                    placeholder="Paste YouTube URL or embed code"
                 />
                 {editingItem?.youtube_url && getYouTubeId(editingItem.youtube_url) && (
                     <div className="mt-3">
@@ -753,9 +795,10 @@ function ImpactContentManagement() {
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                disabled={saving}
+                                className="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Save
+                                {saving ? 'Saving...' : 'Save'}
                             </button>
                         </div>
                     </div>
