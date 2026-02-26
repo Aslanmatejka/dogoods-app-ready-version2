@@ -154,7 +154,13 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
     const fetchFoodListings = async () => {
         try {
             setLoading(true);
-            const { data, error } = await supabase
+            
+            // Add timeout to prevent hanging
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Food listings fetch timeout')), 8000)
+            );
+            
+            const fetchPromise = supabase
                 .from('food_listings')
                 .select('*')
                 .in('status', ['approved', 'active'])
@@ -162,13 +168,14 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 .not('longitude', 'is', null)
                 .limit(100);
 
+            const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+
             if (error) {
                 console.error('Supabase error:', error);
                 throw error;
             }
             
-            console.log('Fetched food listings:', data);
-            console.log('Number of listings with coordinates:', data?.length || 0);
+            console.log('Fetched food listings:', data?.length || 0);
             setFoodListings(data || []);
         } catch (error) {
             console.error('Error fetching food listings:', error);
