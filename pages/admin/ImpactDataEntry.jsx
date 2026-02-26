@@ -596,10 +596,10 @@ function ImpactDataEntry() {
                                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[280px]">
                                             Organization
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-[#2CABE3] uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-[#2CABE3] uppercase tracking-wider min-w-[110px]">
                                             Food Saved from Waste (lb)
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-[#2CABE3] uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-[#2CABE3] uppercase tracking-wider min-w-[110px]">
                                             Food Donated
                                         </th>
                                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">
@@ -747,7 +747,7 @@ function ImpactDataEntry() {
                                         <th className="px-3 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider min-w-[100px]">
                                             School Staff Helped
                                         </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium text-orange-600 uppercase tracking-wider min-w-[220px]">
+                                        <th className="px-3 py-3 text-left text-xs font-medium text-orange-600 uppercase tracking-wider min-w-[110px]">
                                             Food Given (lb)
                                         </th>
                                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">
