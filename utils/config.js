@@ -15,7 +15,7 @@ const API_CONFIG = {
         }
     },
     MAPBOX: {
-        ACCESS_TOKEN: ENV.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q'
+        ACCESS_TOKEN: ENV.VITE_MAPBOX_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN || ''
     },
     RATE_LIMITS: {
         DEFAULT: {
@@ -52,4 +52,4 @@ function getApiConfig() {
     };
 }
 
-export { getApiConfig }; 
+export { API_CONFIG, getApiConfig }; 

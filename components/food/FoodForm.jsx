@@ -4,6 +4,7 @@ import Input from '../common/Input';
 import Button from '../common/Button';
 import { useAuthContext } from '../../utils/AuthContext';
 import supabase from '../../utils/supabaseClient';
+import { API_CONFIG } from '../../utils/config';
 
 function FoodForm({
     initialData = null,
@@ -233,7 +234,7 @@ function FoodForm({
         setGeocoding(true);
         console.log('Geocoding address:', address);
         try {
-            const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+            const MAPBOX_TOKEN = API_CONFIG.MAPBOX.ACCESS_TOKEN;
             const encodedAddress = encodeURIComponent(address);
             const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${MAPBOX_TOKEN}&limit=1`;
             console.log('Geocoding URL:', url);

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../utils/supabaseClient';
+import { API_CONFIG } from '../../utils/config';
 
 // Mapbox is loaded via CDN in index.html
 // Access it from window.mapboxgl
 const getMapboxgl = () => window.mapboxgl;
 
-// Get Mapbox token from environment variable
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+// Get Mapbox token from centralized config (window.__ENV__ → import.meta.env → hardcoded fallback)
+const MAPBOX_TOKEN = API_CONFIG.MAPBOX.ACCESS_TOKEN;
 
 console.log('🔑 Mapbox token set:', MAPBOX_TOKEN.substring(0, 20) + '...');
 
