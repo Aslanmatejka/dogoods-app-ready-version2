@@ -126,7 +126,7 @@ function AppContent() {
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/donate" element={<DonatePage />} />
-                <Route path="/find" element={<ProtectedRoute><FindFoodPage /></ProtectedRoute>} />
+                <Route path="/find" element={<FindFoodPage />} />
                 <Route path="/near-me" element={<ProtectedRoute><NearMePage /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
                 <Route path="/success" element={<ProtectedRoute><Success /></ProtectedRoute>} />
