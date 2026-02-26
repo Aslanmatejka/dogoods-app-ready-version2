@@ -96,8 +96,19 @@ function ImpactContentManagement() {
         try {
             const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
             const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-            const sessionData = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
-            const accessToken = sessionData?.access_token || supabaseKey;
+
+            // Get fresh session from Supabase client
+            let accessToken = supabaseKey;
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.access_token) {
+                    accessToken = session.access_token;
+                }
+            } catch (e) {
+                const sessionData = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
+                accessToken = sessionData?.access_token || supabaseKey;
+            }
+
             const headers = {
                 'apikey': supabaseKey,
                 'Authorization': `Bearer ${accessToken}`,
@@ -146,8 +157,19 @@ function ImpactContentManagement() {
     const supabaseRest = async (table, method, body = null, filter = '') => {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        const sessionData = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
-        const accessToken = sessionData?.access_token || supabaseKey;
+
+        // Get fresh session from Supabase client (handles token refresh automatically)
+        let accessToken = supabaseKey;
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                accessToken = session.access_token;
+            }
+        } catch (e) {
+            // Fallback to localStorage if getSession fails
+            const sessionData = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
+            accessToken = sessionData?.access_token || supabaseKey;
+        }
 
         const url = `${supabaseUrl}/rest/v1/${table}${filter ? '?' + filter : ''}`;
         const headers = {
