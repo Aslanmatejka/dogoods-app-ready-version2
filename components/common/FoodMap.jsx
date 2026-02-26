@@ -26,7 +26,33 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
     useEffect(() => {
         // Prevent double initialization from React Strict Mode
-        if (mapInitialized.current) return;
+        if (mapInitialized.current) {
+            // Map already initialized from a previous mount (Strict Mode remount)
+            // We have a NEW mapLoaded state (starts false), so we need to sync it
+            if (map.current) {
+                console.log('🔄 Map already initialized (Strict Mode remount), syncing state...');
+                if (map.current.loaded()) {
+                    console.log('✅ Map already loaded, setting mapLoaded=true');
+                    setMapLoaded(true);
+                } else {
+                    // Listen for load on existing map
+                    const onLoad = () => {
+                        console.log('✅ Map loaded (from remount listener)');
+                        setMapLoaded(true);
+                    };
+                    map.current.on('load', onLoad);
+                    // Fallback timeout
+                    const remountTimeout = setTimeout(() => {
+                        console.warn('⚠️ Remount fallback: forcing mapLoaded=true');
+                        setMapLoaded(true);
+                    }, 2000);
+                    return () => {
+                        clearTimeout(remountTimeout);
+                    };
+                }
+            }
+            return;
+        }
         
         const mapboxgl = getMapboxgl();
         if (!mapboxgl || !mapContainer.current) return;
@@ -96,7 +122,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
         // Aggressive fallback - if map doesn't load in 2 seconds, force it anyway
         const loadTimeout = setTimeout(() => {
-            if (!mapLoaded && map.current) {
+            if (map.current) {
                 console.warn('⚠️ Map load timeout (2s) - forcing mapLoaded=true to show map');
                 console.warn('⚠️ Check Network tab for failed Mapbox API requests');
                 setMapLoaded(true);
@@ -577,14 +603,13 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             )}
 
             {!loading && foodListings.length === 0 && communities.length === 0 && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg px-6 py-4 z-10 text-center max-w-md">
-                    <div className="text-gray-600">
-                        <i className="fas fa-map-marker-alt text-4xl text-gray-400 mb-3"></i>
-                        <h3 className="font-bold text-lg mb-2">No Food Listings Available</h3>
-                        <p className="text-sm">
-                            There are currently no food listings with location data. 
-                            Be the first to share food and help your community!
-                        </p>
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg px-5 py-3 z-10 text-center max-w-sm">
+                    <div className="text-gray-600 flex items-center gap-3">
+                        <i className="fas fa-map-marker-alt text-xl text-gray-400"></i>
+                        <div className="text-left">
+                            <h3 className="font-bold text-sm">No Food Listings Yet</h3>
+                            <p className="text-xs">Be the first to share food in your community!</p>
+                        </div>
                     </div>
                 </div>
             )}
