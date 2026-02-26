@@ -81,6 +81,14 @@ const localSponsors = [
     description: "We connect food donors with nonprofits to fight hunger and reduce waste. Our solutions make it easy to donate or receive food while helping the environment. All for free.",
     food_saved_from_waste_lb: 22000,
     food_donated_lb: 19500
+  },
+  {
+    name: "Trybe Inc.",
+    img: null,
+    website: "https://www.trybeinc.org",
+    description: "Trybe Inc. is a community-based non-profit rooted in Oakland's Eastlake/San Antonio/Fruitvale area, serving youth, young adults, and families in Oakland, Berkeley, Richmond, Hayward and the greater East Bay Area.",
+    food_saved_from_waste_lb: 0,
+    food_donated_lb: 0
   }
 ];
 
@@ -158,11 +166,18 @@ function SponsorsPage() {
               className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
             >
               <div className="h-48 bg-gray-100 flex items-center justify-center p-6">
-                <img
-                  src={sponsor.img}
-                  alt={sponsor.name + ' logo'}
-                  className="max-h-full max-w-full object-contain"
-                />
+                {sponsor.img ? (
+                  <img
+                    src={sponsor.img}
+                    alt={sponsor.name + ' logo'}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-400">
+                    <i className="fas fa-building text-5xl mb-2"></i>
+                    <span className="text-sm font-medium">{sponsor.name}</span>
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
