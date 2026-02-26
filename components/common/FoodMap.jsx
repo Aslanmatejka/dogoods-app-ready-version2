@@ -569,7 +569,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
                 </div>
             )}
 
-            {!loading && foodListings.length === 0 && (
+            {!loading && foodListings.length === 0 && communities.length === 0 && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg px-6 py-4 z-10 text-center max-w-md">
                     <div className="text-gray-600">
                         <i className="fas fa-map-marker-alt text-4xl text-gray-400 mb-3"></i>
@@ -583,9 +583,15 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
             )}
 
             <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg px-4 py-2 z-10">
-                <div className="flex items-center gap-2 text-sm">
-                    <div className="w-3 h-3 bg-primary-600 rounded-full"></div>
-                    <span className="font-medium text-gray-700">{foodListings.length} Available Listings</span>
+                <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-primary-600 rounded-full"></div>
+                        <span className="font-medium text-gray-700">{foodListings.length} Listings</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                        <span className="font-medium text-gray-700">{communities.length} Communities</span>
+                    </div>
                 </div>
             </div>
         </div>
