@@ -240,9 +240,9 @@ function ImpactStory() {
                         Connecting good food to families in need through smart technology and community care
                     </p>
                     <div className="flex justify-center gap-4 md:gap-8 mt-8 flex-wrap">
-                        <Link to="/featured" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
+                        <button onClick={() => document.getElementById('blog-section')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             Blog
-                        </Link>
+                        </button>
                         <Link to="/news" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
                             News
                         </Link>
@@ -254,7 +254,7 @@ function ImpactStory() {
             </section>
 
             {/* ── Blog / Featured Cards (Default Section) ── */}
-            <section className="py-16 bg-white">
+            <section id="blog-section" className="py-16 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <h2 className="text-3xl font-bold text-gray-900 mb-2">Blog</h2>
                     <p className="text-gray-500 mb-8">Our latest stories, updates, and community highlights</p>
