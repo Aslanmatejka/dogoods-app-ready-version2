@@ -114,8 +114,8 @@ function FeaturedPage() {
 
                     {/* Stats */}
                     {selectedStory.stats && (
-                        <div className="bg-green-50 rounded-xl p-5 mb-8">
-                            <p className="text-green-800 font-medium">📊 {selectedStory.stats}</p>
+                        <div className="bg-primary-50 rounded-xl p-5 mb-8">
+                            <p className="text-primary-800 font-medium">📊 {selectedStory.stats}</p>
                         </div>
                     )}
 
@@ -219,7 +219,7 @@ function FeaturedPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-100">
+            <section className="py-16 bg-gradient-to-br from-primary-50 to-primary-100">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-4xl font-bold text-gray-900 mb-6">Be Part of Our Story</h2>
                     <p className="text-lg text-gray-700 mb-8">
@@ -229,7 +229,7 @@ function FeaturedPage() {
                         <Link to="/signup" className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             Join the Platform
                         </Link>
-                        <Link to="/donate" className="bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
+                        <Link to="/donate" className="bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             Support Our Mission
                         </Link>
                     </div>

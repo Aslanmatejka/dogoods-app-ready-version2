@@ -61,7 +61,7 @@ function Blog() {
                         className={`
                             px-4 py-2 rounded-full text-sm font-medium
                             ${filter === category
-                                ? 'bg-green-600 text-white'
+                                ? 'bg-primary-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }
                         `}
@@ -99,7 +99,7 @@ function Blog() {
                             >
                                 <div className="p-6">
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className="px-3 py-1 text-sm font-medium text-green-600 bg-green-100 rounded-full">
+                                        <span className="px-3 py-1 text-sm font-medium text-primary-600 bg-primary-100 rounded-full">
                                             {post.category}
                                         </span>
                                         <time className="text-sm text-gray-500" dateTime={post.published_at}>

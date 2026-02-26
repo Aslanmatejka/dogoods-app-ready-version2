@@ -115,7 +115,7 @@ function TestimonialsPage() {
                 <div className="max-w-4xl mx-auto mb-12 text-center fade-slide">
                     <button
                         onClick={() => navigate('/impact-story')}
-                        className="mb-6 inline-flex items-center text-green-600 hover:text-green-700 font-semibold transition-colors"
+                        className="mb-6 inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold transition-colors"
                     >
                         <span className="mr-2">&larr;</span>
                         Back to Impact Story

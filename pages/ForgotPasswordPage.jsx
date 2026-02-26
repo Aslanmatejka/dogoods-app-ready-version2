@@ -136,8 +136,8 @@ function ForgotPasswordPage() {
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <div className="text-center mb-6">
-                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                                <i className="fas fa-envelope text-green-600 text-xl"></i>
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary-100 mb-4">
+                                <i className="fas fa-envelope text-primary-600 text-xl"></i>
                             </div>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 Check your email
@@ -167,7 +167,7 @@ function ForgotPasswordPage() {
                                         if (error) setError(null);
                                     }}
                                     placeholder="Enter 6-digit code"
-                                    className="w-full px-4 py-3 text-center text-2xl tracking-[0.5em] font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    className="w-full px-4 py-3 text-center text-2xl tracking-[0.5em] font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     autoFocus
                                     autoComplete="one-time-code"
                                 />
@@ -213,7 +213,7 @@ function ForgotPasswordPage() {
                                 className={`text-sm font-medium transition-colors ${
                                     resendCooldown > 0
                                         ? 'text-gray-400 cursor-not-allowed'
-                                        : 'text-green-600 hover:text-green-500 cursor-pointer'
+                                        : 'text-primary-600 hover:text-primary-500 cursor-pointer'
                                 }`}
                             >
                                 {loading ? (
@@ -272,7 +272,7 @@ function ForgotPasswordPage() {
                                         if (error) setError(null);
                                     }}
                                     placeholder="Enter your email"
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                 />
                             </div>
                         </div>
@@ -305,7 +305,7 @@ function ForgotPasswordPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate('/login')}
-                                className="text-sm font-medium text-green-600 hover:text-green-500"
+                                className="text-sm font-medium text-primary-600 hover:text-primary-500"
                             >
                                 Back to login
                             </button>

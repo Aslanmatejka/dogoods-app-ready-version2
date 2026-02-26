@@ -62,7 +62,7 @@ function ListingsTab({
                         onClick={() => setActiveTab('active')}
                         className={`px-4 py-2 rounded-lg ${
                             activeTab === 'active' 
-                                ? 'bg-green-600 text-white' 
+                                ? 'bg-primary-600 text-white' 
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
@@ -75,7 +75,7 @@ function ListingsTab({
                         onClick={() => setActiveTab('completed')}
                         className={`px-4 py-2 rounded-lg ${
                             activeTab === 'completed' 
-                                ? 'bg-green-600 text-white' 
+                                ? 'bg-primary-600 text-white' 
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
@@ -88,7 +88,7 @@ function ListingsTab({
                         onClick={() => setActiveTab('all')}
                         className={`px-4 py-2 rounded-lg ${
                             activeTab === 'all' 
-                                ? 'bg-green-600 text-white' 
+                                ? 'bg-primary-600 text-white' 
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
@@ -127,7 +127,7 @@ function ListingsTab({
                                 <span 
                                     className={`px-2 py-1 text-xs rounded-full ${
                                         listing.status === 'active' 
-                                            ? 'bg-green-100 text-green-800' 
+                                            ? 'bg-primary-100 text-primary-800' 
                                             : 'bg-gray-100 text-gray-800'
                                     }`}
                                     role="status"

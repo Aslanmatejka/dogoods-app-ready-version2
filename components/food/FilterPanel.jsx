@@ -91,7 +91,7 @@ export const FilterPanel = ({ onFilterChange }) => {
                     <Button 
                         onClick={enableLocation}
                         disabled={locationStatus === 'denied'}
-                        className={`${filters.locationEnabled ? 'bg-green-500' : 'bg-gray-500'}`}
+                        className={`${filters.locationEnabled ? 'bg-primary-500' : 'bg-gray-500'}`}
                     >
                         {filters.locationEnabled ? 'Location Enabled' : 'Enable Location'}
                     </Button>

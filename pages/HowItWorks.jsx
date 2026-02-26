@@ -96,10 +96,10 @@ function HowItWorks() {
                                     )}
                                     <div className="relative bg-white p-6 rounded-lg shadow-sm text-center">
                                         <div 
-                                            className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                                            className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4"
                                             aria-hidden="true"
                                         >
-                                            <i className={`fas ${step.icon} text-2xl text-green-600`}></i>
+                                            <i className={`fas ${step.icon} text-2xl text-primary-600`}></i>
                                         </div>
                                         <h3 className="text-xl font-semibold mb-2">
                                             {`Step ${index + 1}: ${step.title}`}
@@ -139,10 +139,10 @@ function HowItWorks() {
                                     role="listitem"
                                 >
                                     <div 
-                                        className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4"
+                                        className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mb-4"
                                         aria-hidden="true"
                                     >
-                                        <i className={`fas ${feature.icon} text-xl text-green-600`}></i>
+                                        <i className={`fas ${feature.icon} text-xl text-primary-600`}></i>
                                     </div>
                                     <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                                     <p className="text-gray-600">{feature.description}</p>

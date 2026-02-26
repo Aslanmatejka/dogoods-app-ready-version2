@@ -53,7 +53,7 @@ function Sidebar({
                                     href={item.path}
                                     className="
                                         flex items-center px-4 py-2 rounded-lg
-                                        text-gray-700 hover:bg-green-50 hover:text-green-600
+                                        text-gray-700 hover:bg-primary-50 hover:text-primary-600
                                         transition-colors duration-200
                                     "
                                 >

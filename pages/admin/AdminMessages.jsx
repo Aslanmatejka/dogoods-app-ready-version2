@@ -414,7 +414,7 @@ function AdminMessages() {
                                                 }
                                             }}
                                             placeholder="Type your response... (Shift+Enter for new line)"
-                                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                             rows="3"
                                             disabled={sending || selectedConversation.status === 'closed'}
                                         />

@@ -17,7 +17,7 @@ const Input = ({ label, value, onChange, disabled, className, type = "text", ...
 
     const baseInputStyles = `
         w-full px-4 py-2 rounded-lg border
-        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+        focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
         disabled:bg-gray-100 disabled:cursor-not-allowed
         transition-colors duration-200
     `;
@@ -80,7 +80,7 @@ const Input = ({ label, value, onChange, disabled, className, type = "text", ...
                         type={type}
                         onChange={onChange}
                         accept={props.accept}
-                        className={`${inputStyles} file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100`}
+                        className={`${inputStyles} file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100`}
                         multiple={props.accept?.includes('multiple')}
                     />
                 );

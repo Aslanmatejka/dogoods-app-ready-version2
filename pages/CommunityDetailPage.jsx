@@ -164,8 +164,8 @@ function CommunityDetailPage() {
                             {/* Impact Metrics */}
                             <div className="grid grid-cols-3 gap-4 bg-cyan-50 p-4 rounded-lg">
                                 <div className="text-center">
-                                    <i className="fas fa-apple-alt text-3xl text-green-600 mb-2"></i>
-                                    <div className="text-2xl font-bold text-green-700">{foodGivenValue.toLocaleString()}</div>
+                                    <i className="fas fa-apple-alt text-3xl text-primary-600 mb-2"></i>
+                                    <div className="text-2xl font-bold text-primary-700">{foodGivenValue.toLocaleString()}</div>
                                     <div className="text-sm text-gray-600">lbs Given</div>
                                 </div>
                                 <div className="text-center">

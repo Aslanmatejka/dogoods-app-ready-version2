@@ -18,7 +18,7 @@ function PrivacyPolicy() {
                     Privacy Policy
                 </h1>
                 
-                <article className="prose prose-green max-w-none">
+                <article className="prose prose-cyan max-w-none">
                     <p 
                         className="text-gray-600 mb-6"
                         role="contentinfo"
@@ -114,7 +114,7 @@ function PrivacyPolicy() {
                                 For more information about our use of cookies, please see our{' '}
                                 <button
                                     onClick={() => navigate('/cookies')}
-                                    className="text-green-600 hover:text-green-700 underline focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    className="text-primary-600 hover:text-primary-700 underline focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 >
                                     Cookie Policy
                                 </button>.
@@ -301,7 +301,7 @@ function PrivacyPolicy() {
                                 Email:{' '}
                                 <a 
                                     href={`mailto:privacy@sharefoods.com`}
-                                    className="text-green-600 hover:text-green-700"
+                                    className="text-primary-600 hover:text-primary-700"
                                     aria-label="Send email to privacy team"
                                 >
                                     privacy@sharefoods.com
@@ -311,7 +311,7 @@ function PrivacyPolicy() {
                                 Phone:{' '}
                                 <a 
                                     href={`tel:1234567890`}
-                                    className="text-green-600 hover:text-green-700"
+                                    className="text-primary-600 hover:text-primary-700"
                                     aria-label="Call privacy team"
                                 >
                                     (123) 456-7890

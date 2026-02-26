@@ -14,7 +14,7 @@ function TermsOfServiceContent() {
             <nav aria-label="Breadcrumb" className="mb-4">
                 <ol className="flex text-sm">
                     <li>
-                        <Link to="/" className="text-green-600 hover:text-green-700">Home</Link>
+                        <Link to="/" className="text-primary-600 hover:text-primary-700">Home</Link>
                         <span className="mx-2 text-gray-500">/</span>
                     </li>
                     <li className="text-gray-500" aria-current="page">Terms of Service</li>
@@ -24,7 +24,7 @@ function TermsOfServiceContent() {
             <main>
                 <h1 className="text-3xl font-bold text-gray-900 mb-8">Terms of Service</h1>
                 
-                <div className="prose prose-green max-w-none">
+                <div className="prose prose-cyan max-w-none">
                     <p className="text-gray-600 mb-6">
                         Last Updated: {lastUpdated}
                     </p>
@@ -178,9 +178,9 @@ function TermsOfServiceContent() {
                             If you have any questions about these Terms, please contact us at:
                         </p>
                         <address className="not-italic">
-                            Email: <a href={`mailto:${contactInfo.email}`} className="text-green-600 hover:text-green-700">{contactInfo.email}</a><br />
+                            Email: <a href={`mailto:${contactInfo.email}`} className="text-primary-600 hover:text-primary-700">{contactInfo.email}</a><br />
                             Address: {contactInfo.address}<br />
-                            Phone: <a href={`tel:${contactInfo.phone.replace(/[^\d+]/g, '')}`} className="text-green-600 hover:text-green-700">{contactInfo.phone}</a>
+                            Phone: <a href={`tel:${contactInfo.phone.replace(/[^\d+]/g, '')}`} className="text-primary-600 hover:text-primary-700">{contactInfo.phone}</a>
                         </address>
                     </section>
                 </div>

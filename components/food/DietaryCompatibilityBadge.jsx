@@ -56,7 +56,7 @@ function DietaryCompatibilityBadge({ foodListing, userProfile, showDetails = fal
                     {compatibility.reasons.length > 0 && (
                         <div className="space-y-1 mt-2">
                             {compatibility.reasons.map((reason, idx) => (
-                                <p key={idx} className="text-green-700">{reason}</p>
+                                <p key={idx} className="text-primary-700">{reason}</p>
                             ))}
                         </div>
                     )}
@@ -67,7 +67,7 @@ function DietaryCompatibilityBadge({ foodListing, userProfile, showDetails = fal
                             <p className="text-gray-600 text-xs font-medium mb-1">Dietary Tags:</p>
                             <div className="flex flex-wrap gap-1">
                                 {foodListing.dietary_tags.map(tag => (
-                                    <span key={tag} className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs">
+                                    <span key={tag} className="px-2 py-0.5 bg-primary-100 text-primary-800 rounded text-xs">
                                         {tag}
                                     </span>
                                 ))}

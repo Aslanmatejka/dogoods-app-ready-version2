@@ -103,7 +103,7 @@ function FeedbackModal({ isOpen, onClose }) {
                 {/* Modal panel */}
                 <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                    <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-4">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-semibold text-white">
                                 Send Feedback
@@ -117,7 +117,7 @@ function FeedbackModal({ isOpen, onClose }) {
                                 </svg>
                             </button>
                         </div>
-                        <p className="text-green-50 text-sm mt-1">
+                        <p className="text-primary-50 text-sm mt-1">
                             We value your feedback! Help us improve DoGoods.
                         </p>
                     </div>
@@ -138,7 +138,7 @@ function FeedbackModal({ isOpen, onClose }) {
                                             value={type.value}
                                             checked={formData.type === type.value}
                                             onChange={handleInputChange}
-                                            className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500"
+                                            className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500"
                                         />
                                         <div className="ml-3">
                                             <span className="text-sm font-medium text-gray-900">{type.label}</span>
@@ -161,7 +161,7 @@ function FeedbackModal({ isOpen, onClose }) {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     placeholder="your@email.com"
                                     required
                                 />
@@ -179,7 +179,7 @@ function FeedbackModal({ isOpen, onClose }) {
                                 name="subject"
                                 value={formData.subject}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 placeholder="Brief description of your feedback"
                                 required
                             />
@@ -196,7 +196,7 @@ function FeedbackModal({ isOpen, onClose }) {
                                 value={formData.message}
                                 onChange={handleInputChange}
                                 rows="5"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                 placeholder="Please provide as much detail as possible..."
                                 required
                             ></textarea>
@@ -209,7 +209,7 @@ function FeedbackModal({ isOpen, onClose }) {
                         {submitStatus && (
                             <div className={`mb-4 p-3 rounded-md ${
                                 submitStatus.type === 'success' 
-                                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                                    ? 'bg-primary-50 text-primary-800 border border-primary-200' 
                                     : 'bg-red-50 text-red-800 border border-red-200'
                             }`}>
                                 <p className="text-sm">{submitStatus.message}</p>
@@ -228,14 +228,14 @@ function FeedbackModal({ isOpen, onClose }) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                                 disabled={isSubmitting}
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting}
                             >
                                 {isSubmitting ? 'Submitting...' : 'Submit Feedback'}

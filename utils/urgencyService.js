@@ -46,10 +46,10 @@ export const URGENCY_CONFIG = {
     label: 'Available',
     icon: '✓',
     color: 'green',
-    bgClass: 'bg-green-50',
-    textClass: 'text-green-700',
-    borderClass: 'border-green-200',
-    badgeClass: 'bg-green-500 text-white',
+    bgClass: 'bg-primary-50',
+    textClass: 'text-primary-700',
+    borderClass: 'border-primary-200',
+    badgeClass: 'bg-primary-500 text-white',
     threshold: Infinity
   },
   none: {

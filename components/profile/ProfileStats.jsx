@@ -14,7 +14,7 @@ function ProfileStats({
 }) {
     if (loading) {
         return (
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 shadow-sm">
+            <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-2xl p-6 shadow-sm">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Your Impact</h2>
                 <div
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
@@ -48,7 +48,7 @@ function ProfileStats({
             value: impact.activeListings,
             total: impact.totalListings,
             icon: 'fa-list-check',
-            color: 'green'
+            color: 'primary'
         },
         {
             label: 'Claimed Listings',
@@ -68,15 +68,15 @@ function ProfileStats({
 
     return (
         <div
-            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 shadow-sm"
+            className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-2xl p-6 shadow-sm"
             role="region"
             aria-label="Your impact statistics"
         >
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Your Impact</h2>
                 {impact.lastUpdated && (
-                    <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                        <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    <span className="inline-flex items-center px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-xs font-semibold">
+                        <span className="inline-block w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse"></span>
                         Live Updates
                     </span>
                 )}
@@ -110,7 +110,7 @@ function ProfileStats({
                 {progressCards.map((item, index) => {
                     const percentage = item.total > 0 ? (item.value / item.total) * 100 : 0;
                     const colorClasses = {
-                        green: 'bg-green-500',
+                        primary: 'bg-primary-500',
                         blue: 'bg-blue-500',
                         amber: 'bg-amber-500'
                     };
@@ -122,7 +122,7 @@ function ProfileStats({
                         >
                             <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center">
-                                    <i className={`fas ${item.icon} text-xl text-${item.color}-600 mr-3`} aria-hidden="true"></i>
+                                    <i className={`fas ${item.icon} text-xl ${item.color === 'primary' ? 'text-primary-600' : `text-${item.color}-600`} mr-3`} aria-hidden="true"></i>
                                     <span className="text-sm font-semibold text-gray-700">{item.label}</span>
                                 </div>
                                 <span className="text-2xl font-bold text-gray-900">{item.value}</span>

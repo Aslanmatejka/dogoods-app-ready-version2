@@ -66,7 +66,7 @@ const DonationScheduleList = ({ userId, onEdit }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-primary-100 text-primary-800';
       case 'paused':
         return 'bg-yellow-100 text-yellow-800';
       case 'cancelled':
@@ -125,7 +125,7 @@ const DonationScheduleList = ({ userId, onEdit }) => {
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'all'
-                ? 'bg-green-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -135,7 +135,7 @@ const DonationScheduleList = ({ userId, onEdit }) => {
             onClick={() => setFilter('active')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'active'
-                ? 'bg-green-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -145,7 +145,7 @@ const DonationScheduleList = ({ userId, onEdit }) => {
             onClick={() => setFilter('paused')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'paused'
-                ? 'bg-green-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -199,7 +199,7 @@ const DonationScheduleList = ({ userId, onEdit }) => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-2xl font-bold text-primary-600">
                         ${parseFloat(schedule.amount).toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-500">per {schedule.frequency === 'daily' ? 'day' : schedule.frequency === 'weekly' ? 'week' : schedule.frequency === 'monthly' ? 'month' : 'year'}</p>

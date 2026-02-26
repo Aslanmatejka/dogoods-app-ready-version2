@@ -233,7 +233,7 @@ function FoodForm({
         setGeocoding(true);
         console.log('Geocoding address:', address);
         try {
-            const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
+            const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
             const encodedAddress = encodeURIComponent(address);
             const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${MAPBOX_TOKEN}&limit=1`;
             console.log('Geocoding URL:', url);
@@ -380,8 +380,8 @@ function FoodForm({
             )}
 
             {/* Donor Info Section - Top of Form */}
-            <div className="mb-8 p-6 bg-green-50 rounded-xl border border-green-200">
-                <h2 className="text-xl font-bold text-green-700 mb-4">Donor Information</h2>
+            <div className="mb-8 p-6 bg-primary-50 rounded-xl border border-primary-200">
+                <h2 className="text-xl font-bold text-primary-700 mb-4">Donor Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Input
                         label="Name / Organization"
@@ -533,7 +533,7 @@ function FoodForm({
                             </div>
                         )}
                         {formData.latitude && formData.longitude && (
-                            <div className="mt-2 text-sm text-green-600 flex items-center">
+                            <div className="mt-2 text-sm text-primary-600 flex items-center">
                                 <i className="fas fa-check-circle mr-2"></i>
                                 Location verified: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
                             </div>
@@ -649,7 +649,7 @@ function FoodForm({
                                 min="0"
                                 step="0.01"
                                 required
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
                                     errors.quantity ? 'border-red-500' : 'border-gray-300'
                                 }`}
                                 placeholder="Enter amount"
@@ -661,7 +661,7 @@ function FoodForm({
                                 name="unit"
                                 value={formData.unit}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             >
                                 <option value="lb">Pounds (lb)</option>
                                 <option value="oz">Ounces (oz)</option>
@@ -730,7 +730,7 @@ function FoodForm({
                                     value={tag.value}
                                     checked={formData.dietary_tags.includes(tag.value)}
                                     onChange={handleChange}
-                                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                                 />
                                 <span className="text-sm text-gray-700">
                                     {tag.icon} {tag.label}
@@ -807,7 +807,7 @@ function FoodForm({
                             <img 
                                 src={imagePreview} 
                                 alt="Food item preview" 
-                                className="h-32 w-32 object-cover rounded-lg border border-green-200 shadow-sm"
+                                className="h-32 w-32 object-cover rounded-lg border border-primary-200 shadow-sm"
                             />
                         </div>
                     )}
@@ -816,7 +816,7 @@ function FoodForm({
                             <img 
                                 src={initialData.image_url} 
                                 alt="Current food item" 
-                                className="h-32 w-32 object-cover rounded-lg border border-green-200 shadow-sm"
+                                className="h-32 w-32 object-cover rounded-lg border border-primary-200 shadow-sm"
                             />
                         </div>
                     )}

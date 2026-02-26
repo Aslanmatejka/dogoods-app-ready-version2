@@ -62,13 +62,13 @@ function EmailConfirmationPage() {
     if (!email) return null;
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-b from-primary-50 via-white to-primary-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-lg">
                 <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-8 sm:p-10">
                     {/* Email Icon */}
                     <div className="text-center mb-6">
-                        <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
-                            <i className="fas fa-envelope-open-text text-green-600 text-3xl" aria-hidden="true"></i>
+                        <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-primary-100 mb-6">
+                            <i className="fas fa-envelope-open-text text-primary-600 text-3xl" aria-hidden="true"></i>
                         </div>
 
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
@@ -78,7 +78,7 @@ function EmailConfirmationPage() {
                         <p className="text-gray-600 text-base leading-relaxed">
                             We&apos;ve sent a confirmation link to
                         </p>
-                        <p className="text-green-700 font-semibold text-lg mt-1 mb-4 break-all">
+                        <p className="text-primary-700 font-semibold text-lg mt-1 mb-4 break-all">
                             {email}
                         </p>
 
@@ -89,24 +89,24 @@ function EmailConfirmationPage() {
                     </div>
 
                     {/* Steps */}
-                    <div className="bg-green-50 rounded-xl p-5 mb-6">
-                        <h2 className="text-sm font-semibold text-green-800 mb-3">What to do next:</h2>
+                    <div className="bg-primary-50 rounded-xl p-5 mb-6">
+                        <h2 className="text-sm font-semibold text-primary-800 mb-3">What to do next:</h2>
                         <ol className="space-y-3">
                             <li className="flex items-start gap-3">
-                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-green-200 text-green-800 text-xs font-bold">1</span>
-                                <span className="text-sm text-green-700">Open your email inbox for <strong>{email}</strong></span>
+                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary-200 text-primary-800 text-xs font-bold">1</span>
+                                <span className="text-sm text-primary-700">Open your email inbox for <strong>{email}</strong></span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-green-200 text-green-800 text-xs font-bold">2</span>
-                                <span className="text-sm text-green-700">Look for an email from DoGoods (check spam/junk if needed)</span>
+                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary-200 text-primary-800 text-xs font-bold">2</span>
+                                <span className="text-sm text-primary-700">Look for an email from DoGoods (check spam/junk if needed)</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-green-200 text-green-800 text-xs font-bold">3</span>
-                                <span className="text-sm text-green-700">Click the <strong>&ldquo;Confirm your email&rdquo;</strong> link</span>
+                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary-200 text-primary-800 text-xs font-bold">3</span>
+                                <span className="text-sm text-primary-700">Click the <strong>&ldquo;Confirm your email&rdquo;</strong> link</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-green-200 text-green-800 text-xs font-bold">4</span>
-                                <span className="text-sm text-green-700">Once confirmed, sign in and start sharing food!</span>
+                                <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary-200 text-primary-800 text-xs font-bold">4</span>
+                                <span className="text-sm text-primary-700">Once confirmed, sign in and start sharing food!</span>
                             </li>
                         </ol>
                     </div>
@@ -118,7 +118,7 @@ function EmailConfirmationPage() {
                         </p>
 
                         {resendSuccess && (
-                            <div className="mb-3 p-3 bg-green-50 text-green-700 rounded-lg text-sm" role="status">
+                            <div className="mb-3 p-3 bg-primary-50 text-primary-700 rounded-lg text-sm" role="status">
                                 <i className="fas fa-check-circle mr-2" aria-hidden="true"></i>
                                 Confirmation email resent successfully!
                             </div>
@@ -137,7 +137,7 @@ function EmailConfirmationPage() {
                             className={`text-sm font-medium transition-colors ${
                                 cooldown > 0
                                     ? 'text-gray-400 cursor-not-allowed'
-                                    : 'text-green-600 hover:text-green-700 cursor-pointer'
+                                    : 'text-primary-600 hover:text-primary-700 cursor-pointer'
                             }`}
                         >
                             {resending ? (
@@ -168,7 +168,7 @@ function EmailConfirmationPage() {
 
                         <p className="text-center text-sm text-gray-500">
                             Wrong email?{' '}
-                            <Link to="/signup" className="text-green-600 hover:text-green-700 font-medium">
+                            <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
                                 Sign up again
                             </Link>
                         </p>

@@ -103,13 +103,13 @@ function FAQs() {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white py-16">
+            <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-16">
                 <div className="container mx-auto px-4">
                     <button
                         onClick={() => navigate(-1)}
-                        className="mb-6 text-white hover:text-green-100 transition-colors flex items-center gap-2"
+                        className="mb-6 text-white hover:text-primary-100 transition-colors flex items-center gap-2"
                     >
                         <i className="fas fa-arrow-left"></i>
                         <span>Back</span>
@@ -117,7 +117,7 @@ function FAQs() {
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">
                         Frequently Asked Questions
                     </h1>
-                    <p className="text-xl text-green-100 max-w-3xl">
+                    <p className="text-xl text-primary-100 max-w-3xl">
                         Find answers to common questions about the Do Good Store and All Good Living Foundation
                     </p>
                 </div>
@@ -129,7 +129,7 @@ function FAQs() {
                     {faqs.map((category, categoryIndex) => (
                         <div key={categoryIndex} className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <span className="w-1 h-8 bg-gradient-to-b from-green-500 to-teal-500 rounded"></span>
+                                <span className="w-1 h-8 bg-gradient-to-b from-primary-500 to-primary-700 rounded"></span>
                                 {category.category}
                             </h2>
                             
@@ -151,7 +151,7 @@ function FAQs() {
                                                     {faq.question}
                                                 </span>
                                                 <i
-                                                    className={`fas fa-chevron-${isOpen ? 'up' : 'down'} text-green-600 transition-transform`}
+                                                    className={`fas fa-chevron-${isOpen ? 'up' : 'down'} text-primary-600 transition-transform`}
                                                 ></i>
                                             </button>
                                             
@@ -170,22 +170,22 @@ function FAQs() {
                     ))}
 
                     {/* Still Have Questions Section */}
-                    <div className="mt-16 bg-gradient-to-r from-green-600 to-teal-600 rounded-2xl p-8 text-white text-center">
+                    <div className="mt-16 bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 text-white text-center">
                         <h3 className="text-2xl font-bold mb-4">Still Have Questions?</h3>
-                        <p className="text-green-100 mb-6 max-w-2xl mx-auto">
+                        <p className="text-primary-100 mb-6 max-w-2xl mx-auto">
                             Can&apos;t find what you&apos;re looking for? Our team is here to help!
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <a
                                 href="mailto:info@allgoodlivingfoundation.org"
-                                className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors inline-flex items-center justify-center gap-2"
+                                className="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors inline-flex items-center justify-center gap-2"
                             >
                                 <i className="fas fa-envelope"></i>
                                 Email Us
                             </a>
                             <a
                                 href="tel:510-522-6288"
-                                className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors inline-flex items-center justify-center gap-2"
+                                className="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors inline-flex items-center justify-center gap-2"
                             >
                                 <i className="fas fa-phone"></i>
                                 Call Us

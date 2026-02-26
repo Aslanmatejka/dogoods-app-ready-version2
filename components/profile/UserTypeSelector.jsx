@@ -26,8 +26,8 @@ function UserTypeSelector({
                 {userTypes.map((type) => (
                     <div
                         key={type.id}
-                        className={`relative rounded-lg border p-4 cursor-pointer hover:border-green-500 ${
-                            currentType === type.id ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                        className={`relative rounded-lg border p-4 cursor-pointer hover:border-primary-500 ${
+                            currentType === type.id ? 'border-primary-500 bg-primary-50' : 'border-gray-300'
                     }`}
                         onClick={() => onTypeChange(type.id)}
                     >
@@ -38,7 +38,7 @@ function UserTypeSelector({
                             </div>
                             <div className={`h-5 w-5 rounded-full border-2 ${
                                 currentType === type.id
-                                    ? 'border-green-500 bg-green-500'
+                                    ? 'border-primary-500 bg-primary-500'
                                     : 'border-gray-300'
                             }`}>
                                 {currentType === type.id && (

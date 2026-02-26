@@ -19,10 +19,10 @@ function StorageTipCard({ foodItem, tips = [] }) {
             className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200"
             aria-labelledby="storage-tips-title"
         >
-            <div className="bg-green-50 px-4 py-3 border-b border-green-100">
+            <div className="bg-primary-50 px-4 py-3 border-b border-primary-100">
                 <h3 
                     id="storage-tips-title" 
-                    className="font-medium text-green-800"
+                    className="font-medium text-primary-800"
                 >
                     Storage Tips for {foodItem}
                 </h3>
@@ -40,7 +40,7 @@ function StorageTipCard({ foodItem, tips = [] }) {
                             role="listitem"
                         >
                             <i 
-                                className="fas fa-check-circle text-green-500 mt-1 mr-2" 
+                                className="fas fa-check-circle text-primary-500 mt-1 mr-2" 
                                 aria-hidden="true"
                             ></i>
                             <span className="text-gray-700">{tip}</span>

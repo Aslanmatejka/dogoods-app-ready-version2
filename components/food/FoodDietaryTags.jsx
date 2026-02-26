@@ -50,7 +50,7 @@ function FoodDietaryTags({
                             return (
                                 <span 
                                     key={tag}
-                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                                 >
                                     {tagInfo?.label || tag}
                                 </span>
@@ -123,8 +123,8 @@ function FoodDietaryTags({
                             disabled={readOnly}
                             className={`px-3 py-2 text-sm rounded-md border-2 transition-all ${
                                 dietaryTags.includes(tag.value)
-                                    ? 'border-green-500 bg-green-50 text-green-700'
-                                    : 'border-gray-200 hover:border-green-300'
+                                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                    : 'border-gray-200 hover:border-primary-300'
                             } ${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
                         >
                             {tag.label}
@@ -179,7 +179,7 @@ function FoodDietaryTags({
                     disabled={readOnly}
                     placeholder="e.g., Flour, eggs, milk, sugar, vanilla extract, baking powder..."
                     rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
                 />
             </div>
 
@@ -190,7 +190,7 @@ function FoodDietaryTags({
                     <div className="space-y-1 text-sm">
                         {dietaryTags.length > 0 && (
                             <div>
-                                <span className="font-medium text-green-700">✓ Suitable for:</span>
+                                <span className="font-medium text-primary-700">✓ Suitable for:</span>
                                 <span className="ml-2 text-gray-700">{dietaryTags.join(', ')}</span>
                             </div>
                         )}

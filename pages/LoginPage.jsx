@@ -129,19 +129,19 @@ function LoginPage() {
                 <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         {successMessage && (
-                            <div className="mb-6 rounded-md bg-green-50 p-4">
+                            <div className="mb-6 rounded-md bg-primary-50 p-4">
                                 <div className="flex">
                                     <div className="flex-shrink-0">
-                                        <i className="fas fa-check-circle text-green-400"></i>
+                                        <i className="fas fa-check-circle text-primary-400"></i>
                                     </div>
                                     <div className="ml-3">
-                                        <p className="text-sm text-green-800">{successMessage}</p>
+                                        <p className="text-sm text-primary-800">{successMessage}</p>
                                     </div>
                                     <div className="ml-auto pl-3">
                                         <button
                                             type="button"
                                             onClick={() => setSuccessMessage(null)}
-                                            className="inline-flex rounded-md text-green-400 hover:text-green-500"
+                                            className="inline-flex rounded-md text-primary-400 hover:text-primary-500"
                                         >
                                             <i className="fas fa-times"></i>
                                         </button>
@@ -164,7 +164,7 @@ function LoginPage() {
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                     />
                                 </div>
                             </div>
@@ -182,7 +182,7 @@ function LoginPage() {
                                         required
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                     />
                                     <button
                                         type="button"
@@ -202,7 +202,7 @@ function LoginPage() {
                                         type="checkbox"
                                         checked={formData.rememberMe}
                                         onChange={handleChange}
-                                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     />
                                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                                         Remember me

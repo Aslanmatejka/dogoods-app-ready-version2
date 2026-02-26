@@ -25,15 +25,15 @@ export default function Receipt({ receipt, items, onUpdate }) {
                 headerClass: 'bg-orange-500',
                 headerText: 'ORDER NOT PICKED UP',
                 buttonText: 'Reclaim',
-                buttonClass: 'bg-green-600 hover:bg-green-700 shadow-lg',
+                buttonClass: 'bg-primary-600 hover:bg-primary-700 shadow-lg',
                 buttonDisabled: false
             };
         } else {
             return {
-                headerClass: 'bg-green-600',
+                headerClass: 'bg-primary-600',
                 headerText: 'DATE CLAIMED',
                 buttonText: 'Pick Up',
-                buttonClass: 'bg-green-600 hover:bg-green-700 shadow-lg',
+                buttonClass: 'bg-primary-600 hover:bg-primary-700 shadow-lg',
                 buttonDisabled: false
             };
         }

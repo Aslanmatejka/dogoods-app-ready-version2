@@ -108,7 +108,7 @@ function DietaryPreferences({
                         onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-2 font-medium transition-colors ${
                             activeTab === tab.id
-                                ? 'text-green-600 border-b-2 border-green-600'
+                                ? 'text-primary-600 border-b-2 border-primary-600'
                                 : 'text-gray-500 hover:text-gray-700'
                         }`}
                     >
@@ -133,8 +133,8 @@ function DietaryPreferences({
                                 disabled={readOnly}
                                 className={`p-3 rounded-lg border-2 text-left transition-all ${
                                     isSelected('restrictions', option.value)
-                                        ? 'border-green-500 bg-green-50'
-                                        : 'border-gray-200 hover:border-green-300'
+                                        ? 'border-primary-500 bg-primary-50'
+                                        : 'border-gray-200 hover:border-primary-300'
                                 } ${readOnly ? 'cursor-default opacity-70' : 'cursor-pointer'}`}
                             >
                                 <div className="flex items-start justify-between">
@@ -143,7 +143,7 @@ function DietaryPreferences({
                                         <div className="text-xs text-gray-500 mt-1">{option.description}</div>
                                     </div>
                                     {isSelected('restrictions', option.value) && (
-                                        <svg className="w-5 h-5 text-green-600 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className="w-5 h-5 text-primary-600 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
                                     )}
@@ -206,8 +206,8 @@ function DietaryPreferences({
                                 disabled={readOnly}
                                 className={`p-3 rounded-lg border-2 text-left transition-all ${
                                     isSelected('preferences', option.value)
-                                        ? 'border-green-500 bg-green-50'
-                                        : 'border-gray-200 hover:border-green-300'
+                                        ? 'border-primary-500 bg-primary-50'
+                                        : 'border-gray-200 hover:border-primary-300'
                                 } ${readOnly ? 'cursor-default opacity-70' : 'cursor-pointer'}`}
                             >
                                 <div className="flex items-start justify-between">
@@ -216,7 +216,7 @@ function DietaryPreferences({
                                         <div className="text-xs text-gray-500 mt-1">{option.description}</div>
                                     </div>
                                     {isSelected('preferences', option.value) && (
-                                        <svg className="w-5 h-5 text-green-600 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <svg className="w-5 h-5 text-primary-600 flex-shrink-0 ml-2" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
                                     )}
@@ -246,8 +246,8 @@ function DietaryPreferences({
                         )}
                         {preferences.length > 0 && (
                             <div>
-                                <span className="font-medium text-green-800">Preferences:</span>
-                                <span className="ml-2 text-green-700">{preferences.join(', ')}</span>
+                                <span className="font-medium text-primary-800">Preferences:</span>
+                                <span className="ml-2 text-primary-700">{preferences.join(', ')}</span>
                             </div>
                         )}
                     </div>

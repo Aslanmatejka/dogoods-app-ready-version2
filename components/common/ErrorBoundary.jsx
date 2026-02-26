@@ -42,7 +42,7 @@ class ErrorBoundary extends React.Component {
                     <p className="text-gray-600 mb-4">We&apos;re sorry, but there was an error loading this content.</p>
                     <button
                         onClick={() => this.setState({ hasError: false, error: null })}
-                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                        className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
                     >
                         Try Again
                     </button>

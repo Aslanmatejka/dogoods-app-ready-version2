@@ -122,7 +122,7 @@ function ShareFoodPageContent() {
                 <Button onClick={() => navigate('/find')} variant="secondary" className="mr-2">Find Food</Button>
             </div>
             <div className="mb-8 text-center">
-                <h1 className="text-4xl font-extrabold text-green-700 drop-shadow-sm mb-2">{isEditing ? 'Edit Listing' : 'Share Food'}</h1>
+                <h1 className="text-4xl font-extrabold text-primary-700 drop-shadow-sm mb-2">{isEditing ? 'Edit Listing' : 'Share Food'}</h1>
                 <p className="mt-2 text-lg text-gray-600">
                     {isEditing
                         ? 'Update your food listing information.'
@@ -135,14 +135,14 @@ function ShareFoodPageContent() {
                         <div className="text-red-600 text-center mb-4">{submitError}</div>
                     )}
                 {!isEditing && (
-                    <div className="border-b border-gray-200 bg-gradient-to-r from-green-50 to-green-100">
+                    <div className="border-b border-gray-200 bg-gradient-to-r from-primary-50 to-primary-100">
                         <nav className="flex justify-center" role="tablist">
                             <button
                                 onClick={() => setActiveTab('individual')}
                                 className={`px-6 py-4 text-center w-1/2 font-semibold text-base border-b-2 transition-colors duration-200 focus:outline-none ${
                                     activeTab === 'individual'
-                                        ? 'border-green-500 text-green-700 bg-white shadow-sm'
-                                        : 'border-transparent text-gray-500 hover:text-green-600 hover:border-green-300 bg-green-50'
+                                        ? 'border-primary-500 text-primary-700 bg-white shadow-sm'
+                                        : 'border-transparent text-gray-500 hover:text-primary-600 hover:border-primary-300 bg-primary-50'
                                 }`}
                                 role="tab"
                                 aria-selected={activeTab === 'individual'}

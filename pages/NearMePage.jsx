@@ -103,7 +103,7 @@ function NearMePage() {
                             </p>
                             <Button
                                 onClick={enableLocation}
-                                className="bg-green-500 hover:bg-green-600 text-white"
+                                className="bg-primary-500 hover:bg-primary-600 text-white"
                             >
                                 Enable Location
                             </Button>

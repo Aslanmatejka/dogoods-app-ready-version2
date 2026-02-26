@@ -219,7 +219,7 @@ function UserSettings() {
 
             {successMessage && (
                 <div 
-                    className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative"
+                    className="mb-6 bg-primary-50 border border-primary-200 text-primary-700 px-4 py-3 rounded relative"
                     role="status"
                 >
                     <i className="fas fa-check-circle mr-2" aria-hidden="true"></i>
@@ -290,12 +290,12 @@ function UserSettings() {
 
                             {/* SMS Opt-in Status */}
                             {formData.sms_opt_in ? (
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
                                     <div className="flex items-start">
-                                        <i className="fas fa-check-circle text-green-600 mt-0.5 mr-3"></i>
+                                        <i className="fas fa-check-circle text-primary-600 mt-0.5 mr-3"></i>
                                         <div className="flex-1">
-                                            <h3 className="text-sm font-medium text-green-900">SMS Notifications Enabled</h3>
-                                            <p className="text-xs text-green-700 mt-1">
+                                            <h3 className="text-sm font-medium text-primary-900">SMS Notifications Enabled</h3>
+                                            <p className="text-xs text-primary-700 mt-1">
                                                 You've opted in to receive SMS notifications. You can disable notifications below at any time.
                                             </p>
                                         </div>
@@ -387,7 +387,7 @@ function UserSettings() {
                                     id="emailNotifications"
                                     checked={formData.notifications.email}
                                     onChange={() => handleCheckboxChange('notifications', 'email')}
-                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     aria-label="Enable email notifications"
                                 />
                                 <label htmlFor="emailNotifications" className="ml-2 block text-sm text-gray-900">
@@ -400,7 +400,7 @@ function UserSettings() {
                                     id="pushNotifications"
                                     checked={formData.notifications.push}
                                     onChange={() => handleCheckboxChange('notifications', 'push')}
-                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     aria-label="Enable push notifications"
                                 />
                                 <label htmlFor="pushNotifications" className="ml-2 block text-sm text-gray-900">
@@ -435,7 +435,7 @@ function UserSettings() {
                                     id="pickupReminders"
                                     checked={formData.pickup_reminder_enabled}
                                     onChange={() => handleInputChange('pickup_reminder_enabled', !formData.pickup_reminder_enabled)}
-                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     aria-label="Enable pickup reminders"
                                 />
                                 <label htmlFor="pickupReminders" className="ml-2 block text-sm text-gray-900">
@@ -451,7 +451,7 @@ function UserSettings() {
                                     <select
                                         value={formData.default_reminder_hours}
                                         onChange={(e) => handleInputChange('default_reminder_hours', parseInt(e.target.value))}
-                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-[#2CABE3] sm:text-sm rounded-md"
+                                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-[#2CABE3] sm:text-sm rounded-md"
                                         aria-label="Select reminder time"
                                     >
                                         <option value={1}>1 hour before</option>
@@ -530,7 +530,7 @@ function UserSettings() {
                                     id="profileVisibility"
                                     checked={formData.privacy.profileVisibility}
                                     onChange={() => handleCheckboxChange('privacy', 'profileVisibility')}
-                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     aria-label="Make profile visible to other users"
                                 />
                                 <label htmlFor="profileVisibility" className="ml-2 block text-sm text-gray-900">
@@ -543,7 +543,7 @@ function UserSettings() {
                                     id="locationSharing"
                                     checked={formData.privacy.locationSharing}
                                     onChange={() => handleCheckboxChange('privacy', 'locationSharing')}
-                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     aria-label="Share location with food listings"
                                 />
                                 <label htmlFor="locationSharing" className="ml-2 block text-sm text-gray-900">

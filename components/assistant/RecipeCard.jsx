@@ -34,25 +34,25 @@ function RecipeCard({ recipe }) {
                 
                 <div className="flex flex-wrap gap-2 mb-4" role="list" aria-label="Recipe details">
                     {prepTime && (
-                        <span className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full" role="listitem">
+                        <span className="bg-primary-50 text-primary-700 text-xs px-2 py-1 rounded-full" role="listitem">
                             <i className="far fa-clock mr-1" aria-hidden="true"></i>
                             <span className="sr-only">Preparation time:</span> Prep: {prepTime}
                         </span>
                     )}
                     {cookTime && (
-                        <span className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full" role="listitem">
+                        <span className="bg-primary-50 text-primary-700 text-xs px-2 py-1 rounded-full" role="listitem">
                             <i className="fas fa-fire mr-1" aria-hidden="true"></i>
                             <span className="sr-only">Cooking time:</span> Cook: {cookTime}
                         </span>
                     )}
                     {difficulty && (
-                        <span className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full" role="listitem">
+                        <span className="bg-primary-50 text-primary-700 text-xs px-2 py-1 rounded-full" role="listitem">
                             <i className="fas fa-chart-line mr-1" aria-hidden="true"></i>
                             <span className="sr-only">Difficulty level:</span> {difficulty}
                         </span>
                     )}
                     {servings && (
-                        <span className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full" role="listitem">
+                        <span className="bg-primary-50 text-primary-700 text-xs px-2 py-1 rounded-full" role="listitem">
                             <i className="fas fa-utensils mr-1" aria-hidden="true"></i>
                             <span className="sr-only">Number of servings:</span> Serves {servings}
                         </span>

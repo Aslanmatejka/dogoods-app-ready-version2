@@ -174,7 +174,7 @@ function SignupPageContent() {
             <div className="max-w-md mx-auto">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">
-                        <div className="h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+                        <div className="h-12 w-12 bg-primary-600 rounded-full flex items-center justify-center">
                             <i className="fas fa-seedling text-white text-2xl" aria-hidden="true"></i>
                         </div>
                     </div>
@@ -202,7 +202,7 @@ function SignupPageContent() {
                                 type="text"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
                                 placeholder="John Doe"
                                 aria-required="true"
                                 aria-invalid={!!errors.name}
@@ -223,7 +223,7 @@ function SignupPageContent() {
                                 type="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                                 placeholder="johndoe@example.com"
                                 aria-required="true"
                                 aria-invalid={!!errors.email}
@@ -244,7 +244,7 @@ function SignupPageContent() {
                                 type="text"
                                 value={formData.approvalNumber}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.approvalNumber ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.approvalNumber ? 'border-red-500' : 'border-gray-300'}`}
                                 placeholder="e.g. RBE123456"
                                 aria-required="true"
                                 aria-invalid={!!errors.approvalNumber}
@@ -292,7 +292,7 @@ function SignupPageContent() {
                                 type="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
                                 placeholder="At least 8 characters"
                                 aria-required="true"
                                 aria-invalid={!!errors.password}
@@ -313,7 +313,7 @@ function SignupPageContent() {
                                 type="password"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
                                 placeholder="Confirm your password"
                                 aria-required="true"
                                 aria-invalid={!!errors.confirmPassword}
@@ -358,7 +358,7 @@ function SignupPageContent() {
                                     type="checkbox"
                                     checked={formData.agreeToTerms}
                                     onChange={handleChange}
-                                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                     aria-required="true"
                                     aria-invalid={!!errors.agreeToTerms}
                                     aria-describedby={errors.agreeToTerms ? "terms-error" : undefined}
@@ -367,11 +367,11 @@ function SignupPageContent() {
                             <div className="ml-3 text-sm">
                                 <label htmlFor="agreeToTerms" className="text-gray-700">
                                     I agree to the {' '}
-                                    <Link to="/terms" className="text-green-600 hover:text-green-500">
+                                    <Link to="/terms" className="text-primary-600 hover:text-primary-500">
                                         Terms of Service
                                     </Link>
                                     {' '} and {' '}
-                                    <Link to="/privacy" className="text-green-600 hover:text-green-500">
+                                    <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
                                         Privacy Policy
                                     </Link>
                                 </label>
@@ -404,7 +404,7 @@ function SignupPageContent() {
                 <div className="text-center">
                     <p className="text-gray-600">
                         Already have an account?{' '}
-                        <Link to="/login" className="text-green-600 hover:text-green-500 font-medium">
+                        <Link to="/login" className="text-primary-600 hover:text-primary-500 font-medium">
                             Sign in
                         </Link>
                     </p>

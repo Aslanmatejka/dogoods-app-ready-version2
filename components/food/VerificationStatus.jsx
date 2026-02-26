@@ -40,9 +40,9 @@ function VerificationStatus({ status, showIcon = true, compact = false }) {
       shortLabel: 'Verified',
       icon: '✅',
       color: 'green',
-      bgClass: 'bg-green-100',
-      textClass: 'text-green-700',
-      borderClass: 'border-green-300'
+      bgClass: 'bg-primary-100',
+      textClass: 'text-primary-700',
+      borderClass: 'border-primary-300'
     },
     [VERIFICATION_STATUS.DISPUTED]: {
       label: 'Under Dispute',
@@ -118,7 +118,7 @@ export function VerificationProgress({
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
             verifiedBefore 
-              ? 'bg-green-500 text-white' 
+              ? 'bg-primary-500 text-white' 
               : 'bg-gray-200 text-gray-500'
           }`}>
             {verifiedBefore ? (
@@ -142,7 +142,7 @@ export function VerificationProgress({
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
             verifiedAfter 
-              ? 'bg-green-500 text-white' 
+              ? 'bg-primary-500 text-white' 
               : 'bg-gray-200 text-gray-500'
           }`}>
             {verifiedAfter ? (
@@ -163,7 +163,7 @@ export function VerificationProgress({
       {/* Completion Status */}
       {verifiedBefore && verifiedAfter && (
         <div className="mt-4 pt-3 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-green-600">
+          <div className="flex items-center gap-2 text-primary-600">
             <i className="fas fa-check-circle"></i>
             <span className="font-medium text-sm">Verification Complete!</span>
           </div>
@@ -198,7 +198,7 @@ export function VerificationPhotos({ photos, title }) {
             href={photoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative block overflow-hidden rounded-lg border-2 border-gray-200 hover:border-green-500 transition-colors"
+            className="group relative block overflow-hidden rounded-lg border-2 border-gray-200 hover:border-primary-500 transition-colors"
           >
             <img
               src={photoUrl}

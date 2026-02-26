@@ -106,7 +106,7 @@ function AdminClaimDashboard() {
                 <Button variant="danger" onClick={() => handleReview(claim.id, false)} disabled={actionStatus[claim.id] === 'loading'}>
                   Decline
                 </Button>
-                {actionStatus[claim.id] === 'approved' && <span className="text-green-600 ml-2">Approved</span>}
+                {actionStatus[claim.id] === 'approved' && <span className="text-primary-600 ml-2">Approved</span>}
                 {actionStatus[claim.id] === 'declined' && <span className="text-red-600 ml-2">Declined</span>}
                 {actionStatus[claim.id] === 'error' && <span className="text-red-600 ml-2">Error</span>}
               </div>

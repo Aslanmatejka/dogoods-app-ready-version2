@@ -114,15 +114,15 @@ function VerificationModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-green-600 text-white px-6 py-4 rounded-t-lg">
+        <div className="bg-primary-600 text-white px-6 py-4 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">{title}</h2>
-              <p className="text-green-100 text-sm mt-1">{foodTitle}</p>
+              <p className="text-primary-100 text-sm mt-1">{foodTitle}</p>
             </div>
             <button
               onClick={handleClose}
-              className="text-white hover:text-green-100 transition-colors"
+              className="text-white hover:text-primary-100 transition-colors"
               aria-label="Close"
             >
               <i className="fas fa-times text-2xl"></i>
@@ -156,7 +156,7 @@ function VerificationModal({
             </label>
             
             {/* Upload Button */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition-colors">
               <input
                 type="file"
                 accept="image/*"
@@ -216,7 +216,7 @@ function VerificationModal({
                 ? "Add any notes about the food condition, packaging, etc."
                 : "Add notes about the pickup experience, food condition, etc."}
               rows="4"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               maxLength="500"
               disabled={loading}
             />

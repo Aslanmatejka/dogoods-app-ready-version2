@@ -307,7 +307,7 @@ function HeroSlideshow({ children }) {
                                 />
                                 <button
                                     onClick={addSlide}
-                                    className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                                    className="w-full bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
                                 >
                                     Add Slide
                                 </button>

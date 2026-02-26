@@ -238,7 +238,7 @@ function ResetPasswordPage() {
                                 </Button>
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="w-full text-sm font-medium text-green-600 hover:text-green-500"
+                                    className="w-full text-sm font-medium text-primary-600 hover:text-primary-500"
                                 >
                                     Back to Login
                                 </button>
@@ -256,8 +256,8 @@ function ResetPasswordPage() {
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <div className="text-center">
-                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                                <i className="fas fa-check text-green-600 text-xl"></i>
+                            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary-100 mb-4">
+                                <i className="fas fa-check text-primary-600 text-xl"></i>
                             </div>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 Password reset successful
@@ -303,7 +303,7 @@ function ResetPasswordPage() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="Enter new password"
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                 />
                                 <button
                                     type="button"
@@ -332,7 +332,7 @@ function ResetPasswordPage() {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     placeholder="Confirm new password"
-                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                                 />
                                 <button
                                     type="button"
@@ -372,7 +372,7 @@ function ResetPasswordPage() {
                             <button
                                 type="button"
                                 onClick={() => navigate('/login')}
-                                className="text-sm font-medium text-green-600 hover:text-green-500"
+                                className="text-sm font-medium text-primary-600 hover:text-primary-500"
                             >
                                 Back to login
                             </button>

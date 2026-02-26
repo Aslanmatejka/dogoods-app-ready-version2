@@ -177,8 +177,8 @@ function ImpactStory() {
                     )}
 
                     {selectedStory.stats && (
-                        <div className="bg-green-50 rounded-xl p-5 mb-8">
-                            <p className="text-green-800 font-medium">&#128202; {selectedStory.stats}</p>
+                        <div className="bg-primary-50 rounded-xl p-5 mb-8">
+                            <p className="text-primary-800 font-medium">&#128202; {selectedStory.stats}</p>
                         </div>
                     )}
 
@@ -237,7 +237,7 @@ function ImpactStory() {
                         Our Impact Story
                     </h1>
                     <p className="text-xl text-gray-700 max-w-3xl mx-auto fade-in mb-8">
-                        Transforming food waste into community nourishment through AI-powered logistics and compassionate connections
+                        Connecting good food to families in need through smart technology and community care
                     </p>
                     <div className="flex justify-center gap-4 md:gap-8 mt-8 flex-wrap">
                         <Link to="/featured" className="bg-[#2CABE3] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all">
@@ -356,7 +356,7 @@ function ImpactStory() {
             )}
 
             {/* ── CTA Section ── */}
-            <section className="py-20 bg-gradient-to-br from-green-50 to-blue-50">
+            <section className="py-20 bg-gradient-to-br from-primary-50 to-blue-50">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Be Part of Our Story</h2>
                     <p className="text-xl text-gray-600 mb-10">
@@ -366,7 +366,7 @@ function ImpactStory() {
                         <Link to="/signup" className="bg-[#2CABE3] text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             Join the Platform
                         </Link>
-                        <Link to="/donate" className="bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
+                        <Link to="/donate" className="bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all shadow-lg">
                             Support Our Mission
                         </Link>
                     </div>
@@ -384,7 +384,7 @@ function ImpactStory() {
                     </div>
                     <form onSubmit={handleNewsletterSubmit} className="bg-gray-50 rounded-2xl p-8 shadow-lg">
                         {newsletterSuccess && (
-                            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                            <div className="mb-6 p-4 bg-primary-100 border border-primary-400 text-primary-700 rounded-lg">
                                 &#10003; Successfully subscribed! Check your email for confirmation.
                             </div>
                         )}

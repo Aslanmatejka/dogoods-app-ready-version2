@@ -218,25 +218,25 @@ function HomePage() {
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                                         <div className="relative">
                                             <div className="bg-white rounded-lg shadow-lg p-8 text-center h-full flex flex-col items-center justify-center">
-                                                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                    <i className="fas fa-search text-3xl text-green-600"></i>
+                                                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <i className="fas fa-search text-3xl text-primary-600"></i>
                                                 </div>
-                                                <div className="absolute -top-4 -left-4 w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                                                <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
                                                     1
                                                 </div>
                                                 <h3 className="text-xl font-bold mb-3 text-gray-900">Find Food</h3>
                                                 <p className="text-gray-600 mb-4">Browse available food items in your area or search for specific items you need, claim and pick up</p>
                                                 <div className="mt-auto pt-4">
-                                                    <div className="inline-block bg-green-50 text-green-700 text-sm px-4 py-2 rounded-full font-medium">
+                                                    <div className="inline-block bg-primary-50 text-primary-700 text-sm px-4 py-2 rounded-full font-medium">
                                                         Browse Listings
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                                                <i className="fas fa-arrow-right text-4xl text-green-600"></i>
+                                                <i className="fas fa-arrow-right text-4xl text-primary-600"></i>
                                             </div>
                                             <div className="md:hidden flex justify-center my-4">
-                                                <i className="fas fa-arrow-down text-4xl text-green-600"></i>
+                                                <i className="fas fa-arrow-down text-4xl text-primary-600"></i>
                                             </div>
                                         </div>
 
@@ -409,10 +409,10 @@ function HomePage() {
                                             <div className="mt-3 pt-3 border-t space-y-2 bg-blue-50 p-2 rounded">
                                                 <div className="flex items-center justify-between text-xs">
                                                     <span className="text-gray-700 font-medium">
-                                                        <i className="fas fa-apple-alt text-green-600 mr-1"></i>
+                                                        <i className="fas fa-apple-alt text-primary-600 mr-1"></i>
                                                         Food Given (lb)
                                                     </span>
-                                                    <span className="text-green-700 font-bold">{foodGivenValue.toLocaleString()}</span>
+                                                    <span className="text-primary-700 font-bold">{foodGivenValue.toLocaleString()}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between text-xs">
                                                     <span className="text-gray-700 font-medium">

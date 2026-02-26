@@ -185,7 +185,7 @@ function AdminContentManagement() {
                                     name="post_type"
                                     value={formData.post_type}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                                     required
                                 >
                                     <option value="testimony">Testimony</option>
@@ -204,7 +204,7 @@ function AdminContentManagement() {
                                 name="category"
                                 value={formData.category}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                             >
                                 <option value="general">General</option>
                                 <option value="tips">Tips</option>

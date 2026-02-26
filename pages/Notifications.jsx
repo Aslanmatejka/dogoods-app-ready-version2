@@ -129,7 +129,7 @@ function Notifications() {
                             <Card
                                 key={notification.id}
                                 className={`transition-colors duration-200 ${
-                                    notification.read ? 'bg-white' : 'bg-green-50'
+                                    notification.read ? 'bg-white' : 'bg-primary-50'
                                 }`}
                                 role="article"
                                 aria-labelledby={`notification-${notification.id}-title`}
@@ -138,10 +138,10 @@ function Notifications() {
                                     <div className="flex items-start">
                                         <div className="flex-shrink-0">
                                             <div 
-                                                className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"
+                                                className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center"
                                                 aria-hidden="true"
                                             >
-                                                <i className={`fas ${getNotificationIcon(notification.type)} text-green-600`}></i>
+                                                <i className={`fas ${getNotificationIcon(notification.type)} text-primary-600`}></i>
                                             </div>
                                         </div>
                                         <div className="ml-4 flex-1">

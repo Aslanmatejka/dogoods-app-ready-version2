@@ -117,7 +117,7 @@ function UserListings() {
                 </div>
             )}
             {successMessage && (
-                <div className="mb-4 p-4 rounded-lg bg-green-50 text-green-800" role="alert">
+                <div className="mb-4 p-4 rounded-lg bg-primary-50 text-primary-800" role="alert">
                     <i className="fas fa-check-circle mr-2" aria-hidden="true"></i>
                     {successMessage}
                 </div>
@@ -132,7 +132,7 @@ function UserListings() {
                             id="individual-tab"
                             className={`px-4 py-4 text-center w-1/2 font-medium text-sm border-b-2 ${
                                 activeTab === 'individual'
-                                    ? 'border-green-500 text-green-600'
+                                    ? 'border-primary-500 text-primary-600'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >
@@ -145,7 +145,7 @@ function UserListings() {
                             id="listings-tab"
                             className={`px-4 py-4 text-center w-1/2 font-medium text-sm border-b-2 ${
                                 activeTab === 'listings'
-                                    ? 'border-green-500 text-green-600'
+                                    ? 'border-primary-500 text-primary-600'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                         >
@@ -191,7 +191,7 @@ function UserListings() {
                                                         <h3 className="text-lg font-semibold">{listing.title}</h3>
                                                         <span className={`px-2 py-1 text-xs rounded-full ${
                                                             listing.status === 'active' 
-                                                                ? 'bg-green-100 text-green-800' 
+                                                                ? 'bg-primary-100 text-primary-800' 
                                                                 : 'bg-gray-100 text-gray-800'
                                                         }`}>
                                                             {listing.status}

@@ -231,9 +231,9 @@ const ApprovalCodeManagement = () => {
                         <div className="text-sm text-gray-500">Total Codes</div>
                         <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
                     </div>
-                    <div className="bg-white rounded-lg shadow-sm p-5 border-l-4 border-green-500">
+                    <div className="bg-white rounded-lg shadow-sm p-5 border-l-4 border-primary-500">
                         <div className="text-sm text-gray-500">Claimed</div>
-                        <div className="text-2xl font-bold text-green-600">{stats.claimed}</div>
+                        <div className="text-2xl font-bold text-primary-600">{stats.claimed}</div>
                     </div>
                     <div className="bg-white rounded-lg shadow-sm p-5 border-l-4 border-yellow-500">
                         <div className="text-sm text-gray-500">Available (Unclaimed)</div>
@@ -262,7 +262,7 @@ const ApprovalCodeManagement = () => {
                                             <td className="py-2 px-3">{name}</td>
                                             <td className="py-2 px-3 font-mono">{s.school_code}</td>
                                             <td className="py-2 px-3 text-right">{s.total}</td>
-                                            <td className="py-2 px-3 text-right text-green-600">{s.claimed}</td>
+                                            <td className="py-2 px-3 text-right text-primary-600">{s.claimed}</td>
                                             <td className="py-2 px-3 text-right text-yellow-600">{s.unclaimed}</td>
                                         </tr>
                                     ))}
@@ -283,7 +283,7 @@ const ApprovalCodeManagement = () => {
                             <select
                                 value={selectedCommunity}
                                 onChange={(e) => setSelectedCommunity(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
                             >
                                 <option value="">Select school...</option>
                                 {communities.map(c => (
@@ -300,7 +300,7 @@ const ApprovalCodeManagement = () => {
                                 maxLength={3}
                                 value={schoolCode}
                                 onChange={(e) => setSchoolCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 font-mono uppercase"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono uppercase"
                                 placeholder="e.g. RBE"
                             />
                         </div>
@@ -314,7 +314,7 @@ const ApprovalCodeManagement = () => {
                                 max={1000}
                                 value={quantity}
                                 onChange={(e) => setQuantity(Math.min(1000, Math.max(1, parseInt(e.target.value) || 1)))}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
                             />
                         </div>
                         <div>
@@ -345,7 +345,7 @@ const ApprovalCodeManagement = () => {
                             <select
                                 value={filterCommunity}
                                 onChange={(e) => setFilterCommunity(e.target.value)}
-                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                             >
                                 <option value="all">All Schools</option>
                                 {communities.map(c => (
@@ -355,7 +355,7 @@ const ApprovalCodeManagement = () => {
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                             >
                                 <option value="all">All Status</option>
                                 <option value="unclaimed">Unclaimed</option>
@@ -394,7 +394,7 @@ const ApprovalCodeManagement = () => {
                                                 <td className="py-2 px-3">{community?.name || code.school_code}</td>
                                                 <td className="py-2 px-3">
                                                     {code.is_claimed ? (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                                                             <i className="fas fa-check-circle mr-1" aria-hidden="true"></i>
                                                             Claimed
                                                         </span>

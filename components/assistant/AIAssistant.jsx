@@ -297,16 +297,16 @@ function AIAssistant({
         <div data-name="ai-assistant" className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 flex flex-col" style={{ maxHeight: '90vh' }}>
                 {/* Header */}
-                <div className="bg-green-600 text-white px-4 py-3 flex items-center justify-between rounded-t-lg">
+                <div className="bg-primary-600 text-white px-4 py-3 flex items-center justify-between rounded-t-lg">
                     <div className="flex items-center">
                         <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3">
-                            <i className="fas fa-robot text-green-600"></i>
+                            <i className="fas fa-robot text-primary-600"></i>
                         </div>
                         <div>
                             <h3 className="font-bold">Nourish Assistant</h3>
-                            <div className="flex items-center text-xs text-green-100">
+                            <div className="flex items-center text-xs text-primary-100">
                                 <span className={`w-2 h-2 rounded-full mr-2 ${
-                                    connectionStatus === 'connected' ? 'bg-green-300' : 
+                                    connectionStatus === 'connected' ? 'bg-primary-300' : 
                                     connectionStatus === 'checking' ? 'bg-yellow-300' : 'bg-red-300'
                                 }`}></span>
                                 {connectionStatus === 'connected' ? 'Connected' : 
@@ -317,21 +317,21 @@ function AIAssistant({
                     <div className="flex items-center space-x-2">
                         <button 
                             onClick={exportConversation}
-                            className="text-white hover:text-green-200 text-sm"
+                            className="text-white hover:text-primary-200 text-sm"
                             title="Export conversation"
                         >
                             <i className="fas fa-download"></i>
                         </button>
                         <button 
                             onClick={clearConversation}
-                            className="text-white hover:text-green-200 text-sm"
+                            className="text-white hover:text-primary-200 text-sm"
                             title="Clear conversation"
                         >
                             <i className="fas fa-trash"></i>
                         </button>
                         <button 
                             onClick={onClose}
-                            className="text-white hover:text-green-200"
+                            className="text-white hover:text-primary-200"
                             aria-label="Close assistant"
                         >
                             <i className="fas fa-times"></i>
@@ -350,13 +350,13 @@ function AIAssistant({
                                 <div
                                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                                         message.role === 'user'
-                                            ? 'bg-green-600 text-white'
+                                            ? 'bg-primary-600 text-white'
                                             : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
                                     <p className="whitespace-pre-wrap">{message.content}</p>
                                     <div className={`text-xs mt-1 ${
-                                        message.role === 'user' ? 'text-green-200' : 'text-gray-500'
+                                        message.role === 'user' ? 'text-primary-200' : 'text-gray-500'
                                     }`}>
                                         {formatTimestamp(message.timestamp)}
                                     </div>
@@ -424,13 +424,13 @@ function AIAssistant({
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
                             placeholder="Ask me anything..."
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             disabled={isLoading || isStreaming}
                         />
                         <button
                             type="submit"
                             disabled={!userInput.trim() || isLoading || isStreaming}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <i className="fas fa-paper-plane"></i>
                         </button>

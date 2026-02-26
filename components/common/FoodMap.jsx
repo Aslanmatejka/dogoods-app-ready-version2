@@ -7,7 +7,7 @@ import supabase from '../../utils/supabaseClient';
 const getMapboxgl = () => window.mapboxgl;
 
 // Get Mapbox token from environment variable
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoic2lnbndpc2UiLCJhIjoiY21rc2tjNjQ3MGFjajNkcHJ1cTNsbWV6dyJ9.xbJQFP3HCM2jmG87wvwC1Q';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 console.log('🔑 Mapbox token set:', MAPBOX_TOKEN.substring(0, 20) + '...');
 
@@ -583,7 +583,7 @@ function FoodMap({ onMarkerClick, showSignupPrompt = true }) {
 
             <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg px-4 py-2 z-10">
                 <div className="flex items-center gap-2 text-sm">
-                    <div className="w-3 h-3 bg-green-600 rounded-full"></div>
+                    <div className="w-3 h-3 bg-primary-600 rounded-full"></div>
                     <span className="font-medium text-gray-700">{foodListings.length} Available Listings</span>
                 </div>
             </div>

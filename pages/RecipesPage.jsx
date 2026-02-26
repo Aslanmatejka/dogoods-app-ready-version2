@@ -9,7 +9,6 @@ function RecipesPage() {
     const navigate = useNavigate();
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [playingId, setPlayingId] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
 
     useEffect(() => {
@@ -74,7 +73,7 @@ function RecipesPage() {
                 return (
                     <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-                        onClick={() => { setExpandedId(null); setPlayingId(null); }}
+                        onClick={() => setExpandedId(null)}
                     >
                         <div
                             className="relative w-full max-w-5xl mx-4 aspect-video rounded-2xl overflow-hidden shadow-2xl"
@@ -88,7 +87,7 @@ function RecipesPage() {
                                 title={recipe.title}
                             />
                             <button
-                                onClick={() => { setExpandedId(null); setPlayingId(null); }}
+                                onClick={() => setExpandedId(null)}
                                 className="absolute top-3 right-3 w-10 h-10 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors text-xl font-bold"
                             >
                                 ✕
@@ -133,8 +132,6 @@ function RecipesPage() {
                     ) : (
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {recipes.map((recipe, index) => {
-                                const videoId = getYouTubeId(recipe.youtube_url);
-
                                 return (
                                     <div
                                         key={recipe.id}
@@ -145,7 +142,7 @@ function RecipesPage() {
                                         <div className="relative aspect-video bg-gray-900">
                                             <div
                                                 className="w-full h-full cursor-pointer group relative"
-                                                onClick={() => { setExpandedId(recipe.id); setPlayingId(recipe.id); }}
+                                                onClick={() => setExpandedId(recipe.id)}
                                             >
                                                 <img
                                                     src={getThumbnail(recipe)}

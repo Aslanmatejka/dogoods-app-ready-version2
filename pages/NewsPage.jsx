@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import supabase from '../utils/supabaseClient';
 import { reportError } from '../utils/helpers';
@@ -68,7 +68,7 @@ function NewsPage() {
                     transform: scale(1.02);
                 }
                 .clickable-image::before {
-                    content: '🔍 Click to view';
+                    content: '?? Click to view';
                     position: absolute;
                     top: 50%;
                     left: 50%;
@@ -137,7 +137,7 @@ function NewsPage() {
                     onClick={() => navigate('/admin/impact-content')}
                     className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow-2xl hover:shadow-xl transition-all transform hover:scale-105"
                 >
-                    ✏️ Manage Content
+                    ?? Manage Content
                 </button>
             )}
 
@@ -148,7 +148,7 @@ function NewsPage() {
                         onClick={() => navigate('/impact-story')}
                         className="mb-6 text-gray-700 hover:text-blue-600 transition-colors flex items-center gap-2 font-semibold"
                     >
-                        <span>←</span>
+                        <span>?</span>
                         <span>Back to Impact Story</span>
                     </button>
                     <div className="text-center">
@@ -197,7 +197,7 @@ function NewsPage() {
                                         <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
                                         <p className="text-gray-600 leading-relaxed line-clamp-3 text-sm">{item.quote || item.description}</p>
                                         {item.attribution && (
-                                            <p className="text-sm text-gray-500 mt-3">— {item.attribution}{item.organization && `, ${item.organization}`}</p>
+                                            <p className="text-sm text-gray-500 mt-3">� {item.attribution}{item.organization && `, ${item.organization}`}</p>
                                         )}
                                     </div>
                                 </div>
@@ -208,7 +208,7 @@ function NewsPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-100">
+            <section className="py-16 bg-gradient-to-br from-primary-50 to-primary-100">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-4xl font-bold text-gray-900 mb-6">Stay Connected</h2>
                     <p className="text-lg text-gray-700 mb-8">

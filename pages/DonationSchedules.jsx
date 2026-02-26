@@ -67,7 +67,7 @@ const DonationSchedules = () => {
           <Card>
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-1">Total Donated</p>
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-3xl font-bold text-primary-600">
                 ${stats.totalDonated.toFixed(2)}
               </p>
             </div>

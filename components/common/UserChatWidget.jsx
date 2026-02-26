@@ -184,7 +184,7 @@ function UserChatWidget() {
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="text-white hover:text-green-100 transition-colors"
+                            className="text-white hover:text-primary-100 transition-colors"
                             aria-label="Close chat"
                         >
                             <i className="fas fa-times"></i>
@@ -242,7 +242,7 @@ function UserChatWidget() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 placeholder="Type your message..."
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 disabled={sending || loading}
                             />
                             <button

@@ -17,7 +17,7 @@ function CookiesPolicy() {
                         Cookie Policy
                     </h1>
                     
-                    <div className="prose prose-green max-w-none">
+                    <div className="prose prose-cyan max-w-none">
                         <p className="text-gray-600 mb-6" aria-label="Last update date">
                             Last Updated: January 15, 2024
                         </p>
@@ -99,7 +99,7 @@ function CookiesPolicy() {
                             In addition, most advertising networks offer you a way to opt out of targeted advertising. If you would like to find out more information, please visit {' '}
                             <a 
                                 href="http://www.aboutads.info/choices/" 
-                                className="text-green-600 hover:text-green-700" 
+                                className="text-primary-600 hover:text-primary-700" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 aria-label="Visit About Ads Choices website (opens in new tab)"
@@ -108,7 +108,7 @@ function CookiesPolicy() {
                             </a> or {' '}
                             <a 
                                 href="http://www.youronlinechoices.com" 
-                                className="text-green-600 hover:text-green-700" 
+                                className="text-primary-600 hover:text-primary-700" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 aria-label="Visit Your Online Choices website (opens in new tab)"
@@ -130,9 +130,9 @@ function CookiesPolicy() {
                             If you have any questions about our use of cookies or other technologies, please contact us at:
                         </p>
                         <address className="not-italic">
-                            Email: <a href="mailto:privacy@sharefoods.com" className="text-green-600 hover:text-green-700">privacy@sharefoods.com</a><br />
+                            Email: <a href="mailto:privacy@sharefoods.com" className="text-primary-600 hover:text-primary-700">privacy@sharefoods.com</a><br />
                             Address: 123 Main Street, City, State, ZIP<br />
-                            Phone: <a href="tel:+11234567890" className="text-green-600 hover:text-green-700">(123) 456-7890</a>
+                            Phone: <a href="tel:+11234567890" className="text-primary-600 hover:text-primary-700">(123) 456-7890</a>
                         </address>
                     </div>
                 </div>
@@ -148,7 +148,7 @@ function CookiesPolicy() {
                 <p className="text-gray-600">We&apos;re sorry, but there was an error loading this page.</p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    className="mt-4 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
                 >
                     Reload Page
                 </button>

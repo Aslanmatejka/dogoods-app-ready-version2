@@ -159,7 +159,7 @@ const DonationScheduleForm = ({ schedule = null, onSuccess, onCancel }) => {
               name="frequency"
               value={formData.frequency}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             >
               <option value="daily">Daily</option>
@@ -209,7 +209,7 @@ const DonationScheduleForm = ({ schedule = null, onSuccess, onCancel }) => {
               name="recipient_type"
               value={formData.recipient_type}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             >
               <option value="general">General Fund</option>
@@ -229,7 +229,7 @@ const DonationScheduleForm = ({ schedule = null, onSuccess, onCancel }) => {
               name="payment_method"
               value={formData.payment_method}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             >
               <option value="card">Credit/Debit Card</option>
@@ -248,7 +248,7 @@ const DonationScheduleForm = ({ schedule = null, onSuccess, onCancel }) => {
               type="checkbox"
               checked={formData.reminder_enabled}
               onChange={handleChange}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
             <label htmlFor="reminder_enabled" className="ml-2 block text-sm text-gray-700">
               Enable donation reminders
@@ -283,7 +283,7 @@ const DonationScheduleForm = ({ schedule = null, onSuccess, onCancel }) => {
             value={formData.notes}
             onChange={handleChange}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             placeholder="Add any additional notes about this donation schedule..."
           />
         </div>

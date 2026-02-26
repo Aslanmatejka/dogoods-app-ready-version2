@@ -235,7 +235,7 @@ function StoriesPage() {
                             <p className="text-sm text-gray-600 mb-4">Click on any section to edit</p>
                             <button
                                 onClick={saveChanges}
-                                className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors mb-2"
+                                className="w-full bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-2"
                             >
                                 Save Changes
                             </button>
@@ -256,7 +256,7 @@ function StoriesPage() {
                 <div className="max-w-7xl mx-auto mb-12">
                     <button 
                         onClick={() => navigate('/impact-story')}
-                        className="mb-6 flex items-center text-green-600 hover:text-green-700 font-semibold transition-colors"
+                        className="mb-6 flex items-center text-primary-600 hover:text-primary-700 font-semibold transition-colors"
                     >
                         <i className="fas fa-arrow-left mr-2"></i>
                         Back to Impact Story
@@ -540,7 +540,7 @@ function StoriesPage() {
                     <div className="text-center mt-12">
                         <button 
                             onClick={() => navigate('/share')} 
-                            className="bg-green-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl">
+                            className="bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-lg hover:shadow-xl">
                             <span 
                                 className="editable"
                                 contentEditable={isEditMode}

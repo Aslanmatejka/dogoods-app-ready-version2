@@ -70,7 +70,7 @@ function SuccessContent() {
                 <div role="listitem">
                     <Card>
                         <div className="text-center p-6">
-                            <div className="text-3xl font-bold text-green-600">
+                            <div className="text-3xl font-bold text-primary-600">
                                 {stats.totalMeals.toLocaleString()}
                             </div>
                             <div className="text-sm text-gray-600">Meals Shared</div>
@@ -80,7 +80,7 @@ function SuccessContent() {
                 <div role="listitem">
                     <Card>
                         <div className="text-center p-6">
-                            <div className="text-3xl font-bold text-green-600">
+                            <div className="text-3xl font-bold text-primary-600">
                                 {stats.wasteReduced.toLocaleString()}kg
                             </div>
                             <div className="text-sm text-gray-600">Food Waste Reduced</div>
@@ -90,7 +90,7 @@ function SuccessContent() {
                 <div role="listitem">
                     <Card>
                         <div className="text-center p-6">
-                            <div className="text-3xl font-bold text-green-600">
+                            <div className="text-3xl font-bold text-primary-600">
                                 {stats.co2Saved.toLocaleString()}kg
                             </div>
                             <div className="text-sm text-gray-600">CO2 Emissions Saved</div>
@@ -100,7 +100,7 @@ function SuccessContent() {
                 <div role="listitem">
                     <Card>
                         <div className="text-center p-6">
-                            <div className="text-3xl font-bold text-green-600">
+                            <div className="text-3xl font-bold text-primary-600">
                                 {stats.activeUsers.toLocaleString()}+
                             </div>
                             <div className="text-sm text-gray-600">Active Members</div>
@@ -149,24 +149,24 @@ function SuccessContent() {
                                     </p>
 
                                     <div className="grid grid-cols-3 gap-4 mb-6" role="list" aria-label="Impact Metrics">
-                                        <div role="listitem" className="text-center p-4 bg-green-50 rounded-lg">
-                                            <div className="font-bold text-green-600">
+                                        <div role="listitem" className="text-center p-4 bg-primary-50 rounded-lg">
+                                            <div className="font-bold text-primary-600">
                                                 {story.impact.meals.toLocaleString()}
                                             </div>
                                             <div className="text-sm text-gray-600">
                                                 Meals Shared
                                             </div>
                                         </div>
-                                        <div role="listitem" className="text-center p-4 bg-green-50 rounded-lg">
-                                            <div className="font-bold text-green-600">
+                                        <div role="listitem" className="text-center p-4 bg-primary-50 rounded-lg">
+                                            <div className="font-bold text-primary-600">
                                                 {story.impact.waste.toLocaleString()}kg
                                             </div>
                                             <div className="text-sm text-gray-600">
                                                 Waste Reduced
                                             </div>
                                         </div>
-                                        <div role="listitem" className="text-center p-4 bg-green-50 rounded-lg">
-                                            <div className="font-bold text-green-600">
+                                        <div role="listitem" className="text-center p-4 bg-primary-50 rounded-lg">
+                                            <div className="font-bold text-primary-600">
                                                 {story.impact.co2.toLocaleString()}kg
                                             </div>
                                             <div className="text-sm text-gray-600">
