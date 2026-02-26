@@ -167,7 +167,7 @@ function HomePage() {
                                         id="hero-heading"
                                         className="text-4xl md:text-5xl font-bold mb-6 text-white drop-shadow-lg"
                                     >
-                                        Share Food, Reduce Waste, Build Community
+                                        Find Food, Reduce Waste, Build Community
                                     </h1>
                                     <p className="text-xl mb-12 text-white drop-shadow-md">
                                         Join our movement to combat food waste and hunger through community-driven food sharing.
