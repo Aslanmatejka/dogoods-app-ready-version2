@@ -639,6 +639,7 @@ function ImpactDataEntry() {
                                                 defaultValue=""
                                                 inputRef={el => orgRowRefs.current.food_saved_from_waste_lb = el}
                                                 onBlur={() => { }}
+                                                className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             />
                                         </td>
                                         <td className="px-3 py-2">
@@ -647,6 +648,7 @@ function ImpactDataEntry() {
                                                 defaultValue=""
                                                 inputRef={el => orgRowRefs.current.food_donated = el}
                                                 onBlur={() => { }}
+                                                className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             />
                                         </td>
                                         <td className="px-3 py-2">
@@ -695,6 +697,7 @@ function ImpactDataEntry() {
                                                     type="number"
                                                     defaultValue={row.food_saved_from_waste_lb || 0}
                                                     onBlur={(val) => handleUpdateRow(row.id, 'food_saved_from_waste_lb', val)}
+                                                    className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                                 />
                                             </td>
                                             <td className="px-3 py-2">
@@ -702,6 +705,7 @@ function ImpactDataEntry() {
                                                     type="number"
                                                     defaultValue={row.food_donated || 0}
                                                     onBlur={(val) => handleUpdateRow(row.id, 'food_donated', val)}
+                                                    className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                                 />
                                             </td>
                                             <td className="px-3 py-2">
@@ -805,6 +809,7 @@ function ImpactDataEntry() {
                                                 defaultValue=""
                                                 inputRef={el => communityRowRefs.current.food_given_lb = el}
                                                 onBlur={() => { }}
+                                                className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                             />
                                         </td>
                                         <td className="px-3 py-2">
@@ -869,6 +874,7 @@ function ImpactDataEntry() {
                                                     type="number"
                                                     defaultValue={row.food_given_lb || 0}
                                                     onBlur={(val) => handleUpdateRow(row.id, 'food_given_lb', val)}
+                                                    className="w-full min-w-[80px] px-2 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2CABE3] focus:border-transparent"
                                                 />
                                             </td>
                                             <td className="px-3 py-2">
