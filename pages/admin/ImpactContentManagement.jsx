@@ -255,7 +255,7 @@ function ImpactContentManagement() {
             
             setShowModal(false);
             setEditingItem(null);
-            loadAllData(true);
+            await loadAllData(true);
         } catch (error) {
             console.error('[ImpactCMS] Error saving - Full error:', error);
             console.error('[ImpactCMS] Error message:', error.message);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import supabase from '../utils/supabaseClient';
 import { reportError } from '../utils/helpers';
 import { useAuthContext } from '../utils/AuthContext';
 
@@ -19,13 +18,26 @@ function RecipesPage() {
     const loadRecipes = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('impact_recipes')
-                .select('*')
-                .eq('is_active', true)
-                .order('created_at', { ascending: false });
+            const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-            if (error) throw error;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
+
+            const res = await fetch(
+                `${supabaseUrl}/rest/v1/impact_recipes?is_active=eq.true&order=created_at.desc`,
+                {
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`,
+                    },
+                    signal: controller.signal
+                }
+            );
+            clearTimeout(timeout);
+
+            if (!res.ok) throw new Error(`Failed to load recipes: ${res.status}`);
+            const data = await res.json();
             setRecipes(data || []);
         } catch (error) {
             console.error('Error loading recipes:', error);
