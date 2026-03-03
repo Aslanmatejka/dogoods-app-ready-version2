@@ -226,7 +226,7 @@ function HeroSlideshow({ children }) {
             ))}
 
             {/* Hero Content - Rendered above slideshow */}
-            <div className="relative z-10">
+            <div className="relative z-10 flex items-center justify-center min-h-[600px]">
                 {children}
             </div>
 
