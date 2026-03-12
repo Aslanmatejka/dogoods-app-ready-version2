@@ -37,12 +37,12 @@ function CommunityDetailPage() {
                 
                 setCommunity(mergedCommunity);
 
-                // Fetch food listings for this community
+                // Fetch food listings for this community (both approved and active)
                 const { data: listings, error: listingsError } = await supabase
                     .from('food_listings')
                     .select('*')
                     .eq('community_id', id)
-                    .eq('status', 'approved')
+                    .in('status', ['approved', 'active'])
                     .order('created_at', { ascending: false });
 
                 if (listingsError) throw listingsError;

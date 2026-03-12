@@ -33,8 +33,8 @@ function NearMePage() {
     const fetchNearbyListings = async () => {
         setLoading(true);
         try {
-            // Fetch all approved listings
-            const allListings = await dataService.getFoodListings({ status: 'approved' });
+            // Fetch all approved and active listings
+            const allListings = await dataService.getFoodListings({ status: ['approved', 'active'] });
             
             // Filter by distance if location is available
             if (location && location.latitude && location.longitude) {
