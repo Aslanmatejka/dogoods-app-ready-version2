@@ -35,7 +35,7 @@ function FindFoodPage({ initialCategory }) {
     const routerLocation = useRouterLocation();
     const { isAuthenticated, user } = useAuthContext();
     
-    const { listings: foods, loading: foodsLoading, error: foodsError, fetchListings } = useFoodListings({ status: 'approved' });
+    const { listings: foods, loading: foodsLoading, error: foodsError, fetchListings } = useFoodListings({ status: ['approved', 'active'] });
     const { search, results: searchResults, loading: searchLoading } = useSearch();
     const { 
         location: currentLocation, 

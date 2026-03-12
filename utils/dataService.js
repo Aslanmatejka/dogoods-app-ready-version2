@@ -488,9 +488,13 @@ class DataService {
 
         // Apply status filter: skip when viewing own listings (user_id filter present)
         if (filters.status) {
-          q = q.eq('status', filters.status);
+          if (Array.isArray(filters.status)) {
+            q = q.in('status', filters.status);
+          } else {
+            q = q.eq('status', filters.status);
+          }
         } else if (!filters.user_id) {
-          q = q.eq('status', 'pending');
+          q = q.in('status', ['approved', 'active']);
         }
 
         if (filters.category) q = q.eq('category', filters.category);

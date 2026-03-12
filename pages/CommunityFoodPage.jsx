@@ -52,7 +52,7 @@ export default function CommunityFoodPage() {
         fetchCommunity();
     }, [communityId]);
 
-    const { listings: foods, loading, error, fetchListings } = useFoodListings({ status: 'approved' });
+    const { listings: foods, loading, error, fetchListings } = useFoodListings({ status: ['approved', 'active'] });
 
     // Filter foods by community - assume food.location or donor_city contains community name or id
     // We'll use a simple heuristic: check listing.donor_city or listing.location.address for community name
