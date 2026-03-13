@@ -51,7 +51,7 @@ function FoodDistributionManagement() {
     const fetchListings = async () => {
         try {
             setLoading(true);
-            const data = await dataService.getFoodListings();
+            const data = await dataService.getFoodListings({ status: ['pending', 'approved', 'active', 'completed', 'expired', 'declined', 'cancelled'] });
 
             setListings(data);
 
@@ -99,9 +99,13 @@ function FoodDistributionManagement() {
     const getStatusBadge = (status) => {
         const statusStyles = {
             available: 'bg-[#2CABE3]/20 text-[#2CABE3]',
+            active: 'bg-[#2CABE3]/20 text-[#2CABE3]',
             pending: 'bg-yellow-100 text-yellow-800',
             claimed: 'bg-blue-100 text-blue-800',
             approved: 'bg-[#2CABE3]/20 text-[#2CABE3]',
+            completed: 'bg-gray-100 text-gray-800',
+            expired: 'bg-orange-100 text-orange-800',
+            cancelled: 'bg-red-100 text-red-800',
             declined: 'bg-red-100 text-red-800'
         };
 
