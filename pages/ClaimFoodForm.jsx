@@ -142,6 +142,9 @@ export default function ClaimFoodForm() {
                     food_id: food.id,
                     claimer_id: user.id,
                     receipt_id: receiptId,
+                    requester_name: user.name || user.email || 'Anonymous',
+                    requester_email: user.email || null,
+                    requester_phone: user.phone || null,
                     status: 'approved',
                     pickup_date: pickupDeadline,
                 })
