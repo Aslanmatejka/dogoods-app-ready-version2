@@ -157,13 +157,36 @@ export default function ClaimFoodForm() {
 
             if (claimError) throw claimError;
 
-            // Update food listing status
-            const { error: updateError } = await supabase
-                .from('food_listings')
-                .update({ status: 'claimed' })
-                .eq('id', food.id);
+            // Update food listing status (non-blocking — claim is already saved)
+            try {
+                const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+                let accessToken = supabaseKey;
+                try {
+                    const session = JSON.parse(localStorage.getItem('sb-ifzbpqyuhnxbhdcnmvfs-auth-token') || '{}');
+                    if (session?.access_token) accessToken = session.access_token;
+                } catch (_) { /* use anon key */ }
 
-            if (updateError) throw updateError;
+                const patchResp = await fetch(
+                    `${supabaseUrl}/rest/v1/food_listings?id=eq.${food.id}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            apikey: supabaseKey,
+                            Authorization: `Bearer ${accessToken}`,
+                            Prefer: 'return=minimal',
+                        },
+                        body: JSON.stringify({ status: 'claimed' }),
+                    }
+                );
+                if (!patchResp.ok) {
+                    console.warn('Could not update listing status to claimed:', patchResp.status, await patchResp.text());
+                }
+            } catch (statusErr) {
+                // Don't fail the claim if listing status update fails
+                console.warn('Non-critical: failed to update listing status', statusErr);
+            }
 
             // Send SMS notifications if phone numbers are available
             try {
