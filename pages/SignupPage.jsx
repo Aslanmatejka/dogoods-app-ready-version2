@@ -20,6 +20,7 @@ function SignupPageContent() {
     });
 
     const [errors, setErrors] = React.useState({});
+    const [submitting, setSubmitting] = React.useState(false);
 
     React.useEffect(() => {
         // Scroll to top when page loads
@@ -88,10 +89,11 @@ function SignupPageContent() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!validateForm()) {
+        if (!validateForm() || submitting) {
             return;
         }
 
+        setSubmitting(true);
         try {
             // Validate the approval code against the database
             const codeValue = formData.approvalNumber.trim().toUpperCase();
@@ -163,6 +165,8 @@ function SignupPageContent() {
         } catch (error) {
             console.error('Signup error:', error);
             setErrors({ form: error.message || 'An unexpected error occurred. Please try again.' });
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -392,11 +396,11 @@ function SignupPageContent() {
                         <div>
                             <Button
                                 type="submit"
-                                disabled={loading}
+                                disabled={submitting}
                                 variant="primary"
                                 className="w-full"
                             >
-                                {loading ? (
+                                {submitting ? (
                                     <div className="flex items-center justify-center">
                                         <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
                                         Creating account...
