@@ -6,6 +6,24 @@ import { useAuthContext } from '../../utils/AuthContext';
 import communitiesStatic from '../../utils/communities';
 import organizationsStatic from '../../utils/organizations';
 
+// Defined at module level so React never treats it as a new component type on re-renders.
+// If defined inside ImpactDataEntry, every parent re-render creates a new function reference,
+// causing React to unmount/remount all inputs — destroying typed values and nullifying refs.
+function UncontrolledCell({ defaultValue, onBlur, type = 'text', inputRef, className }) {
+    return (
+        <input
+            ref={inputRef}
+            type={type}
+            defaultValue={defaultValue}
+            onBlur={(e) => {
+                const value = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
+                onBlur(value);
+            }}
+            className={className || "w-full px-1 py-1 text-xs border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#2CABE3] focus:border-transparent"}
+        />
+    );
+}
+
 function ImpactDataEntry() {
     const { user } = useAuthContext();
     const [data, setData] = React.useState([]);
@@ -201,42 +219,35 @@ function ImpactDataEntry() {
         }
     };
 
-    const filteredData = React.useMemo(() => {
-        let filtered = data;
-        
-        // Filter by tab (organizations or communities)
-        if (activeTab === 'organizations') {
-            filtered = filtered.filter(row => row.organization && row.organization.trim() !== '');
-        } else {
-            filtered = filtered.filter(row => row.communities_served && row.communities_served.trim() !== '');
-        }
-        
-        // Filter by date range
-        if (dateFilter !== 'all') {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth();
-            
-            filtered = filtered.filter(row => {
-                const rowDate = new Date(row.date);
-                
-                switch (dateFilter) {
-                    case 'current-week': {
-                        const startOfWeek = new Date(now);
-                        startOfWeek.setDate(now.getDate() - now.getDay());
-                        startOfWeek.setHours(0, 0, 0, 0);
-                        return rowDate >= startOfWeek;
-                    }
-                    case 'current-month':
-                        return rowDate.getFullYear() === currentYear && rowDate.getMonth() === currentMonth;
-                    default:
-                        return true;
+    const applyDateFilter = (filtered) => {
+        if (dateFilter === 'all') return filtered;
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        return filtered.filter(row => {
+            const rowDate = new Date(row.date);
+            switch (dateFilter) {
+                case 'current-week': {
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - now.getDay());
+                    startOfWeek.setHours(0, 0, 0, 0);
+                    return rowDate >= startOfWeek;
                 }
-            });
-        }
-        
-        return filtered;
-    }, [data, activeTab, dateFilter]);
+                case 'current-month':
+                    return rowDate.getFullYear() === currentYear && rowDate.getMonth() === currentMonth;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const orgData = React.useMemo(() =>
+        applyDateFilter(data.filter(row => row.organization && row.organization.trim() !== '')),
+    [data, dateFilter]);
+
+    const communityData = React.useMemo(() =>
+        applyDateFilter(data.filter(row => row.communities_served && row.communities_served.trim() !== '')),
+    [data, dateFilter]);
 
     const handleAddOrgRow = async () => {
         try {
@@ -410,7 +421,7 @@ function ImpactDataEntry() {
     // Simple update handler for existing rows - uses uncontrolled inputs too
 
     const exportToCSV = () => {
-        const dataToExport = activeTab === 'organizations' ? filteredData : filteredData;
+        const dataToExport = activeTab === 'organizations' ? orgData : communityData;
         const headers = activeTab === 'organizations'
             ? ['Date', 'Organization', 'Food Saved from Waste (lb)', 'Food Provided (lb)', 'Food Donated', 'Total Meals', 'Notes']
             : ['Date', 'Community', 'Families Helped', 'School Staff Helped', 'Schools Served', 'Non-Profits Helped', 'Total Meals', 'Notes'];
@@ -447,22 +458,6 @@ function ImpactDataEntry() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    };
-
-    // Uncontrolled input component - no state, no re-renders
-    const UncontrolledCell = ({ defaultValue, onBlur, type = 'text', inputRef, className }) => {
-        return (
-            <input
-                ref={inputRef}
-                type={type}
-                defaultValue={defaultValue}
-                onBlur={(e) => {
-                    const value = type === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value;
-                    onBlur(value);
-                }}
-                className={className || "w-full px-1 py-1 text-xs border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#2CABE3] focus:border-transparent"}
-            />
-        );
     };
 
     return (
@@ -547,7 +542,7 @@ function ImpactDataEntry() {
                             </button>
                         </div>
                         <div className="text-sm text-gray-600">
-                            Showing <span className="font-semibold text-blue-700">{filteredData.length}</span> of <span className="font-semibold">{data.length}</span> total entries
+                            Showing <span className="font-semibold text-blue-700">{activeTab === 'organizations' ? orgData.length : communityData.length}</span> of <span className="font-semibold">{data.length}</span> total entries
                         </div>
                     </div>
                 </div>
@@ -586,7 +581,7 @@ function ImpactDataEntry() {
                     </div>
                 ) : (
                     <div className="bg-white rounded-lg shadow overflow-x-auto overflow-y-auto text-xs" style={{maxHeight: 'calc(100vh - 280px)'}}>
-                        {activeTab === 'organizations' ? (
+                        <div className={activeTab !== 'organizations' ? 'hidden' : ''}>
                             <table className="min-w-full divide-y divide-gray-200 [&_td]:px-1 [&_td]:py-1">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
                                     <tr>
@@ -669,7 +664,7 @@ function ImpactDataEntry() {
                                         </td>
                                     </tr>
 
-                                    {filteredData.map((row) => (
+                                    {orgData.map((row) => (
                                         <tr key={row.id} className="hover:bg-gray-50">
                                             <td className="px-3 py-2">
                                                 <UncontrolledCell
@@ -726,7 +721,7 @@ function ImpactDataEntry() {
                                         </tr>
                                     ))}
 
-                                    {filteredData.length === 0 && (
+                                    {orgData.length === 0 && (
                                         <tr>
                                             <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
                                                 No organization entries yet. Add your first entry using the row above.
@@ -735,7 +730,8 @@ function ImpactDataEntry() {
                                     )}
                                 </tbody>
                             </table>
-                        ) : (
+                        </div>
+                        <div className={activeTab !== 'communities' ? 'hidden' : ''}>
                             <table className="min-w-full divide-y divide-gray-200 [&_td]:px-1 [&_td]:py-1">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
                                     <tr>
@@ -830,7 +826,7 @@ function ImpactDataEntry() {
                                         </td>
                                     </tr>
 
-                                    {filteredData.map((row) => (
+                                    {communityData.map((row) => (
                                         <tr key={row.id} className="hover:bg-gray-50">
                                             <td className="px-3 py-2">
                                                 <UncontrolledCell
@@ -895,7 +891,7 @@ function ImpactDataEntry() {
                                         </tr>
                                     ))}
 
-                                    {filteredData.length === 0 && (
+                                    {communityData.length === 0 && (
                                         <tr>
                                             <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
                                                 No community entries yet. Add your first entry using the row above.
@@ -904,7 +900,7 @@ function ImpactDataEntry() {
                                     )}
                                 </tbody>
                             </table>
-                        )}
+                        </div>
                     </div>
                 )}
 
