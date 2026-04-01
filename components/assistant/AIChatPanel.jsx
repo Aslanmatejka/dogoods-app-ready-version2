@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspens
 import { useNavigate } from 'react-router-dom'
 import { useAIChat } from '../../utils/hooks/useAIChat.js'
 import VoiceOutput from './VoiceOutput.jsx'
-import { textToSpeech, playAudioBlob } from '../../utils/openaiVoice.js'
+import { textToSpeech, playAudioBlob, transcribeAudio } from '../../utils/openaiVoice.js'
 
 // ─── Quick action presets ─────────────────────────────
 const QUICK_ACTIONS_EN = [
@@ -239,13 +239,23 @@ function AIChatPanel() {
   const [isVoiceListening, setIsVoiceListening] = useState(false)
   const [isVoiceSpeaking, setIsVoiceSpeaking] = useState(false)
   const [voiceError, setVoiceError] = useState(null)
+  const [voiceTranscript, setVoiceTranscript] = useState('')
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const panelRef = useRef(null)
   const currentAudioRef = useRef(null)
   const lastSpokenIdRef = useRef(null)
-  const voiceRecognitionRef = useRef(null)
   const voiceModeRef = useRef(false)
+  const sendMessageRef = useRef(sendMessage)
+  const mediaStreamRef = useRef(null)
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef = useRef([])
+  const analyserRef = useRef(null)
+  const silenceTimerRef = useRef(null)
+  const vadFrameRef = useRef(null)
+
+  // Keep sendMessage ref current to avoid stale closures
+  useEffect(() => { sendMessageRef.current = sendMessage }, [sendMessage])
 
   // Last assistant message for voice mode auto-speak
   const lastAssistantMessage = useMemo(() => {
@@ -293,10 +303,142 @@ function AIChatPanel() {
     sendMessage(msg)
   }, [sendMessage])
 
+  // ─── Voice recording via MediaRecorder + Whisper STT ───────
+  const stopRecording = useCallback(() => {
+    if (vadFrameRef.current) { cancelAnimationFrame(vadFrameRef.current); vadFrameRef.current = null }
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop()
+    }
+  }, [])
+
+  const startVoiceListening = useCallback(async () => {
+    setVoiceError(null)
+    setVoiceTranscript('')
+    audioChunksRef.current = []
+
+    try {
+      // Get mic stream (reuse existing or request new)
+      if (!mediaStreamRef.current || !mediaStreamRef.current.active) {
+        mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true })
+      }
+      const stream = mediaStreamRef.current
+
+      // Set up audio analyser for VAD (voice activity detection)
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+      const source = audioCtx.createMediaStreamSource(stream)
+      const analyser = audioCtx.createAnalyser()
+      analyser.fftSize = 512
+      analyser.smoothingTimeConstant = 0.3
+      source.connect(analyser)
+      analyserRef.current = analyser
+
+      // Start MediaRecorder
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : ''
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream)
+
+      audioChunksRef.current = []
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+
+      recorder.onstop = async () => {
+        // Clean up analyser
+        if (vadFrameRef.current) { cancelAnimationFrame(vadFrameRef.current); vadFrameRef.current = null }
+        source.disconnect()
+        audioCtx.close().catch(() => {})
+
+        const chunks = audioChunksRef.current
+        if (!chunks.length) { setIsVoiceListening(false); return }
+
+        const audioBlob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
+        // Skip tiny recordings (< 0.5s of data, ~noise)
+        if (audioBlob.size < 5000) {
+          setIsVoiceListening(false)
+          return
+        }
+
+        setIsVoiceListening(false)
+        setVoiceTranscript(language === 'es' ? 'Transcribiendo...' : 'Transcribing...')
+
+        try {
+          const text = await transcribeAudio(audioBlob, language)
+          if (text && text.trim()) {
+            setVoiceTranscript(text.trim())
+            sendMessageRef.current(text.trim())
+          } else {
+            setVoiceTranscript('')
+          }
+        } catch (err) {
+          console.error('[Voice] Whisper transcription failed:', err)
+          setVoiceError(language === 'es' ? 'Error de transcripción' : 'Transcription failed')
+          setVoiceTranscript('')
+        }
+      }
+
+      recorder.start(250) // collect data every 250ms
+      mediaRecorderRef.current = recorder
+      setIsVoiceListening(true)
+
+      // Voice Activity Detection — stop recording after silence
+      let speechDetected = false
+      let silenceStart = 0
+      const SILENCE_THRESHOLD = 15  // RMS level below which = silence
+      const SILENCE_DURATION = 1800 // ms of silence before auto-stop
+      const MAX_DURATION = 30000    // max recording duration
+      const dataArray = new Uint8Array(analyser.frequencyBinCount)
+      const startTime = Date.now()
+
+      const checkAudio = () => {
+        if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording') return
+
+        // Auto-stop at max duration
+        if (Date.now() - startTime > MAX_DURATION) {
+          stopRecording()
+          return
+        }
+
+        analyser.getByteFrequencyData(dataArray)
+        let sum = 0
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+        const avg = sum / dataArray.length
+
+        if (avg > SILENCE_THRESHOLD) {
+          speechDetected = true
+          silenceStart = 0
+        } else if (speechDetected) {
+          if (!silenceStart) silenceStart = Date.now()
+          if (Date.now() - silenceStart > SILENCE_DURATION) {
+            stopRecording()
+            return
+          }
+        }
+
+        vadFrameRef.current = requestAnimationFrame(checkAudio)
+      }
+      vadFrameRef.current = requestAnimationFrame(checkAudio)
+
+    } catch (err) {
+      console.error('[Voice] Mic access failed:', err)
+      setIsVoiceListening(false)
+      setVoiceError(
+        err.name === 'NotAllowedError'
+          ? (language === 'es' ? 'Permiso de micrófono denegado' : 'Microphone permission denied')
+          : (language === 'es' ? 'No se pudo acceder al micrófono' : 'Could not access microphone')
+      )
+    }
+  }, [language, stopRecording])
+
   const enterVoiceMode = useCallback(() => {
     setVoiceMode(true)
     voiceModeRef.current = true
-  }, [])
+    startVoiceListening()
+  }, [startVoiceListening])
 
   const exitVoiceMode = useCallback(() => {
     setVoiceMode(false)
@@ -304,9 +446,12 @@ function AIChatPanel() {
     setIsVoiceSpeaking(false)
     setIsVoiceListening(false)
     setVoiceError(null)
-    if (voiceRecognitionRef.current) {
-      try { voiceRecognitionRef.current.abort() } catch {}
-      voiceRecognitionRef.current = null
+    setVoiceTranscript('')
+    stopRecording()
+    // Release mic stream
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(t => t.stop())
+      mediaStreamRef.current = null
     }
     if (currentAudioRef.current) {
       currentAudioRef.current()
@@ -315,91 +460,41 @@ function AIChatPanel() {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel()
     }
-  }, [])
+  }, [stopRecording])
 
-  // ─── Voice listening via browser SpeechRecognition ───────
-  const startVoiceListening = useCallback(() => {
-    setVoiceError(null)
-
-    const SpeechRecognition = typeof window !== 'undefined'
-      ? window.SpeechRecognition || window.webkitSpeechRecognition
-      : null
-
-    if (!SpeechRecognition) {
-      setVoiceError(language === 'es' ? 'Reconocimiento de voz no soportado' : 'Speech recognition not supported in this browser')
-      return
+  // Interrupt AI speech and start listening (barge-in)
+  const interruptSpeaking = useCallback(() => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current()
+      currentAudioRef.current = null
     }
-
-    // Stop any existing recognition
-    if (voiceRecognitionRef.current) {
-      try { voiceRecognitionRef.current.abort() } catch {}
-      voiceRecognitionRef.current = null
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel()
     }
+    setIsVoiceSpeaking(false)
+    startVoiceListening()
+  }, [startVoiceListening])
 
-    const recognition = new SpeechRecognition()
-    recognition.lang = language === 'es' ? 'es-ES' : 'en-US'
-    recognition.interimResults = false
-    recognition.continuous = false
-    recognition.maxAlternatives = 1
-
-    let gotResult = false
-
-    recognition.onstart = () => {
-      setIsVoiceListening(true)
+  // Orb tap: interrupt when speaking, start listening when idle
+  const handleOrbTap = useCallback(() => {
+    if (isVoiceSpeaking) {
+      interruptSpeaking()
+    } else if (isVoiceListening) {
+      // User taps while listening → stop recording early (send what we have)
+      stopRecording()
+    } else if (!isLoading) {
+      startVoiceListening()
     }
+  }, [isVoiceSpeaking, isVoiceListening, isLoading, interruptSpeaking, stopRecording, startVoiceListening])
 
-    recognition.onresult = (event) => {
-      const result = event.results[event.results.length - 1]
-      if (result.isFinal) {
-        const text = result[0].transcript.trim()
-        if (text) {
-          gotResult = true
-          sendMessage(text)
-        }
-      }
-    }
-
-    recognition.onend = () => {
-      setIsVoiceListening(false)
-      voiceRecognitionRef.current = null
-      // If user spoke, we're now waiting for AI — don't auto-restart
-      // The auto-listen effect will handle restart after TTS finishes
-    }
-
-    recognition.onerror = (event) => {
-      setIsVoiceListening(false)
-      voiceRecognitionRef.current = null
-
-      if (event.error === 'aborted') {
-        // Intentional — do nothing
-      } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        setVoiceError(language === 'es' ? 'Permiso de micrófono denegado' : 'Microphone permission denied')
-      } else if (event.error === 'no-speech') {
-        // User didn't speak — that's ok, auto-listen will restart
-      } else {
-        console.warn('Speech recognition error:', event.error)
-      }
-    }
-
-    voiceRecognitionRef.current = recognition
-    try {
-      recognition.start()
-    } catch (err) {
-      console.error('Could not start speech recognition:', err)
-      setIsVoiceListening(false)
-      setVoiceError(language === 'es' ? 'No se pudo iniciar' : 'Could not start listening')
-    }
-  }, [language, sendMessage])
-
-  // Auto-start listening when voice mode is active and completely idle
-  // Only restart if: in voice mode, NOT speaking, NOT loading AI, NOT already listening
+  // Auto-start listening when idle in voice mode
   useEffect(() => {
     if (!voiceMode || isVoiceSpeaking || isLoading || isVoiceListening) return
     const timer = setTimeout(() => {
-      if (voiceModeRef.current && !voiceRecognitionRef.current) {
+      if (voiceModeRef.current) {
         startVoiceListening()
       }
-    }, 1200)
+    }, 600)
     return () => clearTimeout(timer)
   }, [voiceMode, isVoiceSpeaking, isLoading, isVoiceListening, startVoiceListening])
 
@@ -422,17 +517,35 @@ function AIChatPanel() {
         if (!cleanText) return
 
         setIsVoiceSpeaking(true)
-        const audioBlob = await textToSpeech(cleanText, { voice: 'nova' })
-        const { play, stop } = playAudioBlob(
-          audioBlob,
-          () => setIsVoiceSpeaking(true),
-          () => setIsVoiceSpeaking(false)
-        )
-        currentAudioRef.current = stop
-        await play
-        currentAudioRef.current = null
+        try {
+          const audioBlob = await textToSpeech(cleanText, { voice: 'nova' })
+          const { play, stop } = playAudioBlob(
+            audioBlob,
+            () => setIsVoiceSpeaking(true),
+            () => setIsVoiceSpeaking(false)
+          )
+          currentAudioRef.current = stop
+          await play
+          currentAudioRef.current = null
+          return
+        } catch (ttsErr) {
+          console.warn('OpenAI TTS failed, falling back to browser speech:', ttsErr)
+        }
+
+        // Fallback: browser SpeechSynthesis
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+          await new Promise((resolve) => {
+            const utterance = new SpeechSynthesisUtterance(cleanText.slice(0, 500))
+            utterance.lang = lastAssistantMessage.message?.match(/[\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1]/) ? 'es-ES' : 'en-US'
+            utterance.rate = 1.0
+            utterance.onend = resolve
+            utterance.onerror = resolve
+            window.speechSynthesis.speak(utterance)
+          })
+        }
+        setIsVoiceSpeaking(false)
       } catch (err) {
-        console.error('OpenAI TTS failed:', err)
+        console.error('Voice output failed:', err)
         setIsVoiceSpeaking(false)
       }
     }
@@ -443,9 +556,13 @@ function AIChatPanel() {
   useEffect(() => {
     return () => {
       voiceModeRef.current = false
-      if (voiceRecognitionRef.current) {
-        try { voiceRecognitionRef.current.abort() } catch {}
-        voiceRecognitionRef.current = null
+      if (vadFrameRef.current) cancelAnimationFrame(vadFrameRef.current)
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current)
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        try { mediaRecorderRef.current.stop() } catch {}
+      }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(t => t.stop())
       }
       if (currentAudioRef.current) {
         currentAudioRef.current()
@@ -681,103 +798,130 @@ function AIChatPanel() {
         </div>
       </div>
 
-      {/* ─── Voice Mode Panel (audio-only assistant) ─────── */}
+      {/* ─── Voice Mode (ChatGPT-like immersive voice UI) ─────── */}
       {voiceMode ? (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-4 overflow-hidden relative">
-          {/* Ambient background glow */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full blur-3xl transition-all duration-1000 ${
-              isVoiceSpeaking ? 'bg-cyan-500/15 scale-110' : isVoiceListening ? 'bg-blue-500/10 scale-105' : 'bg-cyan-500/5 scale-100'
-            } animate-voice-ambient`} />
-          </div>
+        <div className="flex-1 flex flex-col items-center justify-between py-6 px-6 overflow-hidden relative" style={{ background: 'radial-gradient(ellipse at center, #0f172a 0%, #020617 100%)' }}>
 
-          {/* Back to chat */}
-          <button
-            onClick={exitVoiceMode}
-            className="absolute top-3 left-3 flex items-center gap-1.5 text-xs text-cyan-300/50 hover:text-cyan-300 px-2.5 py-1.5 rounded-lg hover:bg-cyan-500/10 transition-colors z-10"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            {language === 'es' ? 'Chat' : 'Chat'}
-          </button>
-
-          {/* Robot avatar — animates based on state */}
-          <div className="relative mb-6">
-            {/* Outer glow ring */}
-            <div className={`absolute -inset-4 rounded-full transition-all duration-700 ${
-              isVoiceSpeaking ? 'bg-cyan-400/20 animate-voice-speaking' : isVoiceListening ? 'bg-blue-400/15 animate-pulse' : 'bg-transparent'
-            }`} />
-            <div className={`relative w-28 h-28 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-xl transition-all duration-500 ${
-              isVoiceSpeaking ? 'shadow-cyan-400/50 scale-105' : isVoiceListening ? 'shadow-blue-400/40 scale-100' : 'shadow-cyan-500/30 scale-100'
-            }`}>
-              <svg viewBox="0 0 100 100" className="w-18 h-18" style={{width: '4.5rem', height: '4.5rem'}}>
-                <circle cx="50" cy="52" r="36" fill="#f0f4f8" />
-                <rect x="26" y="38" rx="12" ry="12" width="48" height="24" fill="#1e293b" opacity="0.85" />
-                {isVoiceSpeaking ? (
-                  <>
-                    <circle cx="38" cy="50" r="4" fill="#67e8f9" className="animate-pulse" />
-                    <circle cx="62" cy="50" r="4" fill="#67e8f9" className="animate-pulse" />
-                    <ellipse cx="50" cy="66" rx="6" ry="3" fill="#67e8f9" opacity="0.6" className="animate-pulse" />
-                  </>
-                ) : isVoiceListening ? (
-                  <>
-                    <circle cx="38" cy="50" r="5" fill="#67e8f9" />
-                    <circle cx="62" cy="50" r="5" fill="#67e8f9" />
-                  </>
-                ) : (
-                  <>
-                    <path d="M35 53 Q38 46 41 53" stroke="#67e8f9" strokeWidth="4" strokeLinecap="round" fill="none" />
-                    <path d="M59 53 Q62 46 65 53" stroke="#67e8f9" strokeWidth="4" strokeLinecap="round" fill="none" />
-                  </>
-                )}
-              </svg>
-            </div>
-            {/* Status dot */}
-            <span className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-slate-900 ${
-              isVoiceSpeaking ? 'bg-cyan-400 animate-pulse' : isVoiceListening ? 'bg-blue-400 animate-pulse' : 'bg-green-400'
-            }`} />
-          </div>
-
-          {/* Audio wave visualizer — shown when AI is speaking or processing */}
-          <div className={`voice-eq flex items-end gap-1.5 h-10 mb-5 transition-opacity duration-500 ${
-            isVoiceSpeaking || isLoading ? 'opacity-100' : 'opacity-0'
-          }`}>
-            <span className="voice-eq-bar w-1 bg-cyan-400/80 rounded-full" />
-            <span className="voice-eq-bar w-1 bg-cyan-300/70 rounded-full" style={{animationDelay: '0.08s'}} />
-            <span className="voice-eq-bar w-1.5 bg-cyan-400/90 rounded-full" style={{animationDelay: '0.16s'}} />
-            <span className="voice-eq-bar w-1 bg-cyan-300/70 rounded-full" style={{animationDelay: '0.24s'}} />
-            <span className="voice-eq-bar w-1.5 bg-cyan-400/80 rounded-full" style={{animationDelay: '0.32s'}} />
-            <span className="voice-eq-bar w-1 bg-cyan-300/70 rounded-full" style={{animationDelay: '0.40s'}} />
-            <span className="voice-eq-bar w-1 bg-cyan-400/80 rounded-full" style={{animationDelay: '0.48s'}} />
-            <span className="voice-eq-bar w-1 bg-cyan-300/70 rounded-full" style={{animationDelay: '0.56s'}} />
-            <span className="voice-eq-bar w-1.5 bg-cyan-400/90 rounded-full" style={{animationDelay: '0.64s'}} />
-          </div>
-
-          {/* Status label */}
-          <p className={`text-xs transition-all duration-500 ${
-            isVoiceSpeaking ? 'text-cyan-300/70' : isVoiceListening ? 'text-blue-300/70' : isLoading ? 'text-slate-400' : voiceError ? 'text-red-400/70' : 'text-slate-500/50'
-          }`}>
-            {isVoiceSpeaking
-              ? (language === 'es' ? 'Hablando...' : 'Speaking...')
-              : isLoading
-                ? (language === 'es' ? 'Pensando...' : 'Thinking...')
-                : isVoiceListening
-                  ? (language === 'es' ? 'Escuchando...' : 'Listening...')
-                  : voiceError
-                    ? voiceError
-                    : (language === 'es' ? 'Toca para hablar' : 'Tap to speak')}
-          </p>
-
-          {/* Manual listen button — visible when idle */}
-          {!isVoiceListening && !isVoiceSpeaking && !isLoading && (
+          {/* Top: back to chat */}
+          <div className="w-full flex justify-start z-10">
             <button
-              onClick={() => startVoiceListening()}
-              className="mt-3 px-4 py-2 rounded-full bg-cyan-500/20 text-cyan-300 text-xs border border-cyan-500/30 hover:bg-cyan-500/30 transition-colors"
+              onClick={exitVoiceMode}
+              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 px-3 py-2 rounded-lg hover:bg-white/5 transition-all"
             >
-              🎙 {language === 'es' ? 'Hablar' : 'Speak'}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+              {language === 'es' ? 'Chat' : 'Chat'}
             </button>
-          )}
+          </div>
+
+          {/* Center: Animated Orb */}
+          <div className="flex-1 flex items-center justify-center">
+            <button
+              onClick={handleOrbTap}
+              className="relative focus:outline-none group"
+              aria-label={isVoiceSpeaking ? (language === 'es' ? 'Toca para interrumpir' : 'Tap to interrupt') : (language === 'es' ? 'Toca para hablar' : 'Tap to speak')}
+            >
+              {/* Pulse rings — listening */}
+              {isVoiceListening && (
+                <>
+                  <div className="absolute inset-0 -m-8 rounded-full border-2 border-blue-400/30 animate-voice-ring-1" />
+                  <div className="absolute inset-0 -m-14 rounded-full border border-blue-400/15 animate-voice-ring-2" />
+                  <div className="absolute inset-0 -m-20 rounded-full border border-blue-400/5 animate-voice-ring-3" />
+                </>
+              )}
+
+              {/* Speaking ripple */}
+              {isVoiceSpeaking && (
+                <>
+                  <div className="absolute inset-0 -m-6 rounded-full border-2 border-teal-400/25 animate-voice-speak-ring-1" />
+                  <div className="absolute inset-0 -m-10 rounded-full border border-teal-400/10 animate-voice-speak-ring-2" />
+                </>
+              )}
+
+              {/* Glow */}
+              <div className={`absolute -inset-8 rounded-full blur-2xl transition-all duration-700 ${
+                isVoiceSpeaking ? 'bg-teal-500/25' : isVoiceListening ? 'bg-blue-500/25' : isLoading ? 'bg-violet-500/20' : 'bg-slate-600/10'
+              }`} />
+
+              {/* Main orb */}
+              <div className={`relative w-36 h-36 rounded-full transition-all duration-500 flex items-center justify-center cursor-pointer ${
+                isVoiceListening
+                  ? 'bg-gradient-to-br from-blue-400 via-indigo-500 to-violet-600 shadow-[0_0_60px_rgba(99,102,241,0.4)] scale-105'
+                  : isVoiceSpeaking
+                    ? 'bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500 shadow-[0_0_60px_rgba(20,184,166,0.4)] scale-110'
+                    : isLoading
+                      ? 'bg-gradient-to-br from-violet-400 via-purple-500 to-fuchsia-500 shadow-[0_0_40px_rgba(168,85,247,0.35)] scale-100'
+                      : 'bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700 shadow-[0_0_20px_rgba(100,116,139,0.25)] scale-95 group-hover:scale-100'
+              }`}>
+                {/* Gloss */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-transparent to-white/15" />
+
+                {/* Icon / visual based on state */}
+                <div className="relative z-10">
+                  {isVoiceSpeaking ? (
+                    <div className="flex items-center gap-[3px]">
+                      {[0,1,2,3,4].map(i => (
+                        <span key={i} className="w-1.5 bg-white/90 rounded-full animate-voice-bar" style={{ animationDelay: `${i * 0.12}s` }} />
+                      ))}
+                    </div>
+                  ) : isLoading ? (
+                    <div className="flex items-center gap-2">
+                      {[0,1,2].map(i => (
+                        <span key={i} className="w-3 h-3 bg-white/80 rounded-full animate-voice-dot" style={{ animationDelay: `${i * 0.2}s` }} />
+                      ))}
+                    </div>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-12 w-12 transition-colors ${
+                      isVoiceListening ? 'text-white/90' : 'text-white/50 group-hover:text-white/80'
+                    }`} viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Bottom: transcript + status + end button */}
+          <div className="flex flex-col items-center gap-3 z-10 w-full">
+            {/* Real-time transcript */}
+            {voiceTranscript && (
+              <p className={`text-sm italic text-center max-w-[280px] transition-colors duration-300 ${
+                isVoiceListening ? 'text-white/70' : 'text-slate-400/50'
+              }`}>
+                "{voiceTranscript}"
+              </p>
+            )}
+
+            {/* Status */}
+            <p className={`text-[11px] font-medium tracking-wider uppercase transition-all duration-300 ${
+              isVoiceSpeaking ? 'text-teal-300/50' : isVoiceListening ? 'text-blue-300/50' : isLoading ? 'text-violet-300/50' : voiceError ? 'text-red-400/60' : 'text-slate-500/30'
+            }`}>
+              {isVoiceSpeaking
+                ? (language === 'es' ? 'Toca para interrumpir' : 'Tap to interrupt')
+                : isLoading
+                  ? (language === 'es' ? 'Pensando...' : 'Thinking...')
+                  : isVoiceListening
+                    ? (language === 'es' ? 'Escuchando — toca para enviar' : 'Listening — tap to send')
+                    : voiceError
+                      ? voiceError
+                      : (language === 'es' ? 'Toca el orbe para hablar' : 'Tap to speak')}
+            </p>
+
+            {/* End voice mode */}
+            <button
+              onClick={exitVoiceMode}
+              className="w-14 h-14 rounded-full bg-red-500/20 hover:bg-red-500/80 border border-red-500/30 hover:border-red-500 text-red-300 hover:text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/10 hover:shadow-red-500/30"
+              aria-label={language === 'es' ? 'Terminar' : 'End'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
 
         </div>
       ) : (
@@ -871,39 +1015,35 @@ function AIChatPanel() {
         .nourish-scrollbar::-webkit-scrollbar-thumb { background: rgba(34,211,238,0.2); border-radius: 4px; }
         .nourish-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,0.4); }
 
-        /* Voice panel animations */
-        @keyframes voice-ambient {
-          0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
+        /* Voice orb animations */
+        @keyframes voice-ring-out {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(1.6); opacity: 0; }
         }
-        .animate-voice-ambient { animation: voice-ambient 4s ease-in-out infinite; }
+        .animate-voice-ring-1 { animation: voice-ring-out 2s ease-out infinite; }
+        .animate-voice-ring-2 { animation: voice-ring-out 2s ease-out 0.4s infinite; }
+        .animate-voice-ring-3 { animation: voice-ring-out 2s ease-out 0.8s infinite; }
 
-        @keyframes voice-ring-expand {
-          0% { transform: scale(0.6); opacity: 0.6; border-color: rgba(34,211,238,0.5); }
-          100% { transform: scale(1.2); opacity: 0; border-color: rgba(34,211,238,0); }
+        @keyframes voice-speak-ring {
+          0% { transform: scale(1); opacity: 0.6; }
+          100% { transform: scale(1.4); opacity: 0; }
         }
-        .voice-listening .voice-ring-1 { animation: voice-ring-expand 1.5s ease-out infinite; }
-        .voice-listening .voice-ring-2 { animation: voice-ring-expand 1.5s ease-out 0.3s infinite; }
-        .voice-listening .voice-ring-3 { animation: voice-ring-expand 1.5s ease-out 0.6s infinite; }
+        .animate-voice-speak-ring-1 { animation: voice-speak-ring 1.5s ease-out infinite; }
+        .animate-voice-speak-ring-2 { animation: voice-speak-ring 1.5s ease-out 0.3s infinite; }
 
-        @keyframes voice-fade-in {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+        /* Speaking wave bars */
+        @keyframes voice-bar-bounce {
+          0%, 100% { height: 8px; }
+          50% { height: 28px; }
         }
-        .animate-voice-fade-in { animation: voice-fade-in 0.4s ease-out; }
+        .animate-voice-bar { animation: voice-bar-bounce 0.6s ease-in-out infinite; }
 
-        @keyframes voice-speaking-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.3); }
-          50% { box-shadow: 0 0 40px rgba(34,211,238,0.6); }
+        /* Thinking dots */
+        @keyframes voice-dot-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.4); opacity: 1; }
         }
-        .animate-voice-speaking { animation: voice-speaking-glow 1s ease-in-out infinite; }
-
-        /* Voice EQ bars */
-        @keyframes voice-eq-bounce {
-          0%, 100% { height: 4px; }
-          50% { height: 16px; }
-        }
-        .voice-eq-bar { animation: voice-eq-bounce 0.6s ease-in-out infinite; }
+        .animate-voice-dot { animation: voice-dot-pulse 0.8s ease-in-out infinite; }
       `}</style>
     </div>
   )

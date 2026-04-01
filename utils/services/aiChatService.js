@@ -54,34 +54,55 @@ class AIChatService {
         { role: 'user', content: message },
       ]
 
-      const response = await fetch('/api/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: config.MODELS?.CHAT || 'gpt-4o-mini',
-          messages,
-          temperature: 0.7,
-          max_tokens: 1500,
-        }),
+      const requestBody = JSON.stringify({
+        model: config.MODELS?.CHAT || 'gpt-4o-mini',
+        messages,
+        temperature: 0.7,
+        max_tokens: 1500,
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('OpenAI API error:', response.status, errorText)
-        throw new Error(`AI service error: ${response.status}`)
-      }
+      // Retry up to 2 times on network failures
+      let lastError = null
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const controller = new AbortController()
+          const timeout = setTimeout(() => controller.abort(), 30000)
 
-      const data = await response.json()
-      const responseText = data.choices?.[0]?.message?.content || "I'm sorry, I couldn't process that. Please try again."
+          const response = await fetch('/api/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: requestBody,
+            signal: controller.signal,
+          })
+          clearTimeout(timeout)
 
-      return {
-        response: responseText,
-        toolResults: [],
-        suggestedActions: [],
-        error: null,
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('OpenAI API error:', response.status, errorText)
+            throw new Error(`AI service error: ${response.status}`)
+          }
+
+          const data = await response.json()
+          const responseText = data.choices?.[0]?.message?.content || "I'm sorry, I couldn't process that. Please try again."
+
+          return {
+            response: responseText,
+            toolResults: [],
+            suggestedActions: [],
+            error: null,
+          }
+        } catch (err) {
+          lastError = err
+          // Only retry on network/timeout errors, not API errors
+          if (err.name === 'AbortError' || err.message?.includes('Failed to fetch') || err.message?.includes('network')) {
+            console.warn(`AI request attempt ${attempt + 1} failed, retrying...`)
+            await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+            continue
+          }
+          throw err
+        }
       }
+      throw lastError
     } catch (error) {
       console.error('AI chat service error:', error)
       reportError(error)
