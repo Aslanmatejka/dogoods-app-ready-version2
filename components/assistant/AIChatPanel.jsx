@@ -489,14 +489,14 @@ function AIChatPanel() {
 
   // Auto-start listening when idle in voice mode
   useEffect(() => {
-    if (!voiceMode || isVoiceSpeaking || isLoading || isVoiceListening) return
+    if (!voiceMode || isVoiceSpeaking || isLoading || isVoiceListening || voiceError) return
     const timer = setTimeout(() => {
-      if (voiceModeRef.current) {
+      if (voiceModeRef.current && !voiceError) {
         startVoiceListening()
       }
     }, 600)
     return () => clearTimeout(timer)
-  }, [voiceMode, isVoiceSpeaking, isLoading, isVoiceListening, startVoiceListening])
+  }, [voiceMode, isVoiceSpeaking, isLoading, isVoiceListening, voiceError, startVoiceListening])
 
   // OpenAI TTS: speak latest assistant message in voice mode
   // Skip the initial welcome message — only speak new responses
