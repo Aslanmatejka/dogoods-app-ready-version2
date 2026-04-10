@@ -114,7 +114,7 @@ npm run preview          # Preview production build locally
   - Public: `HomePage.jsx`, `LoginPage.jsx`, `SignupPage.jsx`, `ForgotPasswordPage.jsx`, `ResetPasswordPage.jsx`
   - Protected: `UserDashboard.jsx`, `ShareFoodPage.jsx`, `FindFoodPage.jsx`, `ProfilePage.jsx`, `CommunityPage.jsx`, `NearMePage.jsx`, `DonationSchedules.jsx`
   - Legal: `TermsOfService.jsx`, `PrivacyPolicy.jsx`, `CookiesPolicy.jsx`
-  - Admin: [pages/admin/](pages/admin/) - `AdminDashboard.jsx`, `UserManagement.jsx`, `ContentModeration.jsx`, `AdminSettings.jsx`, `AdminReports.jsx`, `ImpactDataEntry.jsx`, `UserFeedback.jsx`, `VerificationManagement.jsx`, `FoodDistributionManagement.jsx`, `DistributionAttendees.jsx`, `AdminMessages.jsx`, `AdminContentManagement.jsx`
+  - Admin: [pages/admin/](pages/admin/) - `AdminDashboard.jsx`, `UserManagement.jsx`, `AdminSettings.jsx`, `AdminReports.jsx`, `ImpactDataEntry.jsx`, `UserFeedback.jsx`, `VerificationManagement.jsx`, `FoodDistributionManagement.jsx`, `DistributionAttendees.jsx`, `AdminMessages.jsx`, `AdminContentManagement.jsx`
 - **Components** ([components/](components/)): Domain-organized, reusable pieces
   - [layout/](components/layout/): `MainLayout.jsx` (wraps all pages), `Header.jsx`, `Footer.jsx`
   - [common/](components/common/): `ErrorBoundary.jsx`, `UserChatWidget.jsx`, `FeedbackButton.jsx`, `Tutorial.jsx`
@@ -144,8 +144,7 @@ utils/
     ├── aiChatService.js           # AI chat service (calls /api/ai/*)
     ├── feedbackService.js, impactService.js
     ├── locationService.js, urgencyService.js
-    ├── verificationService.js
-    └── goodsService.js        # (empty placeholder)
+    └── verificationService.js
 ```
 
 ### Configuration Cascade
