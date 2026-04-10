@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-React-based community food sharing platform with Supabase backend, AI-powered matching (DeepSeek), and comprehensive admin management. Built with Vite, Tailwind CSS, React Router v6, and modern React patterns (Context API + useReducer).
+React-based community food sharing platform with Supabase backend, AI-powered features (OpenAI GPT-4o via FastAPI backend), and comprehensive admin management. Built with Vite, Tailwind CSS, React Router v6, and modern React patterns (Context API + useReducer).
 
-**Tech Stack**: React 18.2 + Vite 5.4 + Supabase 2.39 + React Router 6.8 + Tailwind CSS 3.4 + DeepSeek AI + Recharts 3.1
+**Tech Stack**: React 18.2 + Vite 5.4 + Supabase 2.39 + React Router 6.8 + Tailwind CSS 3.4 + OpenAI GPT-4o (backend) + Recharts 3.1
 
 **Key Dependencies**: `@supabase/supabase-js`, `react-router-dom`, `react-toastify`, `recharts`, `prop-types`
 
@@ -29,7 +29,7 @@ React-based community food sharing platform with Supabase backend, AI-powered ma
   - Exports: `GoodsProvider` component and `useGoods()` hook
   - Pattern: Wrap app in provider, access via hook in any child component
 - **Custom hooks**: [utils/hooks/](utils/hooks/) for domain logic
-  - `useAI.js`, `useClaims.js`, `useImpact.js`, `useLocation.js`, `useSupabase.js`
+  - `useClaims.js`, `useImpact.js`, `useLocation.js`, `useSupabase.js`, `useAIChat.js`
 - **Service layer**: Class-based singletons for business logic
   - Services: `authService`, `dataService`, `feedbackService`, `impactService`, `locationService`, `urgencyService`, `verificationService`
   - Import pattern: `import authService from './utils/authService.js'` (lowercase instance)
@@ -37,13 +37,15 @@ React-based community food sharing platform with Supabase backend, AI-powered ma
 
 ### AI Integration Architecture
 
-- **Primary API**: DeepSeek (configured in [utils/config.js](utils/config.js) with `DEEPSEEK_API_KEY`)
-- **Matching engine**: [utils/MatchingEngine.js](utils/MatchingEngine.js) class
-  - Circuit breaker pattern for AI failures; gracefully degrades to rule-based matching
-  - Validates API key on init: checks for `sk-` prefix and non-placeholder value
-- **Chat interface**: [components/assistant/AIAssistant.jsx](components/assistant/AIAssistant.jsx) (currently commented out in [MainLayout](components/layout/MainLayout.jsx))
-- **Streaming**: `streamDeepseekChat()` in [utils/deepseekChat.js](utils/deepseekChat.js)
-- **Rate limiting**: Configured in [utils/aiAgent.js](utils/aiAgent.js) (50 req/min default, 100 req/min premium)
+- **Backend**: FastAPI Python backend at `backend/` — all AI calls go through `/api/ai/*`
+- **Models**: OpenAI GPT-4o (chat + function calling), Whisper (STT), TTS-1 Nova (speech)
+- **Frontend service**: [utils/services/aiChatService.js](utils/services/aiChatService.js) calls `/api/ai/chat`, `/api/ai/voice`
+- **Voice**: [utils/openaiVoice.js](utils/openaiVoice.js) calls `/api/ai/transcribe`, `/api/ai/tts`
+- **Chat UI**: [components/assistant/AIChatPanel.jsx](components/assistant/AIChatPanel.jsx) uses `useAIChat` hook
+- **Helper AI**: [utils/aiAgent.js](utils/aiAgent.js) routes recipe/storage/impact queries through backend
+- **API key**: `OPENAI_API_KEY` in `.env` (backend-only, NOT prefixed with `VITE_`)
+- **Proxy**: Vite dev server proxies `/api/ai` → `http://localhost:8000` (see [vite.config.js](vite.config.js))
+- **Rate limiting**: Client-side in [utils/aiAgent.js](utils/aiAgent.js) (50 req/min default)
 
 ## Critical Development Workflows
 
@@ -56,7 +58,7 @@ cp config/env.example .env.local
 # Edit .env.local with your Supabase credentials:
 # VITE_SUPABASE_URL=https://your-project.supabase.co
 # VITE_SUPABASE_ANON_KEY=your-anon-key
-# DEEPSEEK_API_KEY=sk-your-key (optional, for AI features)
+# OPENAI_API_KEY=sk-your-key (backend only, for AI features)
 
 npm install
 npm run dev    # Starts Vite on port 3001, auto-opens browser
@@ -128,17 +130,18 @@ utils/
 ├── authService.js             # Auth singleton class
 ├── dataService.js             # Main data fetching service (2269 lines)
 ├── helpers.js                 # Pure functions: formatDate(), timeAgo(), reportError()
-├── MatchingEngine.js          # AI matching logic
-├── deepseekChat.js            # DeepSeek streaming API client
+├── aiAgent.js                 # AI helper functions (recipes, tips) — routes through backend
+├── openaiVoice.js             # Voice STT/TTS via backend endpoints
 ├── AuthContext.jsx            # React Context for auth state
 ├── TutorialContext.jsx        # Tutorial state provider
 ├── stores/
 │   ├── goodsStore.jsx         # Claimed/requested goods state
 │   └── goodsStore.js          # (duplicate file, ignore)
 ├── hooks/
-│   ├── useAI.js, useClaims.js, useImpact.js
+│   ├── useAIChat.js, useClaims.js, useImpact.js
 │   ├── useLocation.js, useSupabase.js
 └── services/
+    ├── aiChatService.js           # AI chat service (calls /api/ai/*)
     ├── feedbackService.js, impactService.js
     ├── locationService.js, urgencyService.js
     ├── verificationService.js
@@ -152,7 +155,7 @@ utils/
 3. [utils/config.js](utils/config.js) - Runtime loader (`window.__ENV__` → `import.meta.env` → defaults)
 4. [public/config.dev.js](public/config.dev.js) / `config.production.js` - Injected via `<script>` in [index.html](index.html)
 
-**Key vars**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `DEEPSEEK_API_KEY`, `NODE_ENV`, `PORT`
+**Key vars**: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `OPENAI_API_KEY` (backend only), `NODE_ENV`, `PORT`
 
 ## Integration Points & External Dependencies
 
@@ -176,12 +179,12 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 - **Data access**: `supabase.from('table_name').select().eq()...`
 - **Error handling**: Supabase errors have `{ error, data }` shape; always check `error` first
 
-### DeepSeek AI
+### OpenAI (Backend Only)
 
-- **Config validation**: [utils/config.js](utils/config.js) `validateApiConfig()` logs warnings if key missing/invalid
-- **Usage**: [MatchingEngine.js](utils/MatchingEngine.js) calls DeepSeek API for food matching
-- **Graceful degradation**: Features disable if API key validation fails
-- **Fallback**: [utils/openaiClient.js](utils/openaiClient.js) exists but unused; DeepSeek is primary
+- **Backend**: FastAPI at `backend/ai_engine.py` — GPT-4o, Whisper, TTS-1
+- **API key**: `OPENAI_API_KEY` env var (read by backend only, never exposed to frontend)
+- **Proxy**: Vite proxies `/api/ai` → `http://localhost:8000`
+- **Graceful degradation**: Circuit breaker pattern; canned responses on failure
 
 ### React Toastify Notifications
 
@@ -267,7 +270,7 @@ if (!isAdmin) return null  // or <Navigate to="/" />
 1. **Auth state not syncing**: Check if `AuthProvider` wraps app in [app.jsx](app.jsx); verify [utils/authService.js](utils/authService.js) `init()` called
 2. **Admin routes 403**: Confirm `is_admin = true` in Supabase `users` table; check context value with DevTools
 3. **Supabase RLS errors**: Policies enforce `auth.uid()`; ensure user is authenticated and owns resource
-4. **AI features disabled**: Validate `DEEPSEEK_API_KEY` in [utils/config.js](utils/config.js); check console for warnings
+4. **AI features disabled**: Ensure `OPENAI_API_KEY` is set in `.env` (backend only); check backend logs for errors
 5. **Build fails**: Ensure all env vars prefixed with `VITE_` (Vite requirement); check [vite.config.js](vite.config.js)
 6. **Deployment 404s**: Configure history fallback (see [netlify.toml](netlify.toml)); verify `dist/` contains build artifacts
 7. **Service import errors**: Services are lowercase default exports: `import authService from './utils/authService.js'` (NOT `import { AuthService }`)
