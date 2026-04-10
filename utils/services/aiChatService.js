@@ -42,6 +42,12 @@ class AIChatService {
           if (!response.ok) {
             const errorText = await response.text()
             console.error('AI backend error:', response.status, errorText)
+            // Retry on server errors (500, 502, 503, 504)
+            if (response.status >= 500 && attempt < 2) {
+              console.warn(`AI server error ${response.status}, retry ${attempt + 1}...`)
+              await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+              continue
+            }
             throw new Error(`AI service error: ${response.status}`)
           }
 

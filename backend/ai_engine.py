@@ -11,6 +11,7 @@ Run the API:
     uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
 """
 
+import asyncio
 import json
 import logging
 import math
@@ -54,7 +55,8 @@ TTS_VOICE_EN = os.getenv("AI_TTS_VOICE", "nova")
 TTS_VOICE_ES = os.getenv("AI_TTS_VOICE_ES", "nova")  # Sesame-compatible Spanish voice
 
 MAX_RETRIES = int(os.getenv("AI_MAX_RETRIES", "3"))
-TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT", "30"))
+TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT", "25"))
+SUPABASE_TIMEOUT = 8  # seconds for DB lookups
 
 # ---------------------------------------------------------------------------
 # Spanish language detection (lightweight heuristic)
@@ -532,7 +534,7 @@ def _supabase_headers() -> dict:
 
 async def supabase_get(table: str, params: dict) -> list:
     """GET rows from a Supabase table via PostgREST."""
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT) as client:
         resp = await client.get(
             f"{SUPABASE_URL}/rest/v1/{table}",
             params=params,
@@ -550,7 +552,7 @@ async def supabase_post(
     For DELETE, pass method="DELETE" and encode filters in the table path
     (e.g. "ai_conversations?user_id=eq.abc"). data can be None for DELETE.
     """
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT) as client:
         url = f"{SUPABASE_URL}/rest/v1/{table}"
         headers = _supabase_headers()
 
@@ -694,12 +696,24 @@ class ConversationEngine:
         if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
             return
         try:
-            await supabase_post("ai_conversations", {
-                "user_id": user_id,
-                "role": role,
-                "message": message,
-                "metadata": metadata or {},
-            })
+            headers = _supabase_headers()
+            headers["Prefer"] = "return=minimal"
+            async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT) as client:
+                resp = await client.post(
+                    f"{SUPABASE_URL}/rest/v1/ai_conversations",
+                    json={
+                        "user_id": user_id,
+                        "role": role,
+                        "message": message,
+                        "metadata": metadata or {},
+                    },
+                    headers=headers,
+                )
+                if resp.status_code == 409:
+                    # FK violation (user not in users table) — non-critical
+                    logger.debug("Skipped storing message (user %s not in users table)", user_id)
+                    return
+                resp.raise_for_status()
         except Exception as exc:
             logger.error("Failed to store message: %s", exc)
 
@@ -725,11 +739,10 @@ class ConversationEngine:
         # 1. Language detection
         lang = self._detect_lang(message)
 
-        # 2. Profile (graceful — failure doesn't block chat)
-        profile = await self.get_user_profile(user_id)
-
-        # 3. History
-        history = await self.get_conversation_history(user_id, limit=20)
+        # 2 & 3. Profile + History in parallel (graceful — failures don't block)
+        profile_task = asyncio.create_task(self.get_user_profile(user_id))
+        history_task = asyncio.create_task(self.get_conversation_history(user_id, limit=20))
+        profile, history = await asyncio.gather(profile_task, history_task)
 
         # 4. Build messages
         messages: list[dict] = [{"role": "system", "content": self.system_prompt}]
@@ -770,12 +783,10 @@ class ConversationEngine:
         # 5. Call GPT-4o with full fallback chain
         response_text = await self._call_with_fallbacks(messages, lang)
 
-        # 6. Persist conversation
-        await self.store_message(user_id, "user", message)
-        await self.store_message(
-            user_id, "assistant", response_text,
-            metadata={"lang": lang},
-        )
+        # 6. Persist conversation (fire-and-forget — don't block response)
+        asyncio.create_task(self._persist_conversation(
+            user_id, message, response_text, lang
+        ))
 
         # 7. Optional audio (language-aware voice selection)
         audio_url = None
@@ -789,6 +800,19 @@ class ConversationEngine:
             "lang": lang,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
+    async def _persist_conversation(
+        self, user_id: str, user_msg: str, assistant_msg: str, lang: str
+    ) -> None:
+        """Store both user and assistant messages. Errors are logged, not raised."""
+        try:
+            await self.store_message(user_id, "user", user_msg)
+            await self.store_message(
+                user_id, "assistant", assistant_msg,
+                metadata={"lang": lang},
+            )
+        except Exception as exc:
+            logger.error("Conversation persistence failed: %s", exc)
 
     # ---- Fallback-aware orchestrator --------------------------------------
 
@@ -976,7 +1000,7 @@ class ConversationEngine:
                 "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
                 "Content-Type": "audio/mpeg",
             }
-            async with httpx.AsyncClient(timeout=30) as client:
+            async with httpx.AsyncClient(timeout=15) as client:
                 resp = await client.post(
                     f"{SUPABASE_URL}/storage/v1/object/ai-audio/{filename}",
                     content=audio_bytes,
