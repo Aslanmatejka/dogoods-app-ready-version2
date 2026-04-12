@@ -277,6 +277,73 @@ TOOL_DEFINITIONS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_recipes",
+            "description": (
+                "Get recipe suggestions based on specific ingredients or based on "
+                "a user's claimed/available food items from the platform. "
+                "When user_id is provided, looks up their active food claims to "
+                "suggest recipes they can actually make. Returns 3 creative recipes."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ingredients": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of ingredient names to base recipes on",
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": (
+                            "Optional user UUID — if provided, fetches their claimed "
+                            "food items and uses those as ingredients"
+                        ),
+                    },
+                    "dietary_preferences": {
+                        "type": "string",
+                        "description": (
+                            "Optional dietary restrictions or preferences "
+                            "(e.g. vegetarian, vegan, gluten-free, halal, kosher)"
+                        ),
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_storage_tips",
+            "description": (
+                "Get food storage and preservation tips for specific food items "
+                "or for food a user has claimed/listed on the platform. "
+                "Returns optimal storage conditions, shelf life, signs of spoilage, "
+                "and tips to extend freshness."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "food_items": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of food item names to get storage tips for",
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "description": (
+                            "Optional user UUID — if provided, fetches their active "
+                            "food claims/listings and gives storage tips for those items"
+                        ),
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
 ]
 
 
@@ -295,6 +362,8 @@ async def execute_tool(name: str, arguments: dict) -> dict:
         "query_distribution_centers": _query_distribution_centers,
         "get_user_dashboard": _get_user_dashboard,
         "check_pickup_schedule": _check_pickup_schedule,
+        "get_recipes": _get_recipes,
+        "get_storage_tips": _get_storage_tips,
     }
 
     handler = handlers.get(name)
@@ -1183,3 +1252,147 @@ async def _check_pickup_schedule(
         "days_ahead": days_ahead,
         "summary": summary,
     }
+
+
+# ---------------------------------------------------------------------------
+# get_recipes — suggest recipes from ingredients or user's claimed food
+# ---------------------------------------------------------------------------
+
+async def _get_recipes(
+    ingredients: list[str] | None = None,
+    user_id: str | None = None,
+    dietary_preferences: str | None = None,
+) -> dict:
+    """Generate recipe suggestions based on ingredients or a user's food claims."""
+    from backend.ai_engine import supabase_get, legacy_ai_request, _extract_content, DEFAULT_MODEL
+
+    logger.info("get_recipes: ingredients=%s user_id=%s", ingredients, user_id)
+
+    # If user_id provided, look up their claimed food items
+    if not ingredients and user_id:
+        ingredients = []
+        try:
+            claims = await supabase_get("food_claims", {
+                "claimer_id": f"eq.{user_id}",
+                "status": "in.(pending,approved)",
+                "select": "food_id",
+                "limit": "20",
+            })
+            food_ids = [c["food_id"] for c in claims if c.get("food_id")]
+            for fid in food_ids[:10]:
+                try:
+                    rows = await supabase_get("food_listings", {
+                        "id": f"eq.{fid}",
+                        "select": "title,category",
+                    })
+                    if rows:
+                        ingredients.append(rows[0].get("title", ""))
+                except Exception:
+                    pass
+        except Exception as exc:
+            logger.error("Failed to fetch user claims for recipes: %s", exc)
+
+    if not ingredients:
+        return {"error": "No ingredients provided and no claimed food found for user."}
+
+    diet_note = ""
+    if dietary_preferences:
+        diet_note = f" The recipes must be {dietary_preferences}."
+
+    prompt = (
+        "Suggest 3 creative recipes using some or all of these ingredients: "
+        f"{', '.join(ingredients)}.{diet_note} "
+        "For each recipe provide: name, ingredients list with quantities, "
+        "step-by-step instructions, prep time, cook time, and servings. "
+        "Return valid JSON array."
+    )
+    payload = {
+        "model": DEFAULT_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful culinary assistant for a food-sharing community.",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.8,
+        "max_tokens": 1500,
+    }
+
+    try:
+        data = await legacy_ai_request("/chat/completions", payload)
+        return {
+            "recipes": _extract_content(data),
+            "ingredients_used": ingredients,
+            "dietary_preferences": dietary_preferences,
+        }
+    except Exception as exc:
+        logger.error("get_recipes AI call failed: %s", exc)
+        return {"error": f"Failed to generate recipes: {str(exc)}"}
+
+
+# ---------------------------------------------------------------------------
+# get_storage_tips — food storage & preservation advice
+# ---------------------------------------------------------------------------
+
+async def _get_storage_tips(
+    food_items: list[str] | None = None,
+    user_id: str | None = None,
+) -> dict:
+    """Generate storage tips for specific food items or a user's claimed food."""
+    from backend.ai_engine import supabase_get, legacy_ai_request, _extract_content, DEFAULT_MODEL
+
+    logger.info("get_storage_tips: food_items=%s user_id=%s", food_items, user_id)
+
+    # If user_id provided, look up their claimed/listed food
+    if not food_items and user_id:
+        food_items = []
+        try:
+            claims = await supabase_get("food_claims", {
+                "claimer_id": f"eq.{user_id}",
+                "status": "in.(pending,approved)",
+                "select": "food_id",
+                "limit": "20",
+            })
+            food_ids = [c["food_id"] for c in claims if c.get("food_id")]
+            for fid in food_ids[:10]:
+                try:
+                    rows = await supabase_get("food_listings", {
+                        "id": f"eq.{fid}",
+                        "select": "title",
+                    })
+                    if rows:
+                        food_items.append(rows[0].get("title", ""))
+                except Exception:
+                    pass
+        except Exception as exc:
+            logger.error("Failed to fetch user claims for storage tips: %s", exc)
+
+    if not food_items:
+        return {"error": "No food items provided and no claimed food found for user."}
+
+    prompt = (
+        f"Provide storage tips for these food items: {', '.join(food_items)}. "
+        "For each item include: optimal temperature, container type, "
+        "shelf life (fridge/freezer/pantry), signs of spoilage, "
+        "and tips to extend freshness. Return valid JSON."
+    )
+    payload = {
+        "model": DEFAULT_MODEL,
+        "messages": [
+            {"role": "system", "content": "You are a food preservation expert."},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.5,
+        "max_tokens": 1500,
+    }
+
+    try:
+        data = await legacy_ai_request("/chat/completions", payload)
+        return {
+            "tips": _extract_content(data),
+            "food_items": food_items,
+        }
+    except Exception as exc:
+        logger.error("get_storage_tips AI call failed: %s", exc)
+        return {"error": f"Failed to generate storage tips: {str(exc)}"}
