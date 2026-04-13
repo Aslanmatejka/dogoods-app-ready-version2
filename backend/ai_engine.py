@@ -291,6 +291,87 @@ async def _ai_request(
     raise RuntimeError(f"AI request failed after {retries} attempts: {last_exc}")
 
 
+async def _openai_with_retry(
+    method: str,
+    url: str,
+    *,
+    headers: dict,
+    json_payload: dict | None = None,
+    files: dict | None = None,
+    data: dict | None = None,
+    timeout: float = TIMEOUT_SECONDS,
+    retries: int = MAX_RETRIES,
+) -> httpx.Response:
+    """Fire an HTTP request to OpenAI with automatic retry + exponential backoff.
+
+    Retries on 429 (rate-limit), 500/502/503 (server errors), and timeouts.
+    Non-retryable errors (401, 403, 404, 422) are raised immediately.
+    """
+    import asyncio
+
+    NON_RETRYABLE = {401, 403, 404, 422}
+    last_exc: Exception | None = None
+
+    for attempt in range(retries):
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                kwargs: dict = {"headers": headers}
+                if json_payload is not None:
+                    kwargs["json"] = json_payload
+                if files is not None:
+                    kwargs["files"] = files
+                if data is not None:
+                    kwargs["data"] = data
+
+                resp = await client.request(method, url, **kwargs)
+
+            if resp.status_code == 429:
+                wait = min(2 ** attempt + 1, 10)
+                logger.warning(
+                    "OpenAI 429 rate-limited (attempt %d/%d), retrying in %ds",
+                    attempt + 1, retries, wait,
+                )
+                _circuit.record_failure()
+                await asyncio.sleep(wait)
+                continue
+
+            if resp.status_code in NON_RETRYABLE:
+                resp.raise_for_status()
+
+            if resp.status_code >= 500:
+                wait = min(2 ** attempt + 1, 10)
+                logger.warning(
+                    "OpenAI %d server error (attempt %d/%d), retrying in %ds",
+                    resp.status_code, attempt + 1, retries, wait,
+                )
+                _circuit.record_failure()
+                await asyncio.sleep(wait)
+                continue
+
+            resp.raise_for_status()
+            _circuit.record_success()
+            return resp
+
+        except httpx.HTTPStatusError:
+            raise
+        except (httpx.TimeoutException, httpx.RequestError) as exc:
+            last_exc = exc
+            _circuit.record_failure()
+            if attempt < retries - 1:
+                wait = min(2 ** attempt + 1, 10)
+                logger.warning(
+                    "OpenAI request error (attempt %d/%d): %s — retrying in %ds",
+                    attempt + 1, retries, exc, wait,
+                )
+                await asyncio.sleep(wait)
+            else:
+                logger.error("OpenAI request failed after %d attempts: %s", retries, exc)
+
+    raise RuntimeError(
+        f"OpenAI request failed after {retries} attempts: {last_exc}"
+    )
+
+
 def _extract_content(response: dict) -> str:
     try:
         return response["choices"][0]["message"]["content"]
@@ -887,14 +968,13 @@ class ConversationEngine:
             "Content-Type": "application/json",
         }
 
-        async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-            resp = await client.post(
-                f"{OPENAI_BASE_URL}/chat/completions",
-                json=payload,
-                headers=headers,
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        resp = await _openai_with_retry(
+            "POST",
+            f"{OPENAI_BASE_URL}/chat/completions",
+            headers=headers,
+            json_payload=payload,
+        )
+        data = resp.json()
 
         choice = data["choices"][0]
         msg = choice["message"]
@@ -942,14 +1022,13 @@ class ConversationEngine:
                 "max_tokens": 1024,
             }
             try:
-                async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-                    resp = await client.post(
-                        f"{OPENAI_BASE_URL}/chat/completions",
-                        json=followup_payload,
-                        headers=headers,
-                    )
-                    resp.raise_for_status()
-                    data = resp.json()
+                resp = await _openai_with_retry(
+                    "POST",
+                    f"{OPENAI_BASE_URL}/chat/completions",
+                    headers=headers,
+                    json_payload=followup_payload,
+                )
+                data = resp.json()
                 return data["choices"][0]["message"]["content"]
             except Exception as followup_exc:
                 logger.error("GPT-4o follow-up failed: %s", followup_exc)
@@ -972,15 +1051,15 @@ class ConversationEngine:
 
         headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
 
-        async with httpx.AsyncClient(timeout=60) as client:
-            resp = await client.post(
-                f"{OPENAI_BASE_URL}/audio/transcriptions",
-                headers=headers,
-                files={"file": (filename, audio_bytes)},
-                data={"model": WHISPER_MODEL, "response_format": "json"},
-            )
-            resp.raise_for_status()
-            return resp.json()["text"]
+        resp = await _openai_with_retry(
+            "POST",
+            f"{OPENAI_BASE_URL}/audio/transcriptions",
+            headers=headers,
+            files={"file": (filename, audio_bytes)},
+            data={"model": WHISPER_MODEL, "response_format": "json"},
+            timeout=60,
+        )
+        return resp.json()["text"]
 
     # ---- TTS text-to-speech ----------------------------------------------
 
@@ -1002,18 +1081,18 @@ class ConversationEngine:
             "Content-Type": "application/json",
         }
 
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(
-                f"{OPENAI_BASE_URL}/audio/speech",
-                json={
-                    "model": TTS_MODEL,
-                    "input": truncated,
-                    "voice": voice,
-                },
-                headers=headers,
-            )
-            resp.raise_for_status()
-            return resp.content
+        resp = await _openai_with_retry(
+            "POST",
+            f"{OPENAI_BASE_URL}/audio/speech",
+            headers=headers,
+            json_payload={
+                "model": TTS_MODEL,
+                "input": truncated,
+                "voice": voice,
+            },
+            timeout=30,
+        )
+        return resp.content
 
     async def _generate_audio_url(
         self, text: str, lang: str = "en"
