@@ -1440,12 +1440,44 @@ async def _get_recipes(
         except Exception as exc:
             logger.error("Failed to fetch user claims for recipes: %s", exc)
 
-    if not ingredients:
-        return {"error": "No ingredients provided and no claimed food found for user."}
-
     diet_note = ""
     if dietary_preferences:
         diet_note = f" The recipes must be {dietary_preferences}."
+
+    if not ingredients:
+        # No specific ingredients — suggest general easy recipes with common items
+        prompt = (
+            "Suggest 3 easy, budget-friendly recipes using common pantry staples "
+            "that someone who is hungry could make quickly.{diet_note} "
+            "Focus on simple ingredients like rice, beans, pasta, eggs, bread, "
+            "canned vegetables, potatoes, or oatmeal. "
+            "For each recipe provide: name, ingredients list with quantities, "
+            "step-by-step instructions, prep time, cook time, and servings. "
+            "Return valid JSON array."
+        ).format(diet_note=diet_note)
+        payload = {
+            "model": DEFAULT_MODEL,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a helpful culinary assistant for a food-sharing community. Help people who are hungry find easy meals they can make.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": 0.8,
+            "max_tokens": 1500,
+        }
+        try:
+            data = await legacy_ai_request("/chat/completions", payload)
+            return {
+                "recipes": _extract_content(data),
+                "ingredients_used": ["common pantry staples"],
+                "dietary_preferences": dietary_preferences,
+                "note": "These are general recipes using common ingredients. Tell me what you have on hand for more personalized suggestions!",
+            }
+        except Exception as exc:
+            logger.error("get_recipes general AI call failed: %s", exc)
+            return {"error": f"Failed to generate recipes: {str(exc)}"}
 
     prompt = (
         "Suggest 3 creative recipes using some or all of these ingredients: "
