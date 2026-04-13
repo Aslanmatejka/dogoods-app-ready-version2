@@ -750,28 +750,10 @@ export const useCommunityPosts = (filters = {}) => {
   }
 }
 
-// AI Assistant hook
+// AI Assistant hook (used by FoodCard for recipe suggestions)
 export const useAI = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
-
-  const chatWithNourish = useCallback(async (message, context = '') => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      // Import AI functions dynamically to avoid circular dependencies
-      const { chatWithNourish: chatFn } = await import('../aiAgent.js')
-      const result = await chatFn(message, context)
-      
-      return result
-    } catch (error) {
-      setError(error.message)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
 
   const getRecipeSuggestions = useCallback(async (ingredients) => {
     try {
@@ -790,65 +772,10 @@ export const useAI = () => {
     }
   }, [])
 
-  const getStorageTips = useCallback(async (food) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const { getStorageTips: getStorageFn } = await import('../aiAgent.js')
-      const result = await getStorageFn(food)
-      
-      return result
-    } catch (error) {
-      setError(error.message)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const getFoodPairings = useCallback(async (food) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const { getFoodPairings: getPairingsFn } = await import('../aiAgent.js')
-      const result = await getPairingsFn(food)
-      
-      return result
-    } catch (error) {
-      setError(error.message)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const calculateEnvironmentalImpact = useCallback(async (foodType, quantity, unit) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const { calculateEnvironmentalImpact: calculateFn } = await import('../aiAgent.js')
-      const result = await calculateFn(foodType, quantity, unit)
-      
-      return result
-    } catch (error) {
-      setError(error.message)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
   return {
     isLoading,
     error,
-    chatWithNourish,
     getRecipeSuggestions,
-    getStorageTips,
-    getFoodPairings,
-    calculateEnvironmentalImpact
   }
 }
 

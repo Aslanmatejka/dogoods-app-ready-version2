@@ -1,427 +1,90 @@
 /**
- * AI Agent — routes all AI calls through the FastAPI backend at /api/ai/chat.
- * No direct OpenAI calls from the frontend.
+ * AI Agent — routes AI helper calls through the FastAPI backend at /api/ai/chat.
+ * Used by FoodCard for recipe suggestions. Main chat uses aiChatService instead.
  */
 
 const API_BASE = '/api/ai'
 
 // Rate limiting (client-side courtesy throttle)
-const rateLimitStore = new Map();
+const rateLimitStore = new Map()
 
 function checkRateLimit(clientId = 'default') {
-    const now = Date.now();
-    const timeWindow = 60000;
-    const maxRequests = 50;
-    
+    const now = Date.now()
+    const timeWindow = 60000
+    const maxRequests = 50
+
     if (!rateLimitStore.has(clientId)) {
-        rateLimitStore.set(clientId, { requests: [], windowStart: now });
+        rateLimitStore.set(clientId, { requests: [], windowStart: now })
     }
-    
-    const clientData = rateLimitStore.get(clientId);
-    clientData.requests = clientData.requests.filter(time => now - time < timeWindow);
-    
+
+    const clientData = rateLimitStore.get(clientId)
+    clientData.requests = clientData.requests.filter(time => now - time < timeWindow)
+
     if (clientData.requests.length >= maxRequests) {
-        throw new Error('Rate limit exceeded. Please try again later.');
+        throw new Error('Rate limit exceeded. Please try again later.')
     }
-    clientData.requests.push(now);
+    clientData.requests.push(now)
 }
 
 // Circuit breaker pattern
 class CircuitBreaker {
     constructor(failureThreshold = 5, resetTimeout = 60000) {
-        this.failureThreshold = failureThreshold;
-        this.resetTimeout = resetTimeout;
-        this.failureCount = 0;
-        this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
-        this.nextAttempt = Date.now();
+        this.failureThreshold = failureThreshold
+        this.resetTimeout = resetTimeout
+        this.failureCount = 0
+        this.state = 'CLOSED'
+        this.nextAttempt = Date.now()
     }
 
     async executeRequest(request) {
         if (this.state === 'OPEN') {
             if (Date.now() < this.nextAttempt) {
-                throw new Error('Circuit breaker is OPEN');
+                throw new Error('Circuit breaker is OPEN')
             }
-            this.state = 'HALF_OPEN';
+            this.state = 'HALF_OPEN'
         }
 
         try {
-            const result = await request();
-            this.onSuccess();
-            return result;
+            const result = await request()
+            this.onSuccess()
+            return result
         } catch (error) {
-            this.onFailure();
-            throw error;
+            this.onFailure()
+            throw error
         }
     }
 
     onSuccess() {
-        this.failureCount = 0;
-        this.state = 'CLOSED';
+        this.failureCount = 0
+        this.state = 'CLOSED'
     }
 
     onFailure() {
-        this.failureCount++;
+        this.failureCount++
         if (this.failureCount >= this.failureThreshold) {
-            this.state = 'OPEN';
-            this.nextAttempt = Date.now() + this.resetTimeout;
+            this.state = 'OPEN'
+            this.nextAttempt = Date.now() + this.resetTimeout
         }
     }
 }
 
-const circuitBreaker = new CircuitBreaker();
+const circuitBreaker = new CircuitBreaker()
 
-// AI Chat Assistant
-async function chatWithNourish(message, context = '') {
-    if (!message || typeof message !== 'string') {
-        throw new Error('Invalid message format. Message must be a non-empty string.');
-    }
-
-    try {
-        const systemPrompt = `You are Nouri, ShareFoods' AI assistant. You help users with food sharing, 
-        provide cooking tips, and suggest ways to reduce food waste. Consider the following context:
-        ${context}`;
-    
-        const response = await invokeAIAgent(systemPrompt, message);
-        return response;
-    } catch (error) {
-        console.error('AI chat error:', error);
-        throw new Error('Unable to process your request. Please try again.');
-    }
-}
-
-// Recipe Suggestions
-async function getRecipeSuggestions(ingredients) {
-    if (!Array.isArray(ingredients) || ingredients.length === 0) {
-        throw new Error('Invalid ingredients format. Must provide a non-empty array of ingredients.');
-    }
-
-    try {
-        const systemPrompt = `You are a culinary expert. Suggest recipes using these ingredients: ${ingredients.join(', ')}. 
-        Focus on reducing food waste and using ingredients efficiently.`;
-        
-        const response = await invokeAIAgent(systemPrompt, 'Suggest 3 recipes.');
-        
-        // Handle both string and object responses
-        let parsedResponse;
-        if (typeof response === 'string') {
-            try {
-                parsedResponse = JSON.parse(response);
-            } catch (e) {
-                // If response is not JSON, create a structured response
-                parsedResponse = {
-                    recipes: [{
-                        name: "Simple Recipe",
-                        ingredients: ingredients,
-                        instructions: response,
-                        prepTime: "N/A",
-                        cookTime: "N/A",
-                        difficulty: "N/A",
-                        servings: 2
-                    }]
-                };
-            }
-        } else {
-            parsedResponse = response;
-        }
-
-        // Validate response structure
-        if (!parsedResponse.recipes || !Array.isArray(parsedResponse.recipes)) {
-            throw new Error('Invalid response format from AI agent');
-        }
-
-        return parsedResponse;
-    } catch (error) {
-        console.error('Recipe suggestion error:', error);
-        throw new Error('Unable to generate recipe suggestions. Please try again.');
-    }
-}
-
-// Food Pairing Recommendations
-async function getFoodPairings(food) {
-    if (!food || typeof food !== 'string') {
-        throw new Error('Invalid food parameter. Must provide a non-empty string.');
-    }
-
-    try {
-        const systemPrompt = `You are a food pairing expert. Suggest complementary foods and ingredients that pair well with: ${food}.`;
-        
-        const response = await invokeAIAgent(systemPrompt, 'Suggest pairings.');
-        
-        // Handle both string and object responses
-        let parsedResponse;
-        if (typeof response === 'string') {
-            try {
-                parsedResponse = JSON.parse(response);
-            } catch (e) {
-                // If response is not JSON, create a structured response
-                parsedResponse = {
-                    food: food,
-                    pairings: [{
-                        name: "Suggested Pairing",
-                        description: response
-                    }]
-                };
-            }
-        } else {
-            parsedResponse = response;
-        }
-
-        // Validate response structure
-        if (!parsedResponse.food || !Array.isArray(parsedResponse.pairings)) {
-            throw new Error('Invalid response format from AI agent');
-        }
-
-        return parsedResponse;
-    } catch (error) {
-        console.error('Food pairing error:', error);
-        throw new Error('Unable to generate food pairings. Please try again.');
-    }
-}
-
-// Storage Tips
-async function getStorageTips(food) {
-    if (!food || typeof food !== 'string') {
-        throw new Error('Invalid food parameter. Must provide a non-empty string.');
-    }
-
-    try {
-        const systemPrompt = `You are a food preservation expert. Provide storage tips and best practices for: ${food}.`;
-        
-        const response = await invokeAIAgent(systemPrompt, 'Provide storage tips.');
-        
-        // Handle both string and object responses
-        let parsedResponse;
-        if (typeof response === 'string') {
-            try {
-                parsedResponse = JSON.parse(response);
-            } catch (e) {
-                // If response is not JSON, create a structured response
-                parsedResponse = {
-                    food: food,
-                    tips: [response],
-                    shelfLife: {
-                        refrigerator: "Check packaging",
-                        freezer: "Check packaging",
-                        roomTemperature: "Check packaging"
-                    }
-                };
-            }
-        } else {
-            parsedResponse = response;
-        }
-
-        // Validate response structure
-        if (!parsedResponse.food || !Array.isArray(parsedResponse.tips) || !parsedResponse.shelfLife) {
-            throw new Error('Invalid response format from AI agent');
-        }
-
-        return parsedResponse;
-    } catch (error) {
-        console.error('Storage tips error:', error);
-        throw new Error('Unable to generate storage tips. Please try again.');
-    }
-}
-
-// Trade Value Estimation
-async function calculateEnvironmentalImpact(foodType, quantity, unit) {
-    if (!foodType || typeof quantity !== 'number' || !unit) {
-        throw new Error('Invalid parameters. Must provide foodType (string), quantity (number), and unit (string).');
-    }
-
-    try {
-        const systemPrompt = `You are an environmental impact expert. Calculate the environmental impact of saving:
-        Food Type: ${foodType}
-        Quantity: ${quantity}
-        Unit: ${unit}
-        
-        Format your response as JSON with this structure:
-        {
-          "foodType": "${foodType}",
-          "quantity": ${quantity},
-          "unit": "${unit}",
-          "waterSaved": "X liters",
-          "co2Prevented": "X kg",
-          "landSaved": "X sq meters",
-          "equivalents": {
-            "carMiles": "X miles of driving",
-            "showerMinutes": "X minutes of showering"
-          }
-        }`;
-        
-        const response = await invokeAIAgent(systemPrompt, 'Calculate impact.');
-        
-        // Handle both string and object responses
-        let parsedResponse;
-        if (typeof response === 'string') {
-            try {
-                parsedResponse = JSON.parse(response);
-            } catch (parseError) {
-                console.warn('Failed to parse AI response as JSON, using fallback');
-                parsedResponse = {
-                    foodType: foodType,
-                    quantity: quantity,
-                    unit: unit,
-                    waterSaved: "Unable to calculate",
-                    co2Prevented: "Unable to calculate", 
-                    landSaved: "Unable to calculate",
-                    equivalents: {
-                        carMiles: "Unable to calculate",
-                        showerMinutes: "Unable to calculate"
-                    }
-                };
-            }
-        } else if (typeof response === 'object' && response !== null) {
-            parsedResponse = response;
-        } else {
-            throw new Error('Invalid response type from AI agent');
-        }
-        
-        // Validate response structure and provide defaults
-        const validatedResponse = {
-            foodType: parsedResponse.foodType || foodType,
-            quantity: parsedResponse.quantity || quantity,
-            unit: parsedResponse.unit || unit,
-            waterSaved: parsedResponse.waterSaved || "Data unavailable",
-            co2Prevented: parsedResponse.co2Prevented || "Data unavailable",
-            landSaved: parsedResponse.landSaved || "Data unavailable",
-            equivalents: {
-                carMiles: parsedResponse.equivalents?.carMiles || "Data unavailable",
-                showerMinutes: parsedResponse.equivalents?.showerMinutes || "Data unavailable"
-            }
-        };
-
-        return validatedResponse;
-    } catch (error) {
-        console.error('Impact calculation error:', error);
-        throw new Error('Unable to calculate environmental impact. Please try again.');
-    }
-}
-
-// Find Nearest Food Share Locations
-async function findNearestFoodShares(location, radius = 5) {
-    if (!location || typeof location !== 'string') {
-        throw new Error('Invalid location parameter. Must provide a non-empty string.');
-    }
-
-    if (typeof radius !== 'number' || radius <= 0) {
-        radius = 5; // Default to 5 miles if invalid radius provided
-    }
-
-    try {
-        const systemPrompt = `You are a location specialist for ShareFoods. Find the nearest food sharing opportunities near:
-        Location: ${location}
-        Radius: ${radius} miles
-        
-        Format your response as JSON with this structure:
-        {
-          "location": "${location}",
-          "radius": ${radius},
-          "results": [
-            {
-              "name": "Location name",
-              "address": "Full address",
-              "distance": "X miles",
-              "availableItems": ["item 1", "item 2"],
-              "hours": "Opening hours information"
-            }
-          ]
-        }`;
-        
-        const response = await invokeAIAgent(systemPrompt, 'Find food shares.');
-        const parsedResponse = JSON.parse(response);
-        
-        // Validate response structure
-        if (!parsedResponse.location || !Array.isArray(parsedResponse.results)) {
-            throw new Error('Invalid response format from AI agent');
-        }
-
-        return parsedResponse;
-    } catch (error) {
-        console.error('Find food shares error:', error);
-        throw new Error('Unable to find nearby food sharing locations. Please try again.');
-    }
-}
-
-// Validation rules
-const VALIDATION_RULES = {
-    food: {
-        minLength: 2,
-        maxLength: 100,
-        pattern: /^[a-zA-Z0-9\s\-,]+$/
-    },
-    quantity: {
-        min: 0.1,
-        max: 1000000
-    },
-    location: {
-        minLength: 3,
-        maxLength: 200,
-        pattern: /^[a-zA-Z0-9\s\-,\.]+$/
-    },
-    radius: {
-        min: 0.1,
-        max: 100
-    }
-};
-
-// Enhanced validation functions
-function validateInput(value, type, fieldName) {
-    if (value === undefined || value === null) {
-        throw new Error(`${fieldName} is required`);
-    }
-
-    switch (type) {
-        case 'string':
-            if (typeof value !== 'string' || !value.trim()) {
-                throw new Error(`${fieldName} must be a non-empty string`);
-            }
-            if (VALIDATION_RULES[fieldName.toLowerCase()]) {
-                const rules = VALIDATION_RULES[fieldName.toLowerCase()];
-                if (value.length < rules.minLength || value.length > rules.maxLength) {
-                    throw new Error(`${fieldName} must be between ${rules.minLength} and ${rules.maxLength} characters`);
-                }
-                if (rules.pattern && !rules.pattern.test(value)) {
-                    throw new Error(`${fieldName} contains invalid characters`);
-                }
-            }
-            break;
-
-        case 'number':
-            if (typeof value !== 'number' || isNaN(value)) {
-                throw new Error(`${fieldName} must be a valid number`);
-            }
-            if (VALIDATION_RULES[fieldName.toLowerCase()]) {
-                const rules = VALIDATION_RULES[fieldName.toLowerCase()];
-                if (value < rules.min || value > rules.max) {
-                    throw new Error(`${fieldName} must be between ${rules.min} and ${rules.max}`);
-                }
-            }
-            break;
-
-        case 'array':
-            if (!Array.isArray(value) || value.length === 0) {
-                throw new Error(`${fieldName} must be a non-empty array`);
-            }
-            break;
-    }
-    return true;
-}
-
-// Update the invokeAIAgent function to use backend
+/**
+ * Send a prompt to the backend AI chat endpoint.
+ * Returns parsed JSON if the response is valid JSON, otherwise { content, type: 'text' }.
+ */
 async function invokeAIAgent(systemPrompt, userPrompt, options = {}) {
-    const {
-        retries = 2,
-        clientId = 'default',
-    } = options;
+    const { retries = 2, clientId = 'default' } = options
 
-    checkRateLimit(clientId);
+    checkRateLimit(clientId)
 
     return circuitBreaker.executeRequest(async () => {
-        let lastError = null;
+        let lastError = null
         for (let i = 0; i < retries; i++) {
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 30000);
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 30000)
 
                 const response = await fetch(`${API_BASE}/chat`, {
                     method: 'POST',
@@ -431,204 +94,80 @@ async function invokeAIAgent(systemPrompt, userPrompt, options = {}) {
                         user_id: 'agent-helper',
                     }),
                     signal: controller.signal,
-                });
-                clearTimeout(timeout);
+                })
+                clearTimeout(timeout)
 
                 if (!response.ok) {
-                    throw new Error(`Backend error: ${response.status}`);
+                    throw new Error(`Backend error: ${response.status}`)
                 }
 
-                const data = await response.json();
-                const content = data.text || '';
+                const data = await response.json()
+                const content = data.text || ''
 
-                // Try to parse as JSON, if it fails, return as text
                 try {
-                    const result = JSON.parse(content);
-                    validateResponse(result);
-                    return result;
-                } catch (parseError) {
-                    return { content: content, type: 'text' };
+                    return JSON.parse(content)
+                } catch {
+                    return { content, type: 'text' }
                 }
             } catch (error) {
-                lastError = error;
-                console.error(`Backend AI error (attempt ${i + 1}/${retries}):`, error);
+                lastError = error
+                console.error(`Backend AI error (attempt ${i + 1}/${retries}):`, error)
                 if (i < retries - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
                 }
             }
         }
-
-        console.warn('Backend AI failed, falling back to mock response');
-        return generateMockResponse(systemPrompt, userPrompt);
-    });
+        throw lastError
+    })
 }
 
-// Enhanced mock response generator
-function generateMockResponse(systemPrompt, userPrompt) {
-    const promptLower = userPrompt.toLowerCase();
-    const systemLower = systemPrompt.toLowerCase();
+/**
+ * Get recipe suggestions for given ingredients.
+ * Used by FoodCard component via useAI() hook.
+ */
+async function getRecipeSuggestions(ingredients) {
+    if (!Array.isArray(ingredients) || ingredients.length === 0) {
+        throw new Error('Invalid ingredients format. Must provide a non-empty array.')
+    }
 
-    if (promptLower.includes('recipe') || systemLower.includes('suggest recipes')) {
-        return {
-            recipes: [
-                {
-                    name: "Vegetable Stir Fry",
-                    ingredients: ["2 carrots", "1 bell pepper", "broccoli"],
-                    instructions: "1. Heat oil...",
-                    prepTime: "10 minutes",
-                    cookTime: "8 minutes",
-                    difficulty: "Easy",
-                    servings: 2,
-                    nutritionalInfo: {
-                        calories: 250,
-                        protein: "8g",
-                        carbs: "25g",
-                        fat: "12g"
-                    },
-                    tips: ["Cut vegetables uniformly", "Don't overcook"],
-                    variations: ["Add tofu", "Use different vegetables"]
-                },
-                {
-                    name: "Quick Pasta Primavera",
-                    ingredients: ["pasta", "mixed vegetables", "olive oil"],
-                    instructions: "1. Boil pasta...",
-                    prepTime: "15 minutes",
-                    cookTime: "12 minutes",
-                    difficulty: "Easy",
-                    servings: 4,
-                    nutritionalInfo: {
-                        calories: 350,
-                        protein: "10g",
-                        carbs: "45g",
-                        fat: "15g"
-                    },
-                    tips: ["Reserve pasta water", "Don't overcook vegetables"],
-                    variations: ["Use whole grain pasta", "Add cream sauce"]
+    try {
+        const systemPrompt = `You are a culinary expert. Suggest recipes using these ingredients: ${ingredients.join(', ')}. Focus on reducing food waste and using ingredients efficiently.`
+
+        const response = await invokeAIAgent(systemPrompt, 'Suggest 3 recipes.')
+
+        let parsedResponse
+        if (typeof response === 'string') {
+            try {
+                parsedResponse = JSON.parse(response)
+            } catch {
+                parsedResponse = {
+                    recipes: [{
+                        name: 'Simple Recipe',
+                        ingredients: ingredients,
+                        instructions: response,
+                        prepTime: 'N/A',
+                        cookTime: 'N/A',
+                        difficulty: 'N/A',
+                        servings: 2,
+                    }],
                 }
-            ],
-            metadata: {
-                generatedAt: new Date().toISOString(),
-                difficulty: "beginner-friendly",
-                totalTime: "25-30 minutes",
-                cuisine: "fusion"
             }
-        };
-    } else if (promptLower.includes('storage')) {
-        return {
-            food: "Leafy Greens",
-            tips: [
-                "Wash and dry thoroughly",
-                "Store in airtight container",
-                "Add paper towel to absorb moisture",
-                "Keep away from ethylene-producing fruits"
-            ],
-            shelfLife: {
-                refrigerator: "5-7 days",
-                freezer: "Not recommended",
-                roomTemperature: "A few hours"
-            },
-            signs_of_spoilage: [
-                "Wilting leaves",
-                "Yellow or brown spots",
-                "Slimy texture",
-                "Off odor"
-            ],
-            optimal_conditions: {
-                temperature: "32-40°F (0-4°C)",
-                humidity: "90-95%",
-                container: "Plastic bag with holes or container",
-                location: "Crisper drawer"
-            }
-        };
-    } else if (promptLower.includes('impact')) {
-        return {
-            foodType: "Mixed Vegetables",
-            quantity: 5,
-            unit: "kg",
-            waterSaved: "2500 liters",
-            co2Prevented: "7.5 kg",
-            landSaved: "10 sq meters",
-            equivalents: {
-                carMiles: "18.5 miles of driving",
-                showerMinutes: "25 minutes of showering",
-                lightBulbHours: "120 hours of LED light",
-                treeDays: "2.5 days of tree absorption"
-            },
-            additionalImpact: {
-                biodiversityPreserved: "2 sq meters",
-                pesticideReduced: "0.5 kg",
-                soilPreserved: "15 kg"
-            }
-        };
-    } else {
-        return {
-            message: "I'm Nouri, your food sharing assistant.",
-            suggestions: [
-                "Ask about recipes",
-                "Get storage tips",
-                "Calculate environmental impact",
-                "Find food sharing opportunities"
-            ],
-            capabilities: [
-                "Recipe suggestions",
-                "Storage advice",
-                "Impact calculations",
-                "Food pairing recommendations"
-            ]
-        };
-    }
-}
-
-// Response validation
-function validateResponse(response) {
-    if (!response || typeof response !== 'object') {
-        throw new Error('Invalid response format');
-    }
-
-    if (response.recipes) {
-        validateRecipeResponse(response);
-    } else if (response.food) {
-        validateStorageResponse(response);
-    } else if (response.foodType) {
-        validateImpactResponse(response);
-    }
-}
-
-function validateRecipeResponse(response) {
-    if (!Array.isArray(response.recipes)) {
-        throw new Error('Invalid recipe format');
-    }
-    response.recipes.forEach(recipe => {
-        if (!recipe.name || !recipe.ingredients || !recipe.instructions) {
-            throw new Error('Invalid recipe data structure');
+        } else {
+            parsedResponse = response
         }
-    });
-}
 
-function validateStorageResponse(response) {
-    if (!response.tips || !Array.isArray(response.tips)) {
-        throw new Error('Invalid storage tips format');
-    }
-    if (!response.shelfLife || typeof response.shelfLife !== 'object') {
-        throw new Error('Invalid shelf life format');
-    }
-}
+        if (!parsedResponse.recipes || !Array.isArray(parsedResponse.recipes)) {
+            throw new Error('Invalid response format from AI agent')
+        }
 
-function validateImpactResponse(response) {
-    if (!response.waterSaved || !response.co2Prevented) {
-        throw new Error('Invalid impact calculation format');
-    }
-    if (!response.equivalents || typeof response.equivalents !== 'object') {
-        throw new Error('Invalid equivalents format');
+        return parsedResponse
+    } catch (error) {
+        console.error('Recipe suggestion error:', error)
+        throw new Error('Unable to generate recipe suggestions. Please try again.')
     }
 }
 
 export {
     invokeAIAgent,
-    chatWithNourish,
     getRecipeSuggestions,
-    getFoodPairings,
-    getStorageTips,
-    calculateEnvironmentalImpact,
-    findNearestFoodShares
-};
+}

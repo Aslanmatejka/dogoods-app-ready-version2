@@ -6,11 +6,11 @@ Provides all AI-related HTTP endpoints:
   POST /api/ai/chat            – Text conversation (returns text + optional audio URL)
   GET  /api/ai/history/{uid}   – Retrieve conversation history
   POST /api/ai/voice           – Transcribe audio (Whisper) then process as chat
+  POST /api/ai/tts             – Text-to-speech
+  POST /api/ai/feedback        – Submit feedback on AI message
+  GET  /health                 – Health check
 
-Legacy endpoints (matching, recipes, impact, etc.) are preserved from the
-original ai_engine module.
-
-Background job: checks ai_reminders every 15 min, sends SMS via Twilio.
+Background jobs: checks ai_reminders every 15 min, missed pickup alerts.
 
 Run:
     uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
@@ -27,22 +27,17 @@ from base64 import b64encode
 import httpx
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from backend.ai_engine import (
     conversation_engine,
     check_rate_limit,
-    compute_matches,
-    calculate_impact,
-    legacy_ai_request,
-    _extract_content,
     _circuit,
     supabase_get,
     supabase_post,
     SUPABASE_URL,
     SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY,
-    DEFAULT_MODEL,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -423,58 +418,8 @@ class ConversationMessage(BaseModel):
     created_at: str
 
 
-# ---------------------------------------------------------------------------
-# Pydantic models — Legacy endpoints
-# ---------------------------------------------------------------------------
-
-class LegacyChatMessage(BaseModel):
-    role: str = Field(pattern=r"^(system|user|assistant)$")
-    content: str = Field(min_length=1, max_length=10_000)
-
-
-class LegacyChatRequest(BaseModel):
-    messages: list[LegacyChatMessage] = Field(min_length=1)
-    model: str = DEFAULT_MODEL
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    max_tokens: int = Field(default=1024, ge=1, le=4096)
-    stream: bool = False
-
-
-class MatchRequest(BaseModel):
-    request: dict
-    available_offers: list[dict]
-    max_results: int = Field(default=10, ge=1, le=50)
-
-
-class RecipeRequest(BaseModel):
-    ingredients: list[str] = Field(min_length=1, max_length=20)
-
-    @field_validator("ingredients", mode="before")
-    @classmethod
-    def validate_ingredients(cls, v: list[str]) -> list[str]:
-        cleaned = []
-        for item in v:
-            item = item.strip()
-            if not re.match(r"^[\w\s\-,]+$", item):
-                raise ValueError(f"Invalid ingredient: {item}")
-            if len(item) < 2 or len(item) > 100:
-                raise ValueError("Each ingredient must be 2-100 characters")
-            cleaned.append(item)
-        return cleaned
-
-
-class StorageRequest(BaseModel):
-    food: str = Field(min_length=2, max_length=100)
-
-
-class ImpactRequest(BaseModel):
-    food_type: str = Field(min_length=2, max_length=100)
-    quantity: float = Field(gt=0, le=1_000_000)
-    unit: str = Field(min_length=1, max_length=20)
-
-
 # ===================================================================
-#  NEW AI CONVERSATION ROUTES
+#  AI CONVERSATION ROUTES
 # ===================================================================
 
 @app.post("/api/ai/chat", response_model=AIChatResponse)
@@ -788,133 +733,6 @@ async def health() -> dict:
         "openai_configured": bool(os.getenv("OPENAI_API_KEY")),
         "circuit_state": _circuit.state.value,
     }
-
-
-@app.post("/api/chat")
-async def chat(body: LegacyChatRequest, request: Request) -> dict:
-    """Legacy chat proxy (OpenAI direct passthrough)."""
-    _enforce_rate_limit(request)
-
-    payload = {
-        "model": body.model,
-        "messages": [m.model_dump() for m in body.messages],
-        "temperature": body.temperature,
-        "max_tokens": body.max_tokens,
-        "stream": False,
-    }
-    try:
-        data = await legacy_ai_request("/chat/completions", payload)
-        return {"content": _extract_content(data), "model": body.model}
-    except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
-    except Exception as exc:
-        logger.error("Legacy chat error: %s", exc)
-        raise HTTPException(500, "AI service unavailable") from exc
-
-
-@app.post("/api/match")
-async def match_food(body: MatchRequest, request: Request) -> dict:
-    _enforce_rate_limit(request)
-    results = compute_matches(body.request, body.available_offers, body.max_results)
-    return {"matches": results, "total": len(results)}
-
-
-@app.post("/api/recipes")
-async def recipes(body: RecipeRequest, request: Request) -> dict:
-    _enforce_rate_limit(request)
-
-    prompt = (
-        "You are a culinary expert. Suggest 3 creative recipes using some or all "
-        f"of these ingredients: {', '.join(body.ingredients)}. "
-        "For each recipe provide: name, ingredients list with quantities, "
-        "step-by-step instructions, prep time, cook time, and servings. "
-        "Return valid JSON array."
-    )
-    payload = {
-        "model": DEFAULT_MODEL,
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a helpful culinary assistant for a food-sharing community.",
-            },
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.8,
-        "max_tokens": 1500,
-    }
-    try:
-        data = await legacy_ai_request("/chat/completions", payload)
-        return {"recipes": _extract_content(data)}
-    except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
-    except Exception as exc:
-        logger.error("Recipes error: %s", exc)
-        raise HTTPException(500, "AI service unavailable") from exc
-
-
-@app.post("/api/storage-tips")
-async def storage_tips(body: StorageRequest, request: Request) -> dict:
-    _enforce_rate_limit(request)
-
-    prompt = (
-        f"Provide detailed storage tips for {body.food}. Include: "
-        "optimal temperature, container type, shelf life (fridge/freezer/pantry), "
-        "signs of spoilage, and tips to extend freshness. Return valid JSON."
-    )
-    payload = {
-        "model": DEFAULT_MODEL,
-        "messages": [
-            {"role": "system", "content": "You are a food preservation expert."},
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.5,
-        "max_tokens": 1000,
-    }
-    try:
-        data = await legacy_ai_request("/chat/completions", payload)
-        return {"tips": _extract_content(data)}
-    except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
-    except Exception as exc:
-        logger.error("Storage tips error: %s", exc)
-        raise HTTPException(500, "AI service unavailable") from exc
-
-
-@app.post("/api/impact")
-async def impact(body: ImpactRequest, request: Request) -> dict:
-    _enforce_rate_limit(request)
-    return calculate_impact(body.food_type, body.quantity, body.unit)
-
-
-@app.post("/api/food-pairings")
-async def food_pairings(body: StorageRequest, request: Request) -> dict:
-    _enforce_rate_limit(request)
-
-    prompt = (
-        f"Suggest complementary foods that pair well with {body.food}. "
-        "Include nutritional benefits of pairings. Return valid JSON."
-    )
-    payload = {
-        "model": DEFAULT_MODEL,
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a nutrition and food pairing expert.",
-            },
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.7,
-        "max_tokens": 1000,
-    }
-    try:
-        data = await legacy_ai_request("/chat/completions", payload)
-        return {"pairings": _extract_content(data)}
-    except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
-    except Exception as exc:
-        logger.error("Food pairings error: %s", exc)
-        raise HTTPException(500, "AI service unavailable") from exc
-
 
 # ---------------------------------------------------------------------------
 # Entrypoint
