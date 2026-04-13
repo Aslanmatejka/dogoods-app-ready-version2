@@ -594,6 +594,24 @@ def _build_system_prompt(training_data: dict) -> str:
         procs = "\n".join(f"- {p}" for p in training_data["processes"])
         sections.append(f"## Key Processes\n{procs}")
 
+    if "ai_capabilities" in training_data:
+        caps = "\n".join(
+            f"- **{c['capability']}**: {c['description']}"
+            + (f" (Tool: `{c['tool']}`)" if "tool" in c else "")
+            for c in training_data["ai_capabilities"]
+        )
+        sections.append(f"## Your Capabilities & Tools\n{caps}")
+
+    if "navigation" in training_data:
+        nav = training_data["navigation"]
+        pages = []
+        for label, page_map in [("Public Pages", "public_pages"), ("Pages Requiring Login", "protected_pages")]:
+            if page_map in nav:
+                page_list = "\n".join(f"  - `{route}`: {desc}" for route, desc in nav[page_map].items())
+                pages.append(f"**{label}**:\n{page_list}")
+        if pages:
+            sections.append(f"## Platform Navigation\n" + "\n".join(pages))
+
     if "food_safety" in training_data:
         safety = "\n".join(f"- {s}" for s in training_data["food_safety"])
         sections.append(f"## Food Safety Guidelines\n{safety}")
@@ -605,6 +623,20 @@ def _build_system_prompt(training_data: dict) -> str:
         sections.append(
             f"## Spanish Response Guidelines\n{training_data['spanish_guidelines']}"
         )
+
+    if "common_questions" in training_data:
+        qa = "\n".join(
+            f"- **{key}**: {answer}"
+            for key, answer in training_data["common_questions"].items()
+        )
+        sections.append(f"## Common Questions & Answers\n{qa}")
+
+    if "response_examples" in training_data:
+        examples = "\n".join(
+            f"- **{key}**: {template}"
+            for key, template in training_data["response_examples"].items()
+        )
+        sections.append(f"## Response Templates\n{examples}")
 
     base = training_data.get(
         "system_base",
