@@ -41,7 +41,7 @@ OPENAI_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_MODEL = os.getenv("AI_MODEL", "gpt-4o-mini")
 
 # Conversation engine models (OpenAI)
-CHAT_MODEL = os.getenv("AI_CHAT_MODEL", "gpt-4o")
+CHAT_MODEL = os.getenv("AI_CHAT_MODEL", "gpt-4o-mini")
 WHISPER_MODEL = "whisper-1"
 TTS_MODEL = "tts-1"
 TTS_VOICE_EN = os.getenv("AI_TTS_VOICE", "nova")
@@ -50,6 +50,17 @@ TTS_VOICE_ES = os.getenv("AI_TTS_VOICE_ES", "nova")  # Sesame-compatible Spanish
 MAX_RETRIES = int(os.getenv("AI_MAX_RETRIES", "3"))
 TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT", "25"))
 SUPABASE_TIMEOUT = 8  # seconds for DB lookups
+
+# Shared HTTP client — reuses TCP/SSL connections across requests
+_http_client: httpx.AsyncClient | None = None
+
+
+def _get_http_client(timeout: float = TIMEOUT_SECONDS) -> httpx.AsyncClient:
+    """Return a shared httpx.AsyncClient (connection pooling)."""
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(timeout=timeout)
+    return _http_client
 
 # ---------------------------------------------------------------------------
 # Spanish language detection (lightweight heuristic)
@@ -313,16 +324,16 @@ async def _openai_with_retry(
 
     for attempt in range(retries):
         try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                kwargs: dict = {"headers": headers}
-                if json_payload is not None:
-                    kwargs["json"] = json_payload
-                if files is not None:
-                    kwargs["files"] = files
-                if data is not None:
-                    kwargs["data"] = data
+            client = _get_http_client(timeout)
+            kwargs: dict = {"headers": headers}
+            if json_payload is not None:
+                kwargs["json"] = json_payload
+            if files is not None:
+                kwargs["files"] = files
+            if data is not None:
+                kwargs["data"] = data
 
-                resp = await client.request(method, url, **kwargs)
+            resp = await client.request(method, url, **kwargs)
 
             if resp.status_code == 429:
                 wait = min(2 ** attempt + 1, 10)
@@ -641,7 +652,7 @@ class ConversationEngine:
 
         # 2 & 3. Profile + History in parallel (graceful — failures don't block)
         profile_task = asyncio.create_task(self.get_user_profile(user_id))
-        history_task = asyncio.create_task(self.get_conversation_history(user_id, limit=20))
+        history_task = asyncio.create_task(self.get_conversation_history(user_id, limit=6))
         profile, history = await asyncio.gather(profile_task, history_task)
 
         # 4. Build messages
@@ -705,12 +716,14 @@ class ConversationEngine:
     async def _persist_conversation(
         self, user_id: str, user_msg: str, assistant_msg: str, lang: str
     ) -> str | None:
-        """Store both user and assistant messages. Returns assistant row UUID."""
+        """Store both user and assistant messages in parallel. Returns assistant row UUID."""
         try:
-            await self.store_message(user_id, "user", user_msg)
-            row_id = await self.store_message(
-                user_id, "assistant", assistant_msg,
-                metadata={"lang": lang},
+            _, row_id = await asyncio.gather(
+                self.store_message(user_id, "user", user_msg),
+                self.store_message(
+                    user_id, "assistant", assistant_msg,
+                    metadata={"lang": lang},
+                ),
             )
             return row_id
         except Exception as exc:
@@ -754,7 +767,7 @@ class ConversationEngine:
             "messages": messages,
             "tools": self.tool_definitions,
             "temperature": 0.7,
-            "max_tokens": 1024,
+            "max_tokens": 512,
         }
         headers = {
             "Authorization": f"Bearer {OPENAI_API_KEY}",
@@ -812,7 +825,7 @@ class ConversationEngine:
                 "model": CHAT_MODEL,
                 "messages": messages,
                 "temperature": 0.7,
-                "max_tokens": 1024,
+                "max_tokens": 512,
             }
             try:
                 resp = await _openai_with_retry(
