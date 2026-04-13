@@ -801,13 +801,14 @@ class ConversationEngine:
         role: str,
         message: str,
         metadata: dict | None = None,
-    ) -> None:
-        """Persist a conversation message to ai_conversations table."""
+    ) -> str | None:
+        """Persist a conversation message to ai_conversations table.
+        Returns the inserted row's UUID, or None on failure."""
         if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
-            return
+            return None
         try:
             headers = _supabase_headers()
-            headers["Prefer"] = "return=minimal"
+            headers["Prefer"] = "return=representation"
             async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT) as client:
                 resp = await client.post(
                     f"{SUPABASE_URL}/rest/v1/ai_conversations",
@@ -822,10 +823,15 @@ class ConversationEngine:
                 if resp.status_code == 409:
                     # FK violation (user not in users table) — non-critical
                     logger.debug("Skipped storing message (user %s not in users table)", user_id)
-                    return
+                    return None
                 resp.raise_for_status()
+                rows = resp.json()
+                if rows and isinstance(rows, list):
+                    return rows[0].get("id")
+                return None
         except Exception as exc:
             logger.error("Failed to store message: %s", exc)
+            return None
 
     # ---- Main chat flow ---------------------------------------------------
 
@@ -893,10 +899,10 @@ class ConversationEngine:
         # 5. Call GPT-4o with full fallback chain
         response_text = await self._call_with_fallbacks(messages, lang)
 
-        # 6. Persist conversation (fire-and-forget — don't block response)
-        asyncio.create_task(self._persist_conversation(
+        # 6. Persist conversation (await to get row ID for feedback)
+        conversation_id = await self._persist_conversation(
             user_id, message, response_text, lang
-        ))
+        )
 
         # 7. Optional audio (language-aware voice selection)
         audio_url = None
@@ -908,21 +914,24 @@ class ConversationEngine:
             "audio_url": audio_url,
             "user_id": user_id,
             "lang": lang,
+            "conversation_id": conversation_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     async def _persist_conversation(
         self, user_id: str, user_msg: str, assistant_msg: str, lang: str
-    ) -> None:
-        """Store both user and assistant messages. Errors are logged, not raised."""
+    ) -> str | None:
+        """Store both user and assistant messages. Returns assistant row UUID."""
         try:
             await self.store_message(user_id, "user", user_msg)
-            await self.store_message(
+            row_id = await self.store_message(
                 user_id, "assistant", assistant_msg,
                 metadata={"lang": lang},
             )
+            return row_id
         except Exception as exc:
             logger.error("Conversation persistence failed: %s", exc)
+            return None
 
     # ---- Fallback-aware orchestrator --------------------------------------
 

@@ -57,6 +57,7 @@ class AIChatService {
             response: data.text,
             lang: data.lang || 'en',
             audioUrl: data.audio_url || null,
+            conversationId: data.conversation_id || null,
             error: null,
           }
         } catch (err) {
@@ -115,6 +116,7 @@ class AIChatService {
         transcript: data.transcript || '',
         lang: data.lang || 'en',
         audioUrl: data.audio_url || null,
+        conversationId: data.conversation_id || null,
         error: null,
       }
     } catch (error) {

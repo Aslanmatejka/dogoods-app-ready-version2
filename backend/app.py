@@ -412,6 +412,7 @@ class AIChatResponse(BaseModel):
     audio_url: str | None = None
     user_id: str
     lang: str = "en"
+    conversation_id: str | None = None
     transcript: str | None = None
     timestamp: str
 

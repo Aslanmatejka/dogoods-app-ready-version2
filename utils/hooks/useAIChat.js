@@ -82,6 +82,7 @@ export function useAIChat() {
         role: 'assistant',
         message: result.response,
         audioUrl: result.audioUrl,
+        conversationId: result.conversationId,
         timestamp: new Date().toISOString(),
       }
 
@@ -134,8 +135,7 @@ export function useAIChat() {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         message: result.response,
-        audioUrl: result.audioUrl,
-        timestamp: new Date().toISOString(),
+        audioUrl: result.audioUrl,        conversationId: result.conversationId,        timestamp: new Date().toISOString(),
       }
 
       setMessages(prev => [...prev, assistantMsg])
@@ -173,12 +173,15 @@ export function useAIChat() {
 
   const submitFeedback = useCallback(async (messageId, rating) => {
     if (!isAuthenticated || !user?.id) return
+    // Find the message to get real conversation UUID from backend
+    const msg = messages.find(m => m.id === messageId)
+    const convId = msg?.conversationId || messageId
     try {
-      await aiChatService.submitFeedback(messageId, user.id, rating)
+      await aiChatService.submitFeedback(convId, user.id, rating)
     } catch (err) {
       console.error('Failed to submit feedback:', err)
     }
-  }, [isAuthenticated, user?.id])
+  }, [isAuthenticated, user?.id, messages])
 
   return {
     messages,
