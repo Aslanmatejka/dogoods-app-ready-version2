@@ -214,16 +214,135 @@ async def process_pending_reminders() -> int:
     return processed
 
 
+# ---------------------------------------------------------------------------
+# Background job: notify users who forgot to pick up claimed food
+# ---------------------------------------------------------------------------
+
+PICKUP_GRACE_HOURS = int(os.getenv("PICKUP_GRACE_HOURS", "6"))
+
+async def check_missed_pickups() -> int:
+    """Find approved claims with pickup_date in the past and notify users.
+
+    Only notifies once per claim by checking the notifications table
+    for an existing 'missed_pickup' notification with the claim ID.
+    Returns the number of notifications sent.
+    """
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        return 0
+
+    from datetime import timedelta
+
+    cutoff = (
+        datetime.now(timezone.utc) - timedelta(hours=PICKUP_GRACE_HOURS)
+    ).strftime("%Y-%m-%d")
+
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
+
+    # Find approved claims where pickup_date has passed
+    try:
+        overdue_claims = await supabase_get("food_claims", {
+            "status": "eq.approved",
+            "pickup_date": f"lte.{cutoff}",
+            "select": "id,claimer_id,food_id,pickup_date",
+            "limit": "50",
+        })
+    except Exception as exc:
+        logger.error("Missed pickup check — claims fetch failed: %s", exc)
+        return 0
+
+    if not overdue_claims:
+        return 0
+
+    notified = 0
+    for claim in overdue_claims:
+        claim_id = claim.get("id")
+        claimer_id = claim.get("claimer_id")
+        food_id = claim.get("food_id")
+        pickup_date = claim.get("pickup_date", "")
+
+        if not claimer_id or not claim_id:
+            continue
+
+        # Check if we already notified for this claim
+        try:
+            existing = await supabase_get("notifications", {
+                "user_id": f"eq.{claimer_id}",
+                "type": "eq.alert",
+                "data->>claim_id": f"eq.{claim_id}",
+                "select": "id",
+                "limit": "1",
+            })
+            if existing:
+                continue  # Already notified
+        except Exception:
+            pass  # If check fails, send anyway to be safe
+
+        # Look up food title
+        food_title = "your claimed food"
+        try:
+            food_rows = await supabase_get("food_listings", {
+                "id": f"eq.{food_id}",
+                "select": "title",
+            })
+            if food_rows:
+                food_title = food_rows[0].get("title", food_title)
+        except Exception:
+            pass
+
+        # Send in-app notification
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.post(
+                    f"{SUPABASE_URL}/rest/v1/notifications",
+                    json={
+                        "user_id": claimer_id,
+                        "title": "Pickup Reminder",
+                        "message": (
+                            f"It looks like you haven't picked up \"{food_title}\" yet "
+                            f"(scheduled for {pickup_date}). Please pick it up soon "
+                            f"or cancel the claim so others can benefit!"
+                        ),
+                        "type": "alert",
+                        "read": False,
+                        "data": {"claim_id": claim_id, "food_id": food_id},
+                    },
+                    headers=headers,
+                )
+                resp.raise_for_status()
+                notified += 1
+                logger.info(
+                    "Missed pickup notification sent: claim=%s user=%s food=%s",
+                    claim_id, claimer_id, food_title,
+                )
+        except Exception as exc:
+            logger.error(
+                "Failed to notify missed pickup claim=%s: %s", claim_id, exc
+            )
+
+    if notified:
+        logger.info("Sent %d missed-pickup notification(s)", notified)
+    return notified
+
+
 async def _reminder_loop() -> None:
-    """Background loop that runs process_pending_reminders periodically."""
+    """Background loop: reminders + missed pickup checks."""
     logger.info(
-        "Reminder background job started (interval=%ds)", REMINDER_CHECK_INTERVAL
+        "Background job started (interval=%ds)", REMINDER_CHECK_INTERVAL
     )
     while True:
         try:
             await process_pending_reminders()
         except Exception as exc:
             logger.error("Reminder loop error: %s", exc)
+        try:
+            await check_missed_pickups()
+        except Exception as exc:
+            logger.error("Missed pickup check error: %s", exc)
         await asyncio.sleep(REMINDER_CHECK_INTERVAL)
 
 
