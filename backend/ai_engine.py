@@ -642,7 +642,10 @@ def _build_system_prompt(training_data: dict) -> str:
         "system_base",
         "You are DoGoods AI Assistant, a warm and helpful community food sharing assistant.",
     )
-    return f"{base}\n\n" + "\n\n".join(sections)
+
+    # Inject current date/time so the model can reason about "tomorrow", "next week", etc.
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    return f"{base}\n\nCurrent date and time: {now_str}\n\n" + "\n\n".join(sections)
 
 
 # ---------------------------------------------------------------------------

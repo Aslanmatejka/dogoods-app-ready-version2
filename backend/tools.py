@@ -763,7 +763,7 @@ async def _get_pickup_schedule(
         claims = await supabase_get("food_claims", {
             "claimer_id": f"eq.{user_id}",
             "status": "in.(pending,approved)",
-            "select": "id,food_id,status,pickup_date,notes,created_at",
+            "select": "id,food_id,status,pickup_date,pickup_time,pickup_place,created_at",
             "order": "pickup_date.asc",
         })
         for claim in claims:
@@ -788,8 +788,8 @@ async def _get_pickup_schedule(
                 "food_title": food_title,
                 "status": claim.get("status"),
                 "pickup_date": claim.get("pickup_date"),
-                "address": claim.get("address", ""),
-                "notes": claim.get("notes"),
+                "pickup_time": claim.get("pickup_time"),
+                "address": claim.get("address") or claim.get("pickup_place", ""),
             })
     except Exception as exc:
         logger.error("Claims fetch failed: %s", exc)
@@ -1332,7 +1332,7 @@ async def _check_pickup_schedule(
         claims = await supabase_get("food_claims", {
             "claimer_id": f"eq.{user_id}",
             "status": "in.(pending,approved)",
-            "select": "id,food_id,status,pickup_date,notes,created_at",
+            "select": "id,food_id,status,pickup_date,pickup_time,pickup_place,created_at",
             "order": "pickup_date.asc",
             "limit": "20",
         })
@@ -1359,10 +1359,10 @@ async def _check_pickup_schedule(
                 "food_title": food_info.get("title"),
                 "status": claim.get("status"),
                 "pickup_date": claim.get("pickup_date"),
+                "pickup_time": claim.get("pickup_time"),
                 "pickup_by": food_info.get("pickup_by"),
-                "address": food_info.get("address", ""),
+                "address": food_info.get("address") or claim.get("pickup_place", ""),
                 "expiry_date": food_info.get("expiry_date"),
-                "notes": claim.get("notes"),
             })
     except Exception as exc:
         logger.error("Pickup claims fetch failed: %s", exc)
@@ -1615,11 +1615,22 @@ async def _get_active_communities(
         try:
             rows = await supabase_get("users", {
                 "id": f"eq.{user_id}",
-                "select": "latitude,longitude",
+                "select": "location",
             })
-            if rows and rows[0].get("latitude") and rows[0].get("longitude"):
-                user_lat = float(rows[0]["latitude"])
-                user_lng = float(rows[0]["longitude"])
+            if rows:
+                loc = rows[0].get("location")
+                if isinstance(loc, str):
+                    import json as _json
+                    try:
+                        loc = _json.loads(loc)
+                    except (ValueError, TypeError):
+                        loc = None
+                if isinstance(loc, dict):
+                    lat_val = loc.get("latitude") or loc.get("lat")
+                    lng_val = loc.get("longitude") or loc.get("lng") or loc.get("lon")
+                    if lat_val and lng_val:
+                        user_lat = float(lat_val)
+                        user_lng = float(lng_val)
         except Exception as exc:
             logger.warning("Could not get user location: %s", exc)
 
