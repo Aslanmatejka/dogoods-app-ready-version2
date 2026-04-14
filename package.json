@@ -7,6 +7,8 @@
     "start": "vite",
     "build": "vite build",
     "dev": "vite --open",
+    "dev:backend": "python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload",
+    "dev:full": "concurrently \"npm run dev\" \"npm run dev:backend\"",
     "preview": "vite preview",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx",

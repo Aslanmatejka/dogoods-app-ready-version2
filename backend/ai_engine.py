@@ -24,8 +24,10 @@ from typing import Optional
 import httpx
 from dotenv import load_dotenv
 
-load_dotenv(".env.local")
-load_dotenv(".env")  # fallback if .env.local doesn't exist
+# Resolve .env files relative to the project root (parent of backend/)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(_PROJECT_ROOT, ".env.local"))
+load_dotenv(os.path.join(_PROJECT_ROOT, ".env"))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai_engine")
@@ -154,7 +156,8 @@ RATE_LIMIT_DEFAULT = 50
 RATE_LIMIT_WINDOW = 60
 
 # Supabase (service role for server-side operations)
-SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "")
+# Read backend-specific env var first, fall back to VITE_ for backward compat
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 TRAINING_DATA_PATH = os.path.join(os.path.dirname(__file__), "ai_training_data.json")
@@ -269,12 +272,12 @@ async def _ai_request(
     last_exc: Exception | None = None
     for attempt in range(retries):
         try:
-            async with httpx.AsyncClient(timeout=TIMEOUT_SECONDS) as client:
-                resp = await client.post(
-                    f"{effective_base}{endpoint}",
-                    json=payload,
-                    headers=headers,
-                )
+            client = _get_http_client(TIMEOUT_SECONDS)
+            resp = await client.post(
+                f"{effective_base}{endpoint}",
+                json=payload,
+                headers=headers,
+            )
             if resp.status_code == 429:
                 wait = 2**attempt + 1
                 logger.warning("Rate‑limited by upstream, retrying in %ds", wait)
@@ -407,39 +410,37 @@ def _supabase_headers() -> dict:
 
 async def supabase_get(table: str, params: dict) -> list:
     """GET rows from a Supabase table via PostgREST."""
-    async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT) as client:
-        resp = await client.get(
-            f"{SUPABASE_URL}/rest/v1/{table}",
-            params=params,
-            headers=_supabase_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    client = _get_http_client(SUPABASE_TIMEOUT)
+    resp = await client.get(
+        f"{SUPABASE_URL}/rest/v1/{table}",
+        params=params,
+        headers=_supabase_headers(),
+    )
+    resp.raise_for_status()
+    return resp.json()
 
 
 async def supabase_post(
     table: str, data: dict | list | None, *, method: str = "POST"
 ) -> list:
-    """INSERT/DELETE row(s) in a Supabase table via PostgREST.
+    """INSERT/UPDATE/DELETE row(s) in a Supabase table via PostgREST."""
+    client = _get_http_client(SUPABASE_TIMEOUT)
+    url = f"{SUPABASE_URL}/rest/v1/{table}"
+    headers = _supabase_headers()
 
-    For DELETE, pass method="DELETE" and encode filters in the table path
-    (e.g. "ai_conversations?user_id=eq.abc"). data can be None for DELETE.
-    """
-    async with httpx.AsyncClient(timeout=SUPABASE_TIMEOUT) as client:
-        url = f"{SUPABASE_URL}/rest/v1/{table}"
-        headers = _supabase_headers()
+    if method.upper() == "DELETE":
+        resp = await client.delete(url, headers=headers)
+    elif method.upper() == "PATCH":
+        resp = await client.patch(url, json=data, headers=headers)
+    else:
+        resp = await client.post(url, json=data, headers=headers)
 
-        if method.upper() == "DELETE":
-            resp = await client.delete(url, headers=headers)
-        else:
-            resp = await client.post(url, json=data, headers=headers)
-
-        resp.raise_for_status()
-        try:
-            result = resp.json()
-            return result if isinstance(result, list) else [result]
-        except Exception:
-            return []
+    resp.raise_for_status()
+    try:
+        result = resp.json()
+        return result if isinstance(result, list) else [result]
+    except Exception:
+        return []
 
 
 # ---------------------------------------------------------------------------
@@ -539,13 +540,17 @@ class ConversationEngine:
 
     def __init__(self) -> None:
         self.training_data = _load_training_data()
-        self.system_prompt = _build_system_prompt(self.training_data)
 
         # Import tool definitions (lazy to avoid circular imports)
         from backend.tools import TOOL_DEFINITIONS, execute_tool
 
         self.tool_definitions = TOOL_DEFINITIONS
         self._execute_tool = execute_tool
+
+    @property
+    def system_prompt(self) -> str:
+        """Rebuild system prompt each time so the datetime stays current."""
+        return _build_system_prompt(self.training_data)
 
     # ---- Language detection -----------------------------------------------
 
@@ -811,7 +816,7 @@ class ConversationEngine:
             "model": CHAT_MODEL,
             "messages": messages,
             "temperature": 0.7,
-            "max_tokens": 512,
+            "max_tokens": 1024,
         }
         if use_tools:
             payload["tools"] = self.tool_definitions
@@ -837,14 +842,16 @@ class ConversationEngine:
 
         # Handle tool calls (single round) with graceful per-tool errors
         if msg.get("tool_calls"):
-            messages.append(msg)
+            # Work on a copy to avoid mutating the caller's message list
+            tool_messages = list(messages)
+            tool_messages.append(msg)
             for tool_call in msg["tool_calls"]:
                 fn_name = tool_call["function"]["name"]
                 try:
                     fn_args = json.loads(tool_call["function"]["arguments"])
                 except (json.JSONDecodeError, TypeError) as parse_err:
                     logger.error("Bad tool args for %s: %s", fn_name, parse_err)
-                    messages.append({
+                    tool_messages.append({
                         "role": "tool",
                         "tool_call_id": tool_call["id"],
                         "content": json.dumps({"error": f"Invalid arguments: {parse_err}"}),
@@ -866,18 +873,23 @@ class ConversationEngine:
                         ),
                     }
 
-                messages.append({
+                # Truncate large tool results to avoid blowing token limits
+                result_str = json.dumps(result)
+                if len(result_str) > 4000:
+                    result_str = result_str[:4000] + '... [truncated]"}}'
+
+                tool_messages.append({
                     "role": "tool",
                     "tool_call_id": tool_call["id"],
-                    "content": json.dumps(result),
+                    "content": result_str,
                 })
 
             # Follow-up call with tool results — use faster model since it's just formatting
             followup_payload = {
                 "model": FOLLOWUP_MODEL,
-                "messages": messages,
+                "messages": tool_messages,
                 "temperature": 0.7,
-                "max_tokens": 512,
+                "max_tokens": 1024,
             }
             try:
                 t2 = _time.time()

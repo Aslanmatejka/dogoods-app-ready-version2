@@ -18,7 +18,7 @@ import httpx
 
 logger = logging.getLogger("ai_tools")
 
-MAPBOX_TOKEN = os.getenv("VITE_MAPBOX_TOKEN", "")
+MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN") or os.getenv("VITE_MAPBOX_TOKEN", "")
 MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox"
 
 # ---------------------------------------------------------------------------
@@ -439,7 +439,7 @@ TOOL_DEFINITIONS = [
                         "type": "string",
                         "description": "The full notification message body",
                     },
-                    "type": {
+                    "notification_type": {
                         "type": "string",
                         "description": (
                             "Notification type: 'system', 'food_claimed', "
@@ -592,7 +592,7 @@ async def _search_food_near_user(
     except Exception as exc:
         logger.error("User lookup failed: %s", exc)
 
-    # --- 2. Query food_listings ---
+    # --- 2. Query food_listings with bounding box pre-filter ---
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     params: dict = {
         "select": (
@@ -608,6 +608,23 @@ async def _search_food_near_user(
     }
     if food_type:
         params["category"] = f"eq.{food_type}"
+
+    # Bounding box pre-filter: narrow DB results to ~radius before fetching
+    if user_lat is not None and user_lng is not None:
+        # Rough degree offset for the given radius (1 deg lat ≈ 111 km)
+        lat_offset = radius_km / 111.0
+        lng_offset = radius_km / (111.0 * max(math.cos(math.radians(user_lat)), 0.01))
+        params["latitude"] = f"gte.{user_lat - lat_offset}"
+        params["latitude"] = f"lte.{user_lat + lat_offset}"
+        # PostgREST doesn't support duplicate keys; use AND filter
+        params["and"] = (
+            f"(latitude.gte.{user_lat - lat_offset},"
+            f"latitude.lte.{user_lat + lat_offset},"
+            f"longitude.gte.{user_lng - lng_offset},"
+            f"longitude.lte.{user_lng + lng_offset})"
+        )
+        # Remove individual lat filter since we use 'and'
+        params.pop("latitude", None)
 
     try:
         listings = await supabase_get("food_listings", params)
@@ -1686,27 +1703,27 @@ async def _send_notification(
     user_id: str,
     title: str,
     message: str,
-    type: str = "system",
+    notification_type: str = "system",
     data: dict | None = None,
 ) -> dict:
     """Create a notification for a user."""
     import httpx
     from backend.ai_engine import SUPABASE_URL, SUPABASE_SERVICE_KEY
 
-    logger.info("send_notification: user=%s title=%s type=%s", user_id, title, type)
+    logger.info("send_notification: user=%s title=%s type=%s", user_id, title, notification_type)
 
     allowed_types = {
         "system", "food_claimed", "trade_request",
         "claim_approved", "claim_declined", "submission_declined", "alert",
     }
-    if type not in allowed_types:
-        type = "system"
+    if notification_type not in allowed_types:
+        notification_type = "system"
 
     payload = {
         "user_id": user_id,
         "title": title,
         "message": message,
-        "type": type,
+        "type": notification_type,
         "read": False,
         "data": data or {},
     }

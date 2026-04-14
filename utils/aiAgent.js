@@ -91,7 +91,7 @@ async function invokeAIAgent(systemPrompt, userPrompt, options = {}) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: `${systemPrompt}\n\nUser request: ${userPrompt}`,
-                        user_id: 'agent-helper',
+                        user_id: '00000000-0000-0000-0000-000000000000',
                     }),
                     signal: controller.signal,
                 })

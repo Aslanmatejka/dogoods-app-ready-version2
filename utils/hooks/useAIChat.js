@@ -69,7 +69,7 @@ export function useAIChat() {
 
     try {
       const result = await aiChatService.sendMessage(text.trim(), {
-        userId: user?.id || 'anonymous',
+        userId: user?.id || '00000000-0000-0000-0000-000000000000',
       })
 
       // Update language from backend detection
@@ -113,7 +113,7 @@ export function useAIChat() {
 
     try {
       const result = await aiChatService.sendVoice(audioBlob, {
-        userId: user?.id || 'anonymous',
+        userId: user?.id || '00000000-0000-0000-0000-000000000000',
         includeAudio: true,
       })
 

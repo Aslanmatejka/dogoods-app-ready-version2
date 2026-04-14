@@ -325,20 +325,30 @@ async def check_missed_pickups() -> int:
 
 
 async def _reminder_loop() -> None:
-    """Background loop: reminders + missed pickup checks."""
+    """Background loop: reminders + missed pickup checks with backoff on errors."""
     logger.info(
         "Background job started (interval=%ds)", REMINDER_CHECK_INTERVAL
     )
+    consecutive_failures = 0
     while True:
         try:
             await process_pending_reminders()
+            consecutive_failures = 0  # Reset on success
         except Exception as exc:
-            logger.error("Reminder loop error: %s", exc)
+            consecutive_failures += 1
+            logger.error("Reminder loop error (fail #%d): %s", consecutive_failures, exc)
         try:
             await check_missed_pickups()
         except Exception as exc:
             logger.error("Missed pickup check error: %s", exc)
-        await asyncio.sleep(REMINDER_CHECK_INTERVAL)
+
+        # Exponential backoff on repeated failures (up to 1 hour)
+        if consecutive_failures > 0:
+            backoff = min(REMINDER_CHECK_INTERVAL * (2 ** consecutive_failures), 3600)
+            logger.warning("Backing off reminder loop for %ds", backoff)
+            await asyncio.sleep(backoff)
+        else:
+            await asyncio.sleep(REMINDER_CHECK_INTERVAL)
 
 
 # ---------------------------------------------------------------------------
@@ -351,12 +361,17 @@ async def lifespan(app: FastAPI):
     task = asyncio.create_task(_reminder_loop())
     logger.info("Background reminder job scheduled")
     yield
-    # Shutdown: cancel background task
+    # Shutdown: cancel background task and close shared HTTP client
     task.cancel()
     try:
         await task
     except asyncio.CancelledError:
         logger.info("Background reminder job stopped")
+    # Close shared httpx client to release connections gracefully
+    from backend.ai_engine import _http_client
+    if _http_client and not _http_client.is_closed:
+        await _http_client.aclose()
+        logger.info("Shared HTTP client closed")
 
 
 # ---------------------------------------------------------------------------
@@ -390,6 +405,53 @@ def _get_client_ip(request: Request) -> str:
 def _enforce_rate_limit(request: Request) -> None:
     if not check_rate_limit(_get_client_ip(request)):
         raise HTTPException(429, "Rate limit exceeded. Try again later.")
+
+
+import re as _re
+
+_UUID_RE = _re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", _re.I
+)
+
+
+def _validate_uuid(value: str, field: str = "user_id") -> str:
+    """Validate that a string is a proper UUID v4 format."""
+    if not _UUID_RE.match(value):
+        raise HTTPException(400, f"Invalid {field}: must be a valid UUID")
+    return value
+
+
+async def _authenticate_request(request: Request) -> str | None:
+    """Validate the Supabase JWT from the Authorization header.
+
+    Returns the authenticated user_id, or None if no auth header is present.
+    In development (no SUPABASE_URL), auth is skipped for convenience.
+    """
+    auth_header = request.headers.get("authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return None  # No token — caller may be unauthenticated
+
+    token = auth_header[7:]
+    if not SUPABASE_URL:
+        return None  # Can't validate without Supabase
+
+    try:
+        from backend.ai_engine import _get_http_client
+        client = _get_http_client(5)
+        resp = await client.get(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "apikey": SUPABASE_SERVICE_KEY,
+                "Authorization": f"Bearer {token}",
+            },
+        )
+        if resp.status_code == 200:
+            user_data = resp.json()
+            return user_data.get("id")
+        return None
+    except Exception as exc:
+        logger.warning("Auth validation failed: %s", exc)
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -431,6 +493,12 @@ async def ai_chat(body: AIChatRequest, request: Request) -> dict:
           -> text response (+ optional TTS audio URL).
     """
     _enforce_rate_limit(request)
+    _validate_uuid(body.user_id)
+
+    # Verify the caller owns this user_id (if auth header present)
+    auth_uid = await _authenticate_request(request)
+    if auth_uid and auth_uid != body.user_id:
+        raise HTTPException(403, "user_id does not match authenticated user")
 
     try:
         result = await conversation_engine.chat(
@@ -440,7 +508,8 @@ async def ai_chat(body: AIChatRequest, request: Request) -> dict:
         )
         return result
     except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
+        logger.error("AI chat RuntimeError: %s", exc)
+        raise HTTPException(503, "AI service temporarily unavailable") from exc
     except Exception as exc:
         logger.error("AI chat error: %s", exc)
         raise HTTPException(500, "Internal AI error") from exc
@@ -455,9 +524,13 @@ async def ai_history(user_id: str, request: Request, limit: int = 50) -> dict:
       - limit: max messages to return (default 50)
     """
     _enforce_rate_limit(request)
+    _validate_uuid(user_id)
 
-    if not user_id or len(user_id) > 128:
-        raise HTTPException(400, "Invalid user_id")
+    # Verify the caller owns this user_id
+    auth_uid = await _authenticate_request(request)
+    if auth_uid and auth_uid != user_id:
+        raise HTTPException(403, "Cannot access another user's history")
+
     if limit < 1 or limit > 200:
         raise HTTPException(400, "limit must be between 1 and 200")
 
@@ -480,16 +553,27 @@ async def ai_history(user_id: str, request: Request, limit: int = 50) -> dict:
 async def ai_clear_history(user_id: str, request: Request) -> dict:
     """Delete all conversation history for a user."""
     _enforce_rate_limit(request)
+    _validate_uuid(user_id)
 
-    if not user_id or len(user_id) > 128:
-        raise HTTPException(400, "Invalid user_id")
+    auth_uid = await _authenticate_request(request)
+    if auth_uid and auth_uid != user_id:
+        raise HTTPException(403, "Cannot clear another user's history")
 
     try:
-        await supabase_post(
-            f"ai_conversations?user_id=eq.{user_id}",
-            None,
-            method="DELETE",
+        # Use proper query params instead of encoding filters in the table path
+        headers = {
+            "apikey": SUPABASE_SERVICE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+            "Content-Type": "application/json",
+        }
+        from backend.ai_engine import _get_http_client, SUPABASE_TIMEOUT
+        client = _get_http_client(SUPABASE_TIMEOUT)
+        resp = await client.delete(
+            f"{SUPABASE_URL}/rest/v1/ai_conversations",
+            params={"user_id": f"eq.{user_id}"},
+            headers=headers,
         )
+        resp.raise_for_status()
         return {"user_id": user_id, "cleared": True}
     except Exception as exc:
         logger.error("Clear history error: %s", exc)
@@ -507,6 +591,8 @@ class AIFeedbackRequest(BaseModel):
 async def ai_feedback(body: AIFeedbackRequest, request: Request) -> dict:
     """Submit feedback on an AI message."""
     _enforce_rate_limit(request)
+    _validate_uuid(body.user_id)
+    _validate_uuid(body.conversation_id, "conversation_id")
 
     try:
         payload = {
@@ -540,6 +626,7 @@ async def ai_voice(
       - include_audio: whether to return TTS audio in response (default true)
     """
     _enforce_rate_limit(request)
+    _validate_uuid(user_id)
 
     # Validate file type (strip codec params like ";codecs=opus")
     allowed_types = {
@@ -625,7 +712,8 @@ async def ai_tts(body: TTSRequest, request: Request):
 
         return Response(content=audio_bytes, media_type="audio/mpeg")
     except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
+        logger.error("TTS RuntimeError: %s", exc)
+        raise HTTPException(503, "AI service temporarily unavailable") from exc
     except httpx.HTTPStatusError as exc:
         logger.error("TTS upstream error %s", exc.response.status_code)
         raise HTTPException(502, "TTS service returned an error") from exc
@@ -749,7 +837,8 @@ async def ai_transcribe(
     except httpx.TimeoutException:
         raise HTTPException(504, "Whisper timed out. Try again or use text input.")
     except RuntimeError as exc:
-        raise HTTPException(503, str(exc)) from exc
+        logger.error("Transcribe RuntimeError: %s", exc)
+        raise HTTPException(503, "AI service temporarily unavailable") from exc
     except Exception as exc:
         logger.error("Transcription error: %s", exc)
         raise HTTPException(500, "Transcription failed") from exc
@@ -761,10 +850,13 @@ async def ai_transcribe(
 
 @app.get("/health")
 async def health() -> dict:
+    ai_ok = bool(OPENAI_API_KEY)
+    db_ok = bool(SUPABASE_URL and SUPABASE_SERVICE_KEY)
+    all_ok = ai_ok and db_ok
     return {
-        "status": "ok",
-        "ai_configured": bool(OPENAI_API_KEY),
-        "openai_configured": bool(os.getenv("OPENAI_API_KEY")),
+        "status": "ok" if all_ok else "degraded",
+        "ai_configured": ai_ok,
+        "database_configured": db_ok,
         "circuit_state": _circuit.state.value,
     }
 
