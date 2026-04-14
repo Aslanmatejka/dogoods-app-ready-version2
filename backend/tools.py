@@ -1088,183 +1088,120 @@ async def _query_distribution_centers(
 # ---------------------------------------------------------------------------
 
 async def _get_user_dashboard(user_id: str) -> dict:
-    """Return a rich user dashboard: profile, restrictions, favorites,
-    active listings, pending claims, upcoming reminders, and impact stats."""
+    """Return a rich user dashboard: profile, active listings,
+    pending claims, upcoming reminders, and impact stats.
+    All independent queries run in parallel for speed."""
     from backend.ai_engine import supabase_get
+    import asyncio
 
     logger.info("get_user_dashboard: user=%s", user_id)
-
-    dashboard: dict = {
-        "user_id": user_id,
-        "profile": None,
-        "dietary_restrictions": None,
-        "favorites": [],
-        "active_listings": [],
-        "pending_claims": [],
-        "upcoming_reminders": [],
-        "impact_summary": {},
-    }
-
-    # --- Profile + dietary info ---
-    try:
-        rows = await supabase_get("users", {
-            "id": f"eq.{user_id}",
-            "select": (
-                "id,name,email,phone,location,"
-                "is_admin,role,account_type,organization,"
-                "dietary_restrictions,sms_opt_in,sms_notifications_enabled,created_at"
-            ),
-        })
-        if rows:
-            p = rows[0]
-            dashboard["profile"] = {
-                "name": p.get("name") or p.get("email", ""),
-                "email": p.get("email"),
-                "phone": p.get("phone"),
-                "location": p.get("location"),
-                "role": p.get("role", "member"),
-                "account_type": p.get("account_type"),
-                "organization": p.get("organization"),
-                "is_admin": p.get("is_admin", False),
-                "sms_opt_in": p.get("sms_opt_in", False),
-                "sms_notifications_enabled": p.get("sms_notifications_enabled", False),
-                "member_since": p.get("created_at"),
-            }
-            dashboard["dietary_restrictions"] = p.get("dietary_restrictions")
-    except Exception as exc:
-        logger.error("Dashboard profile fetch failed: %s", exc)
-
-    # --- Favorite categories (top categories from claimed food) ---
-    try:
-        claims = await supabase_get("food_claims", {
-            "claimer_id": f"eq.{user_id}",
-            "select": "food_id",
-            "limit": "50",
-        })
-        if claims:
-            food_ids = [c["food_id"] for c in claims if c.get("food_id")]
-            category_counts: dict[str, int] = {}
-            for fid in food_ids[:30]:  # limit lookups
-                try:
-                    food_rows = await supabase_get("food_listings", {
-                        "id": f"eq.{fid}",
-                        "select": "category",
-                    })
-                    if food_rows and food_rows[0].get("category"):
-                        cat = food_rows[0]["category"]
-                        category_counts[cat] = category_counts.get(cat, 0) + 1
-                except Exception:
-                    pass
-            # Sort by frequency
-            sorted_cats = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)
-            dashboard["favorites"] = [
-                {"category": cat, "claim_count": cnt}
-                for cat, cnt in sorted_cats[:5]
-            ]
-    except Exception as exc:
-        logger.error("Dashboard favorites fetch failed: %s", exc)
-
-    # --- Active listings (user's own) ---
-    try:
-        listings = await supabase_get("food_listings", {
-            "user_id": f"eq.{user_id}",
-            "status": "in.(approved,active,pending)",
-            "select": "id,title,category,quantity,unit,status,expiry_date,created_at",
-            "order": "created_at.desc",
-            "limit": "10",
-        })
-        dashboard["active_listings"] = [
-            {
-                "id": l.get("id"),
-                "title": l.get("title"),
-                "category": l.get("category"),
-                "quantity": l.get("quantity"),
-                "unit": l.get("unit"),
-                "status": l.get("status"),
-                "expiry_date": l.get("expiry_date"),
-            }
-            for l in listings
-        ]
-    except Exception as exc:
-        logger.error("Dashboard listings fetch failed: %s", exc)
-
-    # --- Pending claims ---
-    try:
-        pending = await supabase_get("food_claims", {
-            "claimer_id": f"eq.{user_id}",
-            "status": "in.(pending,approved)",
-            "select": "id,food_id,status,pickup_date,created_at",
-            "order": "created_at.desc",
-            "limit": "10",
-        })
-        for claim in pending:
-            title = "Food item"
-            try:
-                food_rows = await supabase_get("food_listings", {
-                    "id": f"eq.{claim['food_id']}",
-                    "select": "title,full_address,location",
-                })
-                if food_rows:
-                    title = food_rows[0].get("title", title)
-                    claim["address"] = (
-                        food_rows[0].get("full_address")
-                        or food_rows[0].get("location", "")
-                    )
-            except Exception:
-                pass
-            dashboard["pending_claims"].append({
-                "claim_id": claim.get("id"),
-                "food_title": title,
-                "status": claim.get("status"),
-                "pickup_date": claim.get("pickup_date"),
-                "address": claim.get("address", ""),
-            })
-    except Exception as exc:
-        logger.error("Dashboard claims fetch failed: %s", exc)
-
-    # --- Upcoming reminders ---
     now_iso = datetime.now(timezone.utc).isoformat()
-    try:
-        reminders = await supabase_get("ai_reminders", {
-            "user_id": f"eq.{user_id}",
-            "sent": "eq.false",
-            "trigger_time": f"gte.{now_iso}",
-            "select": "id,message,trigger_time,reminder_type,created_at",
-            "order": "trigger_time.asc",
-            "limit": "10",
-        })
-        dashboard["upcoming_reminders"] = [
-            {
-                "id": r.get("id"),
-                "message": r.get("message"),
-                "trigger_time": r.get("trigger_time"),
-                "type": r.get("reminder_type"),
-            }
-            for r in reminders
-        ]
-    except Exception as exc:
-        logger.error("Dashboard reminders fetch failed: %s", exc)
 
-    # --- Impact summary ---
-    try:
-        # Count total completed shares
-        completed_listings = await supabase_get("food_listings", {
-            "user_id": f"eq.{user_id}",
-            "status": "in.(completed,claimed)",
-            "select": "id",
-        })
-        completed_claims = await supabase_get("food_claims", {
-            "claimer_id": f"eq.{user_id}",
-            "status": "eq.approved",
-            "select": "id",
-        })
-        dashboard["impact_summary"] = {
-            "food_shared_count": len(completed_listings),
-            "food_received_count": len(completed_claims),
-            "total_contributions": len(completed_listings) + len(completed_claims),
+    # Fire ALL independent queries in parallel
+    async def _safe(coro):
+        try:
+            return await coro
+        except Exception as e:
+            logger.error("Dashboard query failed: %s", e)
+            return []
+
+    profile_q = _safe(supabase_get("users", {
+        "id": f"eq.{user_id}",
+        "select": "id,name,email,phone,location,is_admin,role,organization,created_at",
+    }))
+    listings_q = _safe(supabase_get("food_listings", {
+        "user_id": f"eq.{user_id}",
+        "status": "in.(approved,active,pending)",
+        "select": "id,title,category,quantity,status,expiry_date",
+        "order": "created_at.desc",
+        "limit": "5",
+    }))
+    claims_q = _safe(supabase_get("food_claims", {
+        "claimer_id": f"eq.{user_id}",
+        "status": "in.(pending,approved)",
+        "select": "id,food_id,status,pickup_date",
+        "order": "created_at.desc",
+        "limit": "5",
+    }))
+    reminders_q = _safe(supabase_get("ai_reminders", {
+        "user_id": f"eq.{user_id}",
+        "sent": "eq.false",
+        "trigger_time": f"gte.{now_iso}",
+        "select": "id,message,trigger_time,reminder_type",
+        "order": "trigger_time.asc",
+        "limit": "5",
+    }))
+    shared_q = _safe(supabase_get("food_listings", {
+        "user_id": f"eq.{user_id}",
+        "status": "in.(completed,claimed)",
+        "select": "id",
+    }))
+    received_q = _safe(supabase_get("food_claims", {
+        "claimer_id": f"eq.{user_id}",
+        "status": "eq.approved",
+        "select": "id",
+    }))
+
+    (profile_rows, listings, claims, reminders,
+     completed_listings, completed_claims) = await asyncio.gather(
+        profile_q, listings_q, claims_q, reminders_q, shared_q, received_q
+    )
+
+    # Build dashboard from parallel results
+    dashboard: dict = {"user_id": user_id}
+
+    # Profile
+    if profile_rows:
+        p = profile_rows[0]
+        dashboard["profile"] = {
+            "name": p.get("name") or p.get("email", ""),
+            "email": p.get("email"),
+            "phone": p.get("phone"),
+            "role": p.get("role", "member"),
+            "organization": p.get("organization"),
+            "is_admin": p.get("is_admin", False),
+            "member_since": p.get("created_at"),
         }
-    except Exception as exc:
-        logger.error("Dashboard impact fetch failed: %s", exc)
+
+    # Active listings
+    dashboard["active_listings"] = [
+        {"title": l.get("title"), "category": l.get("category"),
+         "quantity": l.get("quantity"), "status": l.get("status")}
+        for l in listings
+    ]
+
+    # Pending claims — batch fetch food titles
+    if claims:
+        food_ids = [c["food_id"] for c in claims if c.get("food_id")]
+        food_map = {}
+        if food_ids:
+            ids_csv = ",".join(food_ids)
+            food_rows = await _safe(supabase_get("food_listings", {
+                "id": f"in.({ids_csv})",
+                "select": "id,title",
+            }))
+            food_map = {r["id"]: r.get("title", "Food item") for r in food_rows}
+        dashboard["pending_claims"] = [
+            {"food_title": food_map.get(c.get("food_id"), "Food item"),
+             "status": c.get("status"), "pickup_date": c.get("pickup_date")}
+            for c in claims
+        ]
+    else:
+        dashboard["pending_claims"] = []
+
+    # Reminders
+    dashboard["upcoming_reminders"] = [
+        {"message": r.get("message"), "trigger_time": r.get("trigger_time"),
+         "type": r.get("reminder_type")}
+        for r in reminders
+    ]
+
+    # Impact
+    dashboard["impact_summary"] = {
+        "food_shared_count": len(completed_listings),
+        "food_received_count": len(completed_claims),
+        "total_contributions": len(completed_listings) + len(completed_claims),
+    }
 
     return dashboard
 

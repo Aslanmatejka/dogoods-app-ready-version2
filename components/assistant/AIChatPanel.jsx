@@ -369,12 +369,9 @@ function AIChatPanel() {
         try {
           const text = await transcribeAudio(audioBlob, language)
           const trimmed = text?.trim() || ''
-          // Filter out noise: too short, or common Whisper hallucinations on silence/noise
-          const NOISE_PHRASES = ['thank you', 'thanks', 'bye', 'you', 'the', 'i', 'a', 'um', 'uh',
-            'thank you for watching', 'thanks for watching', 'subscribe', 'like and subscribe',
-            'music', '...', '…', 'foreign', 'applause', 'laughter']
-          const isNoise = trimmed.length < 3 || NOISE_PHRASES.includes(trimmed.toLowerCase())
-          if (trimmed && !isNoise) {
+          // Backend already filters noise via _is_whisper_noise, but double-check
+          // empty string means backend filtered it (data.filtered === true)
+          if (trimmed && trimmed.length >= 3) {
             setVoiceTranscript(trimmed)
             sendMessageRef.current(trimmed)
           } else {
@@ -444,8 +441,7 @@ function AIChatPanel() {
   const enterVoiceMode = useCallback(() => {
     setVoiceMode(true)
     voiceModeRef.current = true
-    startVoiceListening()
-  }, [startVoiceListening])
+  }, [])
 
   const exitVoiceMode = useCallback(() => {
     setVoiceMode(false)
@@ -469,7 +465,7 @@ function AIChatPanel() {
     }
   }, [stopRecording])
 
-  // Interrupt AI speech and start listening (barge-in)
+  // Interrupt AI speech (barge-in) — user must tap orb again to start listening
   const interruptSpeaking = useCallback(() => {
     if (currentAudioRef.current) {
       currentAudioRef.current()
@@ -479,8 +475,7 @@ function AIChatPanel() {
       window.speechSynthesis.cancel()
     }
     setIsVoiceSpeaking(false)
-    startVoiceListening()
-  }, [startVoiceListening])
+  }, [])
 
   // Orb tap: interrupt when speaking, start listening when idle
   const handleOrbTap = useCallback(() => {
@@ -494,16 +489,7 @@ function AIChatPanel() {
     }
   }, [isVoiceSpeaking, isVoiceListening, isLoading, interruptSpeaking, stopRecording, startVoiceListening])
 
-  // Auto-start listening when idle in voice mode (delay after TTS to avoid echo)
-  useEffect(() => {
-    if (!voiceMode || isVoiceSpeaking || isLoading || isVoiceListening || voiceError) return
-    const timer = setTimeout(() => {
-      if (voiceModeRef.current && !voiceError) {
-        startVoiceListening()
-      }
-    }, 1200)
-    return () => clearTimeout(timer)
-  }, [voiceMode, isVoiceSpeaking, isLoading, isVoiceListening, voiceError, startVoiceListening])
+  // Voice mode is manual — user taps the orb to start each recording
 
   // OpenAI TTS: speak latest assistant message in voice mode
   // Skip the initial welcome message — only speak new responses

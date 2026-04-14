@@ -638,11 +638,31 @@ async def ai_tts(body: TTSRequest, request: Request):
 # Whisper hallucination filter (common artifacts on silence / noise)
 # ---------------------------------------------------------------------------
 
+# Exact-match noise phrases (after punctuation removal + lowercase)
 _WHISPER_NOISE_PHRASES = {
     "thank you", "thanks", "thank you for watching", "thanks for watching",
-    "subscribe", "like and subscribe", "music", "foreign", "applause",
-    "laughter", "bye", "you", "the", "i", "a", "um", "uh",
-    "gwynple", "asha", "welcome", "goodbye",
+    "thank you very much", "thank you so much", "thank you bye",
+    "thank you byebye", "thank you goodbye", "thanks bye",
+    "thanks for listening", "thanks for tuning in",
+    "subscribe", "like and subscribe", "please subscribe",
+    "music", "foreign", "applause", "laughter", "silence",
+    "bye", "byebye", "bye bye", "goodbye", "good bye",
+    "you", "the", "i", "a", "um", "uh", "oh", "hmm", "huh",
+    "gwynple", "asha", "welcome",
+    "okay", "ok", "so", "yeah", "yes", "no", "right",
+    "subtitles by", "subtitles", "captions",
+    "you know", "see you next time", "see you",
+    "thats all", "thats it", "the end",
+}
+
+# Words that are individually noise — if ALL words in transcript are noise, filter it
+_WHISPER_NOISE_WORDS = {
+    "thank", "thanks", "you", "bye", "byebye", "goodbye", "good",
+    "the", "a", "i", "um", "uh", "oh", "hmm", "huh", "ok", "okay",
+    "so", "yeah", "yes", "no", "right", "well", "and", "but",
+    "please", "welcome", "foreign", "music", "applause", "laughter",
+    "silence", "subscribe", "like", "see", "next", "time",
+    "very", "much", "for", "watching", "listening", "bye",
 }
 
 
@@ -651,18 +671,32 @@ def _is_whisper_noise(text: str) -> bool:
     stripped = text.strip()
     if len(stripped) < 3:
         return True
-    # Check against known noise phrases (case-insensitive)
+
     # Remove punctuation for comparison
     cleaned = re.sub(r"[^\w\s]", "", stripped).strip().lower()
+
+    # Exact match against known noise phrases
     if cleaned in _WHISPER_NOISE_PHRASES:
         return True
+
     # Very short cleaned text
     if len(cleaned) < 3:
         return True
+
+    # All-noise-words check: if every word is a filler/noise word, filter it
+    words = cleaned.split()
+    if words and all(w in _WHISPER_NOISE_WORDS for w in words):
+        return True
+
+    # Repeated phrase detection (e.g. "thank you thank you thank you")
+    if words and len(set(words)) <= 2 and len(words) >= 3:
+        return True
+
     # High ratio of non-ASCII chars suggests garbled output
     ascii_chars = sum(1 for c in stripped if c.isascii())
     if len(stripped) > 5 and ascii_chars / len(stripped) < 0.5:
         return True
+
     return False
 
 

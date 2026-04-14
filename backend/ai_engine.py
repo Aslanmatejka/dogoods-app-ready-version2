@@ -47,9 +47,12 @@ TTS_MODEL = "tts-1"
 TTS_VOICE_EN = os.getenv("AI_TTS_VOICE", "nova")
 TTS_VOICE_ES = os.getenv("AI_TTS_VOICE_ES", "nova")  # Sesame-compatible Spanish voice
 
-MAX_RETRIES = int(os.getenv("AI_MAX_RETRIES", "3"))
-TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT", "25"))
+MAX_RETRIES = int(os.getenv("AI_MAX_RETRIES", "2"))
+TIMEOUT_SECONDS = int(os.getenv("AI_TIMEOUT", "30"))
 SUPABASE_TIMEOUT = 8  # seconds for DB lookups
+
+# Faster model for formatting tool results (follow-up calls after tool execution)
+FOLLOWUP_MODEL = os.getenv("AI_FOLLOWUP_MODEL", "gpt-4o-mini")
 
 # Shared HTTP client — reuses TCP/SSL connections across requests
 _http_client: httpx.AsyncClient | None = None
@@ -652,7 +655,7 @@ class ConversationEngine:
 
         # 2 & 3. Profile + History in parallel (graceful — failures don't block)
         profile_task = asyncio.create_task(self.get_user_profile(user_id))
-        history_task = asyncio.create_task(self.get_conversation_history(user_id, limit=6))
+        history_task = asyncio.create_task(self.get_conversation_history(user_id, limit=4))
         profile, history = await asyncio.gather(profile_task, history_task)
 
         # 4. Build messages
@@ -687,7 +690,11 @@ class ConversationEngine:
             messages.append({"role": "system", "content": context})
 
         for msg in history:
-            messages.append({"role": msg["role"], "content": msg["message"]})
+            # Truncate long history messages to avoid bloating the context
+            content = msg["message"]
+            if len(content) > 400:
+                content = content[:400] + "... [truncated]"
+            messages.append({"role": msg["role"], "content": content})
 
         messages.append({"role": "user", "content": message})
 
@@ -753,33 +760,76 @@ class ConversationEngine:
             logger.error("GPT-4o unexpected error: %s", exc)
             return get_canned_response("general_error", lang)
 
+    # ---- Lightweight tool-need classifier ---------------------------------
+
+    @staticmethod
+    def _needs_tools(message: str) -> bool:
+        """Quick heuristic: does the user message likely need a tool call?
+
+        Tool-requiring messages reference personal data (dashboard, profile,
+        pickups, claims, notifications, reminders, nearby food, directions,
+        communities, distribution centers).
+        Generic chat (greetings, recipes, storage tips, food safety, how-to)
+        can be answered from the system prompt alone — skip tools for speed.
+        """
+        lower = message.lower()
+        # Keywords that signal a database/tool lookup is needed
+        tool_keywords = {
+            "dashboard", "profile", "my account", "my info",
+            "pickup", "schedule", "claim", "claimed",
+            "notification", "notifications", "unread",
+            "remind", "reminder", "set a reminder",
+            "near me", "nearby", "find food", "available food",
+            "search food", "food near", "listings near",
+            "direction", "directions", "route", "how do i get",
+            "distribution", "community", "communities",
+            "my listings", "my food", "my impact",
+            "mark", "read",
+        }
+        return any(kw in lower for kw in tool_keywords)
+
     # ---- OpenAI chat completions with tool calling -----------------------
 
     async def _call_openai_chat(
         self, messages: list[dict], lang: str = "en"
     ) -> str:
         """Call GPT-4o, handle tool calls, return final assistant text."""
+        import time as _time
         if not OPENAI_API_KEY:
             raise RuntimeError("OPENAI_API_KEY not configured")
+
+        # Only include tool definitions when the message likely needs them
+        # This avoids the ~16s overhead of sending 14 tool schemas for simple chat
+        user_text = ""
+        for m in reversed(messages):
+            if m["role"] == "user":
+                user_text = m.get("content", "")
+                break
+        use_tools = self._needs_tools(user_text)
 
         payload = {
             "model": CHAT_MODEL,
             "messages": messages,
-            "tools": self.tool_definitions,
             "temperature": 0.7,
             "max_tokens": 512,
         }
+        if use_tools:
+            payload["tools"] = self.tool_definitions
+
         headers = {
             "Authorization": f"Bearer {OPENAI_API_KEY}",
             "Content-Type": "application/json",
         }
 
+        t0 = _time.time()
         resp = await _openai_with_retry(
             "POST",
             f"{OPENAI_BASE_URL}/chat/completions",
             headers=headers,
             json_payload=payload,
         )
+        t1 = _time.time()
+        logger.info("GPT initial call: %.1fs", t1 - t0)
         data = resp.json()
 
         choice = data["choices"][0]
@@ -802,7 +852,9 @@ class ConversationEngine:
                     continue
 
                 try:
+                    t_tool = _time.time()
                     result = await self._execute_tool(fn_name, fn_args)
+                    logger.info("Tool %s executed: %.1fs", fn_name, _time.time() - t_tool)
                 except Exception as tool_exc:
                     logger.error("Tool %s failed: %s", fn_name, tool_exc)
                     # Graceful tool error — feed error context back to GPT
@@ -820,20 +872,23 @@ class ConversationEngine:
                     "content": json.dumps(result),
                 })
 
-            # Follow-up call with tool results (no tools this time)
+            # Follow-up call with tool results — use faster model since it's just formatting
             followup_payload = {
-                "model": CHAT_MODEL,
+                "model": FOLLOWUP_MODEL,
                 "messages": messages,
                 "temperature": 0.7,
                 "max_tokens": 512,
             }
             try:
+                t2 = _time.time()
                 resp = await _openai_with_retry(
                     "POST",
                     f"{OPENAI_BASE_URL}/chat/completions",
                     headers=headers,
                     json_payload=followup_payload,
                 )
+                t3 = _time.time()
+                logger.info("GPT follow-up call: %.1fs (total: %.1fs)", t3 - t2, t3 - t0)
                 data = resp.json()
                 return data["choices"][0]["message"]["content"]
             except Exception as followup_exc:

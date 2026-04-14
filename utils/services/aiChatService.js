@@ -9,7 +9,7 @@ import { reportError } from '../helpers.js'
  */
 
 const API_BASE = '/api/ai'
-const REQUEST_TIMEOUT = 35000 // slightly above backend's 30s timeout
+const REQUEST_TIMEOUT = 60000 // allow time for tool-calling flows (GPT call + tool + follow-up)
 
 class AIChatService {
   /**
