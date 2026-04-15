@@ -155,7 +155,7 @@ function FindFoodPage({ initialCategory }) {
         }
 
         if (filters.type !== 'all') {
-            result = result.filter(food => food.type === filters.type);
+            result = result.filter(food => food.listing_type === filters.type);
         }
 
         // Location-based filtering

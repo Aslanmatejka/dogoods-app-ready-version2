@@ -43,9 +43,9 @@ export default function UserReceipts() {
                         const items = (claims || []).map((c) => ({
                             food_id: c.food_id,
                             food_name: c.food_listings?.title || 'Food item',
-                            quantity: c.quantity || c.food_listings?.quantity || 1,
+                            quantity: c.quantity ?? 1,
                             unit: c.food_listings?.unit || '',
-                            amount: `${c.quantity || c.food_listings?.quantity || 1} ${c.food_listings?.unit || ''}`.trim(),
+                            amount: `${c.quantity ?? 1} ${c.food_listings?.unit || ''}`.trim(),
                         }));
 
                         return { receipt, items };

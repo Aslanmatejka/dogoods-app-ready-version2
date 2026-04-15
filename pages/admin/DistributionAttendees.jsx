@@ -2,8 +2,10 @@ import React from 'react';
 import AdminLayout from './AdminLayout';
 import supabase from '../../utils/supabaseClient';
 import Button from '../../components/common/Button';
+import { useAuthContext } from '../../utils/AuthContext';
 
 const DistributionAttendees = () => {
+  const { user, isAdmin } = useAuthContext();
   const [attendees, setAttendees] = React.useState([]);
   const [communities, setCommunities] = React.useState({});
   const [loading, setLoading] = React.useState(true);
@@ -15,6 +17,8 @@ const DistributionAttendees = () => {
   });
 
   React.useEffect(() => {
+    if (!user || !isAdmin) return;
+
     fetchCommunities();
     fetchAttendees();
 
@@ -37,7 +41,7 @@ const DistributionAttendees = () => {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [user, isAdmin]);
 
   const fetchCommunities = async () => {
     try {
@@ -72,13 +76,12 @@ const DistributionAttendees = () => {
           food_listings(
             id,
             title,
-            name,
             quantity,
             unit,
             community_id
           )
         `)
-        .order('claimed_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -249,7 +252,7 @@ const DistributionAttendees = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
-                        {claim.food_listings?.title || claim.food_listings?.name || 'N/A'}
+                        {claim.food_listings?.title || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -266,7 +269,7 @@ const DistributionAttendees = () => {
                       <div>Staff: {claim.school_staff || 0}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(claim.claimed_at).toLocaleString()}
+                      {new Date(claim.created_at).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

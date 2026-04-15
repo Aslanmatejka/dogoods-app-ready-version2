@@ -346,7 +346,7 @@ function UserDashboard() {
                                                 {notification.message}
                                             </p>
                                             <p className="mt-1 text-xs text-gray-400">
-                                                {notification.time}
+                                                {notification.created_at ? new Date(notification.created_at).toLocaleString() : ''}
                                             </p>
                                         </div>
                                         {!notification.read && (

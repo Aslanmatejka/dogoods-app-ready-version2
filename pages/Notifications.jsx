@@ -1,5 +1,6 @@
 import React from "react";
 import Card from "../components/common/Card";
+import Button from "../components/common/Button";
 import ErrorBoundary from "../components/common/ErrorBoundary";
 import { reportError } from "../utils/helpers";
 import { useAuth, useNotifications } from "../utils/hooks/useSupabase";
@@ -165,9 +166,9 @@ function Notifications() {
                                                 <div className="flex items-center space-x-4">
                                                     <time 
                                                         className="text-sm text-gray-500"
-                                                        dateTime={notification.time}
+                                                        dateTime={notification.created_at}
                                                     >
-                                                        {notification.time}
+                                                        {notification.created_at ? new Date(notification.created_at).toLocaleString() : ''}
                                                     </time>
                                                     <div className="flex space-x-2">
                                                         {!notification.read && (
