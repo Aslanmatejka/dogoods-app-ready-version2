@@ -146,7 +146,12 @@ function FindFoodPage({ initialCategory }) {
         }
 
         if (filters.community) {
-            result = result.filter(food => String(food.community_id) === String(filters.community) || food.community === filters.community);
+            const WAREHOUSE_COMMUNITY_ID = '1';
+            result = result.filter(food => 
+                String(food.community_id) === String(filters.community) || 
+                food.community === filters.community ||
+                String(food.community_id) === WAREHOUSE_COMMUNITY_ID
+            );
         }
 
         if (filters.type !== 'all') {
