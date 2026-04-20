@@ -9,6 +9,7 @@ const DistributionAttendees = () => {
   const [attendees, setAttendees] = React.useState([]);
   const [communities, setCommunities] = React.useState({});
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const [stats, setStats] = React.useState({
     totalClaims: 0,
     totalPeople: 0,
@@ -17,29 +18,42 @@ const DistributionAttendees = () => {
   });
 
   React.useEffect(() => {
-    if (!user || !isAdmin || authLoading || !initialized) return;
+    if (!user || !isAdmin || authLoading || !initialized) {
+      // If auth is done but user/admin not available, stop loading
+      if (!authLoading && initialized) {
+        setLoading(false);
+      }
+      return;
+    }
 
     fetchCommunities();
     fetchAttendees();
 
-    const subscription = supabase
-      .channel('distribution-attendees')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'food_claims'
-        },
-        () => {
-          console.log('Claims data changed, refreshing...');
-          fetchAttendees();
-        }
-      )
-      .subscribe();
+    let subscription;
+    try {
+      subscription = supabase
+        .channel('distribution-attendees')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'food_claims'
+          },
+          () => {
+            console.log('Claims data changed, refreshing...');
+            fetchAttendees();
+          }
+        )
+        .subscribe();
+    } catch (err) {
+      console.error('Error subscribing to realtime:', err);
+    }
 
     return () => {
-      supabase.removeChannel(subscription);
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
     };
   }, [user, isAdmin, authLoading, initialized]);
 
@@ -61,15 +75,17 @@ const DistributionAttendees = () => {
   const fetchAttendees = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.warn('No active Supabase session — skipping fetch');
+        setError('No active session. Please log in again.');
         setLoading(false);
         return;
       }
 
-      const { data: claims, error } = await supabase
+      const { data: claims, error: queryError } = await supabase
         .from('food_claims')
         .select(`
           *,
@@ -90,7 +106,7 @@ const DistributionAttendees = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (queryError) throw queryError;
 
       const claimsData = claims || [];
       setAttendees(claimsData);
@@ -106,8 +122,9 @@ const DistributionAttendees = () => {
         totalStudents,
         totalStaff
       });
-    } catch (error) {
-      console.error('Error fetching attendees:', error);
+    } catch (err) {
+      console.error('Error fetching attendees:', err);
+      setError(err.message || 'Failed to load attendees');
       setAttendees([]);
     } finally {
       setLoading(false);
@@ -193,6 +210,18 @@ const DistributionAttendees = () => {
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2CABE3] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading attendees...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <i className="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <p className="text-red-600 font-medium mb-2">Error loading attendees</p>
+            <p className="text-gray-500 text-sm mb-4">{error}</p>
+            <button
+              onClick={fetchAttendees}
+              className="px-4 py-2 bg-[#2CABE3] text-white rounded hover:bg-[#2CABE3]/80"
+            >
+              Retry
+            </button>
           </div>
         ) : attendees.length === 0 ? (
           <div className="p-8 text-center">
