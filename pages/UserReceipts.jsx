@@ -37,7 +37,7 @@ export default function UserReceipts() {
                     try {
                         const { data: claims } = await supabase
                             .from('food_claims')
-                            .select('id, food_id, quantity, status, food_listings(title, quantity, unit)')
+                            .select('id, food_id, quantity, status, food_listings(title, unit)')
                             .eq('receipt_id', receipt.id);
 
                         const items = (claims || []).map((c) => ({
