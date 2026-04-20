@@ -1,0 +1,11 @@
+{
+    "chat.mcp.serverSampling": {
+        "dogoods-app-ready-version2-master/.vscode/mcp.json: supabase": {
+            "allowedModels": [
+                "copilot/auto",
+                "copilotcli/claude-sonnet-4.6",
+                "claude-code/claude-opus-4.6"
+            ]
+        }
+    }
+}

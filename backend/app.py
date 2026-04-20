@@ -45,7 +45,8 @@ logger = logging.getLogger("app")
 
 ALLOWED_ORIGINS = [
     o.strip() for o in os.getenv(
-        "CORS_ORIGINS", "http://localhost:3001,http://127.0.0.1:3001"
+        "CORS_ORIGINS",
+        "http://localhost:3001,http://127.0.0.1:3001,https://dogoods.netlify.app,https://dogoods.store,https://www.dogoods.store"
     ).split(",")
 ]
 

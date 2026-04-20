@@ -222,8 +222,8 @@ export default function ClaimFoodForm() {
                 console.error('SMS notification error:', smsError);
             }
 
-            toast.success('Item added to your receipt! View it on your dashboard.');
-            navigate('/dashboard');
+            toast.success('Added to your receipt — view it on your dashboard!', { autoClose: 5000, position: 'top-center' });
+            navigate('/find');
         } catch (error) {
             console.error('Error claiming food:', error);
             toast.error(error.message || 'Failed to claim food');

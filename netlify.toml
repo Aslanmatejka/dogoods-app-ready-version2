@@ -6,6 +6,13 @@
   VITE_SUPABASE_URL = "https://ifzbpqyuhnxbhdcnmvfs.supabase.co"
   VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmemJwcXl1aG54YmhkY25tdmZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNTI5NTgsImV4cCI6MjA3MTYyODk1OH0.ivjNXt8z704sVv6Jt2Z3tVkkelUzeb8Ih4SaCQFHerk"
 
+# Proxy AI API to Railway backend
+[[redirects]]
+  from = "/api/ai/*"
+  to = "https://dogoods-backend-production.up.railway.app/api/ai/:splat"
+  status = 200
+  force = true
+
 # SPA fallback
 [[redirects]]
   from = "/*"
